@@ -91,12 +91,14 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem className="gap-2">
-                    <User className="h-4 w-4" />
-                    Mi Perfil
-                  </DropdownMenuItem>
+                  <Link to="/portal">
+                    <DropdownMenuItem className="gap-2 cursor-pointer">
+                      <User className="h-4 w-4" />
+                      Mi Portal
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive">
+                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive cursor-pointer">
                     <LogOut className="h-4 w-4" />
                     Cerrar Sesión
                   </DropdownMenuItem>
@@ -142,9 +144,12 @@ export function Header() {
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
                 {user ? (
                   <>
-                    <div className="px-4 py-2 text-sm text-white/60">
-                      {user.email}
-                    </div>
+                    <Link to="/portal" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="glass" className="w-full">
+                        <User className="mr-2 h-4 w-4" />
+                        Mi Portal
+                      </Button>
+                    </Link>
                     <Button variant="glass" className="w-full" onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Cerrar Sesión
