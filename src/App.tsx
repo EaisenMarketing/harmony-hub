@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import StudentPortal from "./pages/StudentPortal";
 import AdminPanel from "./pages/AdminPanel";
+import AdFlowDashboard from "./pages/AdFlowDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/portal/*" element={<StudentPortal />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/admin/*" element={<AdminPanel />} />
+            <Route path="/adflow" element={<AdFlowDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
