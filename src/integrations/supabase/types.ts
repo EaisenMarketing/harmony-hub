@@ -14,6 +14,139 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_spend: {
+        Row: {
+          campaign_id: string
+          clicks: number
+          created_at: string
+          date: string
+          id: string
+          impressions: number
+          leads_count: number
+          spend_amount: number
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          clicks?: number
+          created_at?: string
+          date: string
+          id?: string
+          impressions?: number
+          leads_count?: number
+          spend_amount?: number
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          clicks?: number
+          created_at?: string
+          date?: string
+          id?: string
+          impressions?: number
+          leads_count?: number
+          spend_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_spend_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_insights: {
+        Row: {
+          action_label: string | null
+          campaign_id: string | null
+          created_at: string
+          id: string
+          is_applied: boolean | null
+          is_dismissed: boolean | null
+          message: string
+          priority: string
+          user_id: string
+        }
+        Insert: {
+          action_label?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          is_applied?: boolean | null
+          is_dismissed?: boolean | null
+          message: string
+          priority?: string
+          user_id: string
+        }
+        Update: {
+          action_label?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          is_applied?: boolean | null
+          is_dismissed?: boolean | null
+          message?: string
+          priority?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          cost_per_lead: number | null
+          created_at: string
+          daily_budget: number
+          health: Database["public"]["Enums"]["campaign_health"]
+          id: string
+          leads_count: number
+          name: string
+          platform: Database["public"]["Enums"]["ad_platform"]
+          status: Database["public"]["Enums"]["campaign_status"]
+          total_spent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cost_per_lead?: number | null
+          created_at?: string
+          daily_budget?: number
+          health?: Database["public"]["Enums"]["campaign_health"]
+          id?: string
+          leads_count?: number
+          name: string
+          platform: Database["public"]["Enums"]["ad_platform"]
+          status?: Database["public"]["Enums"]["campaign_status"]
+          total_spent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cost_per_lead?: number | null
+          created_at?: string
+          daily_budget?: number
+          health?: Database["public"]["Enums"]["campaign_health"]
+          id?: string
+          leads_count?: number
+          name?: string
+          platform?: Database["public"]["Enums"]["ad_platform"]
+          status?: Database["public"]["Enums"]["campaign_status"]
+          total_spent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       course_modules: {
         Row: {
           course_id: string
@@ -97,6 +230,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      leads: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          email: string | null
+          estimated_value: number | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          source: Database["public"]["Enums"]["ad_platform"]
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          source: Database["public"]["Enums"]["ad_platform"]
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          email?: string | null
+          estimated_value?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          source?: Database["public"]["Enums"]["ad_platform"]
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lessons: {
         Row: {
@@ -357,9 +543,13 @@ export type Database = {
       }
     }
     Enums: {
+      ad_platform: "facebook" | "instagram" | "tiktok" | "google"
       app_role: "admin" | "instructor" | "student"
+      campaign_health: "healthy" | "needs_optimization" | "underperforming"
+      campaign_status: "active" | "paused" | "completed" | "draft"
       course_level: "beginner" | "intermediate" | "advanced"
       instrument_type: "guitar" | "piano" | "drums" | "banjo"
+      lead_status: "new" | "contacted" | "qualified" | "closed" | "lost"
       subscription_plan: "basic" | "standard" | "pro"
     }
     CompositeTypes: {
@@ -488,9 +678,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ad_platform: ["facebook", "instagram", "tiktok", "google"],
       app_role: ["admin", "instructor", "student"],
+      campaign_health: ["healthy", "needs_optimization", "underperforming"],
+      campaign_status: ["active", "paused", "completed", "draft"],
       course_level: ["beginner", "intermediate", "advanced"],
       instrument_type: ["guitar", "piano", "drums", "banjo"],
+      lead_status: ["new", "contacted", "qualified", "closed", "lost"],
       subscription_plan: ["basic", "standard", "pro"],
     },
   },

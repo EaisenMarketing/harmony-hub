@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Rocket, 
   Zap, 
@@ -7,6 +8,7 @@ import {
   Facebook,
   Instagram
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { DashboardHeader } from '@/components/adflow/DashboardHeader';
 import { KPICard } from '@/components/adflow/KPICard';
 import { PlatformStatusCard } from '@/components/adflow/PlatformStatusCard';
@@ -14,7 +16,17 @@ import { AIInsightBox } from '@/components/adflow/AIInsightBox';
 import { PerformanceChart } from '@/components/adflow/PerformanceChart';
 import { LeadRow } from '@/components/adflow/LeadRow';
 import { QuickActionTile } from '@/components/adflow/QuickActionTile';
+import { 
+  useAdFlowStats, 
+  useCampaignsByPlatform, 
+  useLeads, 
+  useChartData,
+  useAIInsights,
+  useUpdateLead,
+  useApplyInsight,
+} from '@/hooks/useAdFlowData';
 import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
 
 // TikTok icon component
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -30,55 +42,118 @@ const GoogleAdsIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Mock data
-const mockChartData = [
-  { date: 'Mon', leads: 12, adSpend: 45 },
-  { date: 'Tue', leads: 19, adSpend: 52 },
-  { date: 'Wed', leads: 15, adSpend: 48 },
-  { date: 'Thu', leads: 25, adSpend: 61 },
-  { date: 'Fri', leads: 32, adSpend: 75 },
-  { date: 'Sat', leads: 28, adSpend: 68 },
-  { date: 'Sun', leads: 35, adSpend: 72 },
-];
+const platformIcons: Record<string, React.ReactNode> = {
+  facebook: <Facebook className="w-5 h-5 text-blue-600" />,
+  instagram: <Instagram className="w-5 h-5 text-pink-600" />,
+  tiktok: <TikTokIcon className="w-5 h-5" />,
+  google: <GoogleAdsIcon className="w-5 h-5 text-red-500" />,
+};
 
-const mockInsights = [
-  {
-    id: '1',
-    message: 'TikTok is generating leads 23% cheaper than Facebook. Consider reallocating $15/day to maximize ROI.',
-    priority: 'high' as const,
-    actionLabel: 'Reallocate Budget',
-  },
-  {
-    id: '2',
-    message: 'Your Google Ads campaign "Summer Sale" is converting well. We recommend scaling the budget by 20%.',
-    priority: 'medium' as const,
-    actionLabel: 'Scale Campaign',
-  },
-];
-
-const mockLeads = [
-  { id: '1', name: 'Sarah Johnson', source: 'Facebook', status: 'new' as const, timestamp: '2 min ago' },
-  { id: '2', name: 'Michael Chen', source: 'Google', status: 'contacted' as const, timestamp: '15 min ago' },
-  { id: '3', name: 'Emily Rodriguez', source: 'TikTok', status: 'new' as const, timestamp: '1 hour ago' },
-  { id: '4', name: 'David Kim', source: 'Instagram', status: 'closed' as const, timestamp: '2 hours ago' },
-  { id: '5', name: 'Jessica Brown', source: 'Facebook', status: 'contacted' as const, timestamp: '3 hours ago' },
-];
+const platformLabels: Record<string, string> = {
+  facebook: 'Facebook Ads',
+  instagram: 'Instagram Ads',
+  tiktok: 'TikTok Ads',
+  google: 'Google Ads',
+};
 
 export default function AdFlowDashboard() {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [dateRange, setDateRange] = useState('7days');
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
+
+  // Data hooks
+  const { data: stats, isLoading: statsLoading } = useAdFlowStats(dateRange);
+  const { data: platformData, isLoading: platformLoading } = useCampaignsByPlatform();
+  const { data: leads, isLoading: leadsLoading } = useLeads(5);
+  const { data: chartData, isLoading: chartLoading } = useChartData(dateRange);
+  const { data: insights } = useAIInsights();
+
+  // Mutations
+  const updateLead = useUpdateLead();
+  const applyInsight = useApplyInsight();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   const handleAction = (action: string) => {
     toast.success(`${action} initiated successfully!`);
   };
 
+  const handleLeadStatusChange = async (leadId: string, newStatus: 'contacted' | 'closed') => {
+    try {
+      await updateLead.mutateAsync({ id: leadId, status: newStatus });
+      toast.success(`Lead marked as ${newStatus}`);
+    } catch {
+      toast.error('Failed to update lead status');
+    }
+  };
+
+  const handleApplyInsight = async (insightId: string) => {
+    try {
+      await applyInsight.mutateAsync(insightId);
+      toast.success('Optimization applied successfully!');
+    } catch {
+      toast.error('Failed to apply optimization');
+    }
+  };
+
+  const handleOptimizeCampaign = (platform: string) => {
+    toast.success(`Optimizing ${platform} campaigns...`);
+  };
+
+  const handlePauseCampaign = (platform: string) => {
+    toast.info(`${platform} campaigns paused`);
+  };
+
+  const handleScaleCampaign = (platform: string) => {
+    toast.success(`Scaling ${platform} campaigns...`);
+  };
+
+  // Format leads for display
+  const formattedLeads = leads?.map(lead => ({
+    id: lead.id,
+    name: lead.name,
+    source: platformLabels[lead.source] || lead.source,
+    sourceIcon: platformIcons[lead.source],
+    status: lead.status as 'new' | 'contacted' | 'closed',
+    timestamp: formatDistanceToNow(new Date(lead.created_at), { addSuffix: true }),
+  })) || [];
+
+  // Format insights for display
+  const formattedInsights = insights?.map(insight => ({
+    id: insight.id,
+    message: insight.message,
+    priority: insight.priority as 'high' | 'medium' | 'low',
+    actionLabel: insight.action_label || 'Apply Optimization',
+  })) || [];
+
+  // Check if any data is still loading
+  const _isLoading = statsLoading || platformLoading || leadsLoading || chartLoading;
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader
-        businessName="My Business"
+        businessName={user.email?.split('@')[0] || 'My Business'}
         plan="growth"
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
-        notificationCount={3}
+        notificationCount={insights?.length || 0}
         onCreateCampaign={() => handleAction('Campaign creation')}
       />
 
@@ -88,31 +163,31 @@ export default function AdFlowDashboard() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <KPICard
               title="Leads Generated"
-              value={167}
-              change={12.5}
-              status="positive"
+              value={stats?.totalLeads || 0}
+              change={stats?.leadsChange}
+              status={stats?.leadsChange && stats.leadsChange > 0 ? 'positive' : 'neutral'}
             />
             <KPICard
               title="Cost Per Lead"
-              value={4.23}
+              value={stats?.costPerLead || 0}
               prefix="$"
-              change={-8.3}
-              status="positive"
+              change={stats?.cplChange}
+              status={stats?.cplChange && stats.cplChange > 0 ? 'positive' : stats?.cplChange && stats.cplChange < 0 ? 'negative' : 'neutral'}
             />
             <KPICard
               title="Estimated Revenue"
-              value="12,450"
+              value={stats?.estimatedRevenue?.toLocaleString() || '0'}
               prefix="$"
-              change={18.2}
+              change={stats?.revenueChange}
               status="positive"
             />
             <KPICard
               title="ROI"
-              value={285}
+              value={stats?.roi || 0}
               suffix="%"
-              change={22}
-              status="positive"
-              statusBadge="🔥 Profitable"
+              change={stats?.roiChange}
+              status={stats?.isRoiPositive ? 'positive' : 'negative'}
+              statusBadge={stats?.isRoiPositive ? '🔥 Profitable' : '⚠️ Needs Attention'}
             />
           </div>
         </section>
@@ -121,55 +196,33 @@ export default function AdFlowDashboard() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-4">Campaign Health</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <PlatformStatusCard
-              platform="Facebook Ads"
-              icon={<Facebook className="w-5 h-5 text-blue-600" />}
-              status="healthy"
-              leads={45}
-              costPerLead={4.50}
-              onOptimize={() => handleAction('Facebook optimization')}
-              onPause={() => handleAction('Facebook pause')}
-              onScale={() => handleAction('Facebook scale')}
-            />
-            <PlatformStatusCard
-              platform="Instagram Ads"
-              icon={<Instagram className="w-5 h-5 text-pink-600" />}
-              status="needs-optimization"
-              leads={32}
-              costPerLead={5.20}
-              onOptimize={() => handleAction('Instagram optimization')}
-              onPause={() => handleAction('Instagram pause')}
-              onScale={() => handleAction('Instagram scale')}
-            />
-            <PlatformStatusCard
-              platform="TikTok Ads"
-              icon={<TikTokIcon className="w-5 h-5" />}
-              status="healthy"
-              leads={58}
-              costPerLead={3.45}
-              onOptimize={() => handleAction('TikTok optimization')}
-              onPause={() => handleAction('TikTok pause')}
-              onScale={() => handleAction('TikTok scale')}
-            />
-            <PlatformStatusCard
-              platform="Google Ads"
-              icon={<GoogleAdsIcon className="w-5 h-5 text-red-500" />}
-              status="underperforming"
-              leads={22}
-              costPerLead={6.80}
-              onOptimize={() => handleAction('Google optimization')}
-              onPause={() => handleAction('Google pause')}
-              onScale={() => handleAction('Google scale')}
-            />
+            {platformData?.map((platform) => (
+              <PlatformStatusCard
+                key={platform.platform}
+                platform={platformLabels[platform.platform]}
+                icon={platformIcons[platform.platform]}
+                status={platform.status}
+                leads={platform.leads}
+                costPerLead={platform.costPerLead}
+                onOptimize={() => handleOptimizeCampaign(platform.platform)}
+                onPause={() => handlePauseCampaign(platform.platform)}
+                onScale={() => handleScaleCampaign(platform.platform)}
+              />
+            ))}
+            {(!platformData || platformData.length === 0) && !platformLoading && (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No active campaigns. Create your first campaign to get started!
+              </div>
+            )}
           </div>
         </section>
 
         {/* Section 3 & 4: Chart and AI Insights */}
         <div className="grid lg:grid-cols-2 gap-6">
-          <PerformanceChart data={mockChartData} />
+          <PerformanceChart data={chartData || []} />
           <AIInsightBox
-            insights={mockInsights}
-            onApply={(id) => handleAction(`Insight ${id} applied`)}
+            insights={formattedInsights}
+            onApply={handleApplyInsight}
             onViewDetails={(id) => handleAction(`Viewing details for insight ${id}`)}
           />
         </div>
@@ -183,18 +236,25 @@ export default function AdFlowDashboard() {
             </button>
           </div>
           <div className="space-y-3">
-            {mockLeads.map((lead) => (
-              <LeadRow
-                key={lead.id}
-                name={lead.name}
-                source={lead.source}
-                status={lead.status}
-                timestamp={lead.timestamp}
-                onCall={() => handleAction(`Calling ${lead.name}`)}
-                onMessage={() => handleAction(`Messaging ${lead.name}`)}
-                onMarkClosed={() => handleAction(`Marked ${lead.name} as closed`)}
-              />
-            ))}
+            {formattedLeads.length > 0 ? (
+              formattedLeads.map((lead) => (
+                <LeadRow
+                  key={lead.id}
+                  name={lead.name}
+                  source={lead.source}
+                  sourceIcon={lead.sourceIcon}
+                  status={lead.status}
+                  timestamp={lead.timestamp}
+                  onCall={() => handleAction(`Calling ${lead.name}`)}
+                  onMessage={() => handleAction(`Messaging ${lead.name}`)}
+                  onMarkClosed={() => handleLeadStatusChange(lead.id, 'closed')}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground bg-card rounded-xl border border-border/50">
+                No leads yet. Start a campaign to generate leads!
+              </div>
+            )}
           </div>
         </section>
 
