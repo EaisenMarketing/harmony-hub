@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Play, Clock, BarChart3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,8 +24,13 @@ const levelLabels: Record<string, string> = {
 };
 
 export const CourseCard = ({ course }: CourseCardProps) => {
+  const navigate = useNavigate();
   const emoji = instrumentEmojis[course.instrument] || '🎵';
   const levelLabel = levelLabels[course.level] || course.level;
+
+  const handleStartCourse = () => {
+    navigate(`/portal/curso/${course.id}`);
+  };
 
   return (
     <Card className="group overflow-hidden border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
@@ -75,7 +81,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
 
         <div className="flex items-center justify-between pt-2">
           <span className="text-sm font-medium text-primary">{course.progress}% completado</span>
-          <Button size="sm" className="gap-2">
+          <Button size="sm" className="gap-2" onClick={handleStartCourse}>
             <Play className="w-4 h-4" />
             {course.progress > 0 ? 'Continuar' : 'Comenzar'}
           </Button>
