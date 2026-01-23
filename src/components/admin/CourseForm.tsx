@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCreateCourse, useUpdateCourse } from '@/hooks/useAdminData';
 import { useToast } from '@/hooks/use-toast';
+import { ImageUploader } from './ImageUploader';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface CourseFormProps {
@@ -48,6 +49,18 @@ export const CourseForm = ({ open, onClose, course }: CourseFormProps) => {
   const createCourse = useCreateCourse();
   const updateCourse = useUpdateCourse();
   const { toast } = useToast();
+
+  // Reset form when course changes
+  useEffect(() => {
+    setTitle(course?.title || '');
+    setDescription(course?.description || '');
+    setInstrument(course?.instrument || 'guitar');
+    setLevel(course?.level || 'beginner');
+    setRequiredPlan(course?.required_plan || 'basic');
+    setDurationHours(course?.duration_hours?.toString() || '');
+    setThumbnailUrl(course?.thumbnail_url || '');
+    setIsPublished(course?.is_published || false);
+  }, [course]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,12 +177,11 @@ export const CourseForm = ({ open, onClose, course }: CourseFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="thumbnail">URL de Imagen</Label>
-            <Input
-              id="thumbnail"
+            <Label>Imagen del Curso</Label>
+            <ImageUploader
               value={thumbnailUrl}
-              onChange={(e) => setThumbnailUrl(e.target.value)}
-              placeholder="https://..."
+              onChange={setThumbnailUrl}
+              folder="thumbnails"
             />
           </div>
 
