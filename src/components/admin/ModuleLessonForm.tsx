@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCreateModule, useCreateLesson } from '@/hooks/useAdminData';
 import { useToast } from '@/hooks/use-toast';
+import { VideoUploader } from './VideoUploader';
 
 interface ModuleLessonFormProps {
   open: boolean;
@@ -36,6 +37,23 @@ export const ModuleLessonForm = ({ open, onClose, courseId, moduleId }: ModuleLe
   const createLesson = useCreateLesson();
   const { toast } = useToast();
 
+  const resetForm = () => {
+    setModuleTitle('');
+    setModuleDescription('');
+    setModuleSortOrder('0');
+    setLessonTitle('');
+    setLessonDescription('');
+    setLessonVideoUrl('');
+    setLessonDuration('');
+    setLessonSortOrder('0');
+    setIsFreePreview(false);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   const handleCreateModule = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -47,7 +65,7 @@ export const ModuleLessonForm = ({ open, onClose, courseId, moduleId }: ModuleLe
         sort_order: parseInt(moduleSortOrder) || 0,
       });
       toast({ title: 'Módulo creado exitosamente' });
-      onClose();
+      handleClose();
     } catch (error) {
       toast({ title: 'Error al crear el módulo', variant: 'destructive' });
     }
@@ -72,15 +90,15 @@ export const ModuleLessonForm = ({ open, onClose, courseId, moduleId }: ModuleLe
         is_free_preview: isFreePreview,
       });
       toast({ title: 'Lección creada exitosamente' });
-      onClose();
+      handleClose();
     } catch (error) {
       toast({ title: 'Error al crear la lección', variant: 'destructive' });
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Agregar Contenido</DialogTitle>
         </DialogHeader>
@@ -126,7 +144,7 @@ export const ModuleLessonForm = ({ open, onClose, courseId, moduleId }: ModuleLe
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
                   Cancelar
                 </Button>
                 <Button type="submit" className="flex-1" disabled={createModule.isPending}>
@@ -161,12 +179,11 @@ export const ModuleLessonForm = ({ open, onClose, courseId, moduleId }: ModuleLe
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lesson-video">URL del Video</Label>
-                <Input
-                  id="lesson-video"
+                <Label>Video de la Lección</Label>
+                <VideoUploader
                   value={lessonVideoUrl}
-                  onChange={(e) => setLessonVideoUrl(e.target.value)}
-                  placeholder="https://youtube.com/..."
+                  onChange={setLessonVideoUrl}
+                  folder="lessons"
                 />
               </div>
 
@@ -203,7 +220,7 @@ export const ModuleLessonForm = ({ open, onClose, courseId, moduleId }: ModuleLe
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
                   Cancelar
                 </Button>
                 <Button type="submit" className="flex-1" disabled={createLesson.isPending}>
