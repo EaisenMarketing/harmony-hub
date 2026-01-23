@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import StudentPortal from "./pages/StudentPortal";
+import CourseViewer from "./pages/CourseViewer";
 import AdminPanel from "./pages/AdminPanel";
 import AdFlowDashboard from "./pages/AdFlowDashboard";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/portal" element={<StudentPortal />} />
+            <Route path="/portal/curso/:courseId" element={<CourseViewer />} />
+            <Route path="/portal/curso/:courseId/leccion/:lessonId" element={<CourseViewer />} />
             <Route path="/portal/*" element={<StudentPortal />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/admin/*" element={<AdminPanel />} />
