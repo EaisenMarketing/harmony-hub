@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Calendar, Clock, Video, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -110,18 +111,22 @@ export function CalendarSection() {
                 </div>
               </div>
 
-              <Button variant="outline" size="sm" className="w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                Reservar lugar
-              </Button>
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  Reservar lugar
+                </Button>
+              </Link>
             </div>
           ))}
         </div>
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Button variant="gradient" size="lg">
-            Ver calendario completo
-          </Button>
+          <Link to="/auth">
+            <Button variant="gradient" size="lg">
+              Ver calendario completo
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

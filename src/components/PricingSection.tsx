@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Check, X, Sparkles, Zap, Crown } from 'lucide-react';
 
@@ -125,13 +126,15 @@ export function PricingSection() {
               </ul>
 
               {/* CTA */}
-              <Button
-                variant={plan.buttonVariant}
-                className={`w-full ${plan.popular ? '' : 'border-white/20 text-white hover:bg-white/10'}`}
-                size="lg"
-              >
-                {plan.popular ? 'Comenzar Ahora' : 'Elegir Plan'}
-              </Button>
+              <Link to="/auth" className="block">
+                <Button
+                  variant={plan.buttonVariant}
+                  className={`w-full ${plan.popular ? '' : 'border-white/20 text-white hover:bg-white/10'}`}
+                  size="lg"
+                >
+                  {plan.popular ? 'Comenzar Ahora' : 'Elegir Plan'}
+                </Button>
+              </Link>
             </div>
           ))}
         </div>

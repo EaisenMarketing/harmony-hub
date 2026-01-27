@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Music2, Mail, Phone, Instagram, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -38,9 +39,11 @@ export function Footer() {
                 Únete a miles de estudiantes que ya están aprendiendo con nosotros.
               </p>
             </div>
-            <Button variant="gradient" size="xl" className="flex-shrink-0">
-              Comenzar Gratis
-            </Button>
+            <Link to="/auth">
+              <Button variant="gradient" size="xl" className="flex-shrink-0">
+                Comenzar Gratis
+              </Button>
+            </Link>
           </div>
         </div>
 
