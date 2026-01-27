@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Video, Clock, Award, CheckCircle2 } from 'lucide-react';
 import heroImage from '@/assets/hero-musician.jpg';
@@ -54,12 +55,16 @@ export function HeroSection() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <Button variant="hero" size="xl">
-              Ver Planes
-            </Button>
-            <Button variant="heroOutline" size="xl">
-              Acceder a Clases
-            </Button>
+            <a href="#precios">
+              <Button variant="hero" size="xl">
+                Ver Planes
+              </Button>
+            </a>
+            <Link to="/auth">
+              <Button variant="heroOutline" size="xl">
+                Acceder a Clases
+              </Button>
+            </Link>
           </div>
 
           {/* Badges */}

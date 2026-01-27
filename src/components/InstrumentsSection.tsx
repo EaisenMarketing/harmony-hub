@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import guitarImage from '@/assets/guitar-card.jpg';
@@ -111,10 +112,12 @@ export function InstrumentsSection() {
                 </div>
 
                 {/* CTA */}
-                <Button variant="outline" className="w-full group/btn">
-                  Ver cursos
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                </Button>
+                <Link to="/auth">
+                  <Button variant="outline" className="w-full group/btn">
+                    Ver cursos
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                  </Button>
+                </Link>
               </div>
             </div>
           ))}

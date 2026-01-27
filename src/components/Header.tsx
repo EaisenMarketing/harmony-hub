@@ -111,9 +111,11 @@ export function Header() {
                 </Button>
               </Link>
             )}
-            <Button variant="gradient" size="sm">
-              Obtén Suscripción Pro
-            </Button>
+            <a href="#precios">
+              <Button variant="gradient" size="sm">
+                Obtén Suscripción Pro
+              </Button>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -162,9 +164,11 @@ export function Header() {
                     </Button>
                   </Link>
                 )}
-                <Button variant="gradient" className="w-full">
-                  Obtén Suscripción Pro
-                </Button>
+                <a href="#precios">
+                  <Button variant="gradient" className="w-full">
+                    Obtén Suscripción Pro
+                  </Button>
+                </a>
               </div>
             </nav>
           </div>
