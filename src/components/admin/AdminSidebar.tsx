@@ -7,7 +7,8 @@ import {
   Settings,
   LogOut,
   Music,
-  BarChart3
+  BarChart3,
+  Film
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +17,7 @@ import { Button } from '@/components/ui/button';
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Cursos', href: '/admin/cursos', icon: BookOpen },
+  { name: 'Biblioteca Videos', href: '/admin/videos', icon: Film },
   { name: 'Clases en Vivo', href: '/admin/clases', icon: Video },
   { name: 'Estudiantes', href: '/admin/estudiantes', icon: Users },
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin, useAdminStats } from '@/hooks/useAdminData';
@@ -7,6 +7,7 @@ import { AdminStats } from '@/components/admin/AdminStats';
 import { CoursesTable } from '@/components/admin/CoursesTable';
 import { LiveClassesTable } from '@/components/admin/LiveClassesTable';
 import { StudentsTable } from '@/components/admin/StudentsTable';
+import { VideoLibrary } from '@/components/admin/VideoLibrary';
 import { Shield } from 'lucide-react';
 
 const AdminPanel = () => {
@@ -45,6 +46,9 @@ const AdminPanel = () => {
   const renderContent = () => {
     if (currentPath === '/admin/cursos') {
       return <CoursesTable />;
+    }
+    if (currentPath === '/admin/videos') {
+      return <VideoLibrary />;
     }
     if (currentPath === '/admin/clases') {
       return <LiveClassesTable />;
@@ -105,13 +109,16 @@ const AdminPanel = () => {
               <h1 className="text-2xl font-bold text-foreground">
                 {currentPath === '/admin' && 'Panel de Administración'}
                 {currentPath === '/admin/cursos' && 'Gestión de Cursos'}
+                {currentPath === '/admin/videos' && 'Biblioteca de Videos'}
                 {currentPath === '/admin/clases' && 'Clases en Vivo'}
                 {currentPath === '/admin/estudiantes' && 'Estudiantes'}
                 {currentPath === '/admin/estadisticas' && 'Estadísticas'}
                 {currentPath === '/admin/configuracion' && 'Configuración'}
               </h1>
               <p className="text-muted-foreground text-sm">
-                Gestiona todo el contenido de la plataforma
+                {currentPath === '/admin/videos' 
+                  ? 'Visualiza todos los videos organizados por instrumento'
+                  : 'Gestiona todo el contenido de la plataforma'}
               </p>
             </div>
           </header>
