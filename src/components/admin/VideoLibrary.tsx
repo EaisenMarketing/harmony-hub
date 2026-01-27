@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Play, Filter, Music, Search } from 'lucide-react';
+import { Play, Filter, Music, Search, Upload } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -18,6 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { VideoUploadForm } from './VideoUploadForm';
 import type { Database } from '@/integrations/supabase/types';
 
 type InstrumentType = Database['public']['Enums']['instrument_type'];
@@ -58,6 +60,7 @@ export const VideoLibrary = () => {
   const [selectedInstrument, setSelectedInstrument] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<LessonWithCourse | null>(null);
+  const [showUploadForm, setShowUploadForm] = useState(false);
 
   const { data: lessons = [], isLoading } = useQuery({
     queryKey: ['admin-video-library'],
@@ -146,6 +149,20 @@ export const VideoLibrary = () => {
   return (
     <>
       <div className="space-y-6">
+        {/* Header with Upload Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold">Biblioteca de Videos</h2>
+            <p className="text-sm text-muted-foreground">
+              Gestiona todos los videos de tus cursos
+            </p>
+          </div>
+          <Button onClick={() => setShowUploadForm(true)} className="gap-2">
+            <Upload className="w-4 h-4" />
+            Subir Video
+          </Button>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="border-border/50">
@@ -154,25 +171,25 @@ export const VideoLibrary = () => {
               <p className="text-sm text-muted-foreground">Total Videos</p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-orange-500/10">
+          <Card className="border-border/50 bg-primary/5">
             <CardContent className="pt-4">
               <div className="text-2xl font-bold">🎸 {stats.guitar}</div>
               <p className="text-sm text-muted-foreground">Guitarra</p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-purple-500/10">
+          <Card className="border-border/50 bg-secondary/5">
             <CardContent className="pt-4">
               <div className="text-2xl font-bold">🎹 {stats.piano}</div>
               <p className="text-sm text-muted-foreground">Piano</p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-red-500/10">
+          <Card className="border-border/50 bg-destructive/5">
             <CardContent className="pt-4">
               <div className="text-2xl font-bold">🥁 {stats.drums}</div>
               <p className="text-sm text-muted-foreground">Batería</p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-amber-500/10">
+          <Card className="border-border/50 bg-accent/20">
             <CardContent className="pt-4">
               <div className="text-2xl font-bold">🪕 {stats.banjo}</div>
               <p className="text-sm text-muted-foreground">Banjo</p>
@@ -329,6 +346,12 @@ export const VideoLibrary = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Upload Form Modal */}
+      <VideoUploadForm 
+        open={showUploadForm} 
+        onClose={() => setShowUploadForm(false)} 
+      />
     </>
   );
 };
