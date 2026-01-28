@@ -1,0 +1,177 @@
+import { CreditCard, Check, Crown, Star, Zap } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { useStudentProfile } from '@/hooks/useStudentData';
+
+const plans = [
+  {
+    id: 'basic',
+    name: 'Básico',
+    price: 0,
+    description: 'Perfecto para comenzar tu viaje musical',
+    icon: Zap,
+    features: [
+      'Acceso a lecciones gratuitas',
+      'Progreso básico guardado',
+      'Comunidad de estudiantes',
+    ],
+  },
+  {
+    id: 'standard',
+    name: 'Estándar',
+    price: 299,
+    description: 'Para estudiantes comprometidos',
+    icon: Star,
+    popular: true,
+    features: [
+      'Todo del plan Básico',
+      'Acceso a todos los cursos estándar',
+      'Clases en vivo mensuales',
+      'Soporte prioritario',
+      'Certificados de cursos',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    price: 499,
+    description: 'La experiencia completa de aprendizaje',
+    icon: Crown,
+    features: [
+      'Todo del plan Estándar',
+      'Acceso a todos los cursos premium',
+      'Clases en vivo ilimitadas',
+      'Mentoría personalizada',
+      'Grabaciones de clases en vivo',
+      'Acceso anticipado a nuevos cursos',
+    ],
+  },
+];
+
+export const PaymentsSection = () => {
+  const { data: profile } = useStudentProfile();
+  const currentPlan = profile?.subscription_plan || 'basic';
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Pagos y Suscripción</h1>
+        <p className="text-muted-foreground mt-1">
+          Gestiona tu plan y métodos de pago
+        </p>
+      </div>
+
+      {/* Current Plan */}
+      <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Tu plan actual</p>
+              <h2 className="text-2xl font-bold text-foreground capitalize">
+                {currentPlan === 'basic' ? 'Básico' : currentPlan === 'standard' ? 'Estándar' : 'Pro'}
+              </h2>
+              {currentPlan !== 'basic' && profile?.subscription_expires_at && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Válido hasta: {new Date(profile.subscription_expires_at).toLocaleDateString('es-MX', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </p>
+              )}
+            </div>
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+              <CreditCard className="w-8 h-8 text-primary" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Plans */}
+      <div>
+        <h2 className="text-xl font-semibold text-foreground mb-4">Planes Disponibles</h2>
+        <div className="grid gap-6 md:grid-cols-3">
+          {plans.map((plan) => {
+            const isCurrentPlan = currentPlan === plan.id;
+            const Icon = plan.icon;
+
+            return (
+              <Card
+                key={plan.id}
+                className={cn(
+                  'relative transition-all',
+                  plan.popular && 'border-primary shadow-lg',
+                  isCurrentPlan && 'ring-2 ring-primary'
+                )}
+              >
+                {plan.popular && (
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    Más Popular
+                  </Badge>
+                )}
+                <CardHeader className="text-center pb-2">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <Icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <CardTitle>{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <span className="text-4xl font-bold text-foreground">
+                      ${plan.price}
+                    </span>
+                    <span className="text-muted-foreground">/mes</span>
+                  </div>
+
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className="w-full"
+                    variant={isCurrentPlan ? 'secondary' : plan.popular ? 'default' : 'outline'}
+                    disabled={isCurrentPlan}
+                  >
+                    {isCurrentPlan ? 'Plan Actual' : 'Seleccionar Plan'}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Payment History */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Historial de Pagos</CardTitle>
+          <CardDescription>
+            Tus transacciones recientes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {currentPlan === 'basic' ? (
+            <div className="text-center py-8">
+              <CreditCard className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                No tienes pagos registrados. Actualiza tu plan para acceder a más contenido.
+              </p>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              El historial de pagos estará disponible próximamente.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

@@ -22,7 +22,20 @@ export interface UpcomingClass {
   scheduled_at: string;
   duration_minutes: number | null;
   instrument: string | null;
+  max_attendees: number | null;
+  zoom_join_url: string | null;
   isRegistered: boolean;
+}
+
+export interface AvailableCourse {
+  id: string;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  instrument: string;
+  level: string;
+  duration_hours: number | null;
+  required_plan: string | null;
 }
 
 export const useStudentProfile = () => {
@@ -174,6 +187,51 @@ export const useStudentStats = () => {
         certificates: 0, // Will be implemented with certificates table
         streak: 7, // Placeholder - would need activity tracking
       };
+    },
+    enabled: !!user?.id,
+  });
+};
+
+export const useAvailableCourses = () => {
+  return useQuery({
+    queryKey: ['available-courses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('courses')
+        .select(`
+          id,
+          title,
+          description,
+          thumbnail_url,
+          instrument,
+          level,
+          duration_hours,
+          required_plan
+        `)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as AvailableCourse[];
+    },
+  });
+};
+
+export const useUserRegistrations = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['user-registrations', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('live_class_registrations')
+        .select('id, live_class_id, registered_at, attended')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!user?.id,
   });
