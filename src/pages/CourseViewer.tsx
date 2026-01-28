@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, StickyNote, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedVideoPlayer } from '@/components/student/ProtectedVideoPlayer';
 import { LessonSidebar } from '@/components/student/LessonSidebar';
+import { LessonNotesPanel } from '@/components/student/LessonNotesPanel';
 import { 
   useCourseDetails, 
   useCourseContent, 
@@ -13,6 +14,7 @@ import {
   useUpdateLessonProgress 
 } from '@/hooks/useCourseViewer';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const CourseViewer = () => {
   const { courseId, lessonId } = useParams();
@@ -44,12 +46,25 @@ const CourseViewer = () => {
   }, [lessonId, allLessons, userProgress]);
 
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [showNotesPanel, setShowNotesPanel] = useState(false);
+  const [currentVideoTime, setCurrentVideoTime] = useState(0);
+  const [seekToTime, setSeekToTime] = useState<number | null>(null);
 
   useEffect(() => {
     if (currentLesson && !selectedLessonId) {
       setSelectedLessonId(currentLesson.id);
     }
   }, [currentLesson, selectedLessonId]);
+
+  const handleTimeUpdate = useCallback((time: number) => {
+    setCurrentVideoTime(time);
+  }, []);
+
+  const handleSeekToTime = useCallback((seconds: number) => {
+    setSeekToTime(seconds);
+    // Reset after a moment to allow re-seeking to same time
+    setTimeout(() => setSeekToTime(null), 100);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -149,7 +164,9 @@ const CourseViewer = () => {
               currentPlan={userPlan}
               onProgress={handleProgress}
               onComplete={handleComplete}
+              onTimeUpdate={handleTimeUpdate}
               initialProgress={userProgress?.lessonProgress[selectedLesson.id] || 0}
+              seekToTime={seekToTime}
             />
           ) : (
             <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
@@ -162,17 +179,49 @@ const CourseViewer = () => {
             </div>
           )}
 
-          {/* Lesson Info */}
+          {/* Lesson Info & Notes Toggle */}
           {selectedLesson && (
             <div className="mt-6 space-y-4">
-              <h2 className="text-xl font-semibold text-foreground">
-                {selectedLesson.title}
-              </h2>
-              {selectedLesson.description && (
-                <p className="text-muted-foreground">
-                  {selectedLesson.description}
-                </p>
-              )}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {selectedLesson.title}
+                  </h2>
+                  {selectedLesson.description && (
+                    <p className="text-muted-foreground mt-2">
+                      {selectedLesson.description}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  variant={showNotesPanel ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowNotesPanel(!showNotesPanel)}
+                  className="shrink-0"
+                >
+                  <StickyNote className="w-4 h-4 mr-2" />
+                  Notas
+                  {showNotesPanel ? (
+                    <ChevronUp className="w-4 h-4 ml-1" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  )}
+                </Button>
+              </div>
+
+              {/* Notes Panel */}
+              <div
+                className={cn(
+                  "transition-all duration-300 overflow-hidden",
+                  showNotesPanel ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+                )}
+              >
+                <LessonNotesPanel
+                  lessonId={selectedLesson.id}
+                  currentVideoTime={currentVideoTime}
+                  onSeekToTime={handleSeekToTime}
+                />
+              </div>
             </div>
           )}
         </div>
