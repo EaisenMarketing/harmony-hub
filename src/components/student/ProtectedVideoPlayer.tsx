@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -11,7 +11,9 @@ interface ProtectedVideoPlayerProps {
   currentPlan: string;
   onProgress?: (percent: number) => void;
   onComplete?: () => void;
+  onTimeUpdate?: (currentTime: number) => void;
   initialProgress?: number;
+  seekToTime?: number | null;
 }
 
 const planHierarchy: Record<string, number> = {
@@ -33,7 +35,9 @@ export const ProtectedVideoPlayer = ({
   currentPlan,
   onProgress,
   onComplete,
+  onTimeUpdate,
   initialProgress = 0,
+  seekToTime,
 }: ProtectedVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,17 +51,31 @@ export const ProtectedVideoPlayer = ({
 
   const hasAccess = !isLocked || planHierarchy[currentPlan] >= planHierarchy[requiredPlan];
 
+  // Handle seek to time from notes
+  useEffect(() => {
+    if (seekToTime !== null && seekToTime !== undefined && videoRef.current && hasAccess) {
+      videoRef.current.currentTime = seekToTime;
+      if (!isPlaying) {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  }, [seekToTime, hasAccess, isPlaying]);
+
   useEffect(() => {
     if (videoRef.current && initialProgress > 0 && duration > 0) {
       videoRef.current.currentTime = (initialProgress / 100) * duration;
     }
   }, [initialProgress, duration]);
 
-  const handleTimeUpdate = () => {
+  const handleTimeUpdate = useCallback(() => {
     if (videoRef.current) {
       const current = videoRef.current.currentTime;
       const total = videoRef.current.duration;
       setCurrentTime(current);
+      
+      // Notify parent of current time for notes
+      onTimeUpdate?.(current);
       
       const percent = Math.round((current / total) * 100);
       onProgress?.(percent);
@@ -67,7 +85,7 @@ export const ProtectedVideoPlayer = ({
         onComplete?.();
       }
     }
-  };
+  }, [onProgress, onComplete, onTimeUpdate]);
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
