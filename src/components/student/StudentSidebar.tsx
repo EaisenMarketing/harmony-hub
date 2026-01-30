@@ -7,13 +7,15 @@ import {
   Settings, 
   CreditCard,
   LogOut,
-  Music
+  Music,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useStudentProfile } from '@/hooks/useStudentData';
+import { useIsAdmin } from '@/hooks/useAdminData';
 
 const navigation = [
   { name: 'Dashboard', href: '/portal', icon: LayoutDashboard },
@@ -28,6 +30,7 @@ export const StudentSidebar = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { data: profile } = useStudentProfile();
+  const { data: isAdmin } = useIsAdmin();
 
   const getInitials = (name: string) => {
     return name
@@ -91,6 +94,21 @@ export const StudentSidebar = () => {
           );
         })}
       </nav>
+
+      {/* Admin Link */}
+      {isAdmin && (
+        <div className="p-3 border-t border-border">
+          <Link to="/admin">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-primary hover:text-primary hover:bg-primary/10"
+            >
+              <Shield className="w-5 h-5" />
+              Panel Admin
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Sign Out */}
       <div className="p-3 border-t border-border">
