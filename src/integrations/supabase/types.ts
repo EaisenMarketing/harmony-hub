@@ -231,6 +231,124 @@ export type Database = {
         }
         Relationships: []
       }
+      instructor_activity_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          instructor_id: string
+          metadata: Json | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          instructor_id: string
+          metadata?: Json | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          instructor_id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_activity_logs_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "instructor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      instructor_profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          instrument: Database["public"]["Enums"]["instrument_type"]
+          specialization: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          instrument: Database["public"]["Enums"]["instrument_type"]
+          specialization?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          instrument?: Database["public"]["Enums"]["instrument_type"]
+          specialization?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
+      instructor_students: {
+        Row: {
+          enrolled_at: string
+          id: string
+          instructor_id: string
+          instrument: Database["public"]["Enums"]["instrument_type"]
+          status: string
+          student_id: string
+        }
+        Insert: {
+          enrolled_at?: string
+          id?: string
+          instructor_id: string
+          instrument: Database["public"]["Enums"]["instrument_type"]
+          status?: string
+          student_id: string
+        }
+        Update: {
+          enrolled_at?: string
+          id?: string
+          instructor_id?: string
+          instrument?: Database["public"]["Enums"]["instrument_type"]
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_students_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "instructor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           campaign_id: string | null
