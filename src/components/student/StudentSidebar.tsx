@@ -8,7 +8,8 @@ import {
   CreditCard,
   LogOut,
   Music,
-  Shield
+  Shield,
+  GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useStudentProfile } from '@/hooks/useStudentData';
 import { useIsAdmin } from '@/hooks/useAdminData';
+import { useIsInstructor, useInstructorProfile } from '@/hooks/useInstructorData';
 
 const navigation = [
   { name: 'Dashboard', href: '/portal', icon: LayoutDashboard },
@@ -31,6 +33,8 @@ export const StudentSidebar = () => {
   const { user, signOut } = useAuth();
   const { data: profile } = useStudentProfile();
   const { data: isAdmin } = useIsAdmin();
+  const { data: isInstructor } = useIsInstructor();
+  const { data: instructorProfile } = useInstructorProfile();
 
   const getInitials = (name: string) => {
     return name
@@ -40,6 +44,9 @@ export const StudentSidebar = () => {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  // Show instructor link if user is instructor or has a pending request
+  const showInstructorLink = isInstructor || instructorProfile;
 
   return (
     <aside className="w-64 bg-card border-r border-border h-screen sticky top-0 flex flex-col">
@@ -95,6 +102,21 @@ export const StudentSidebar = () => {
         })}
       </nav>
 
+      {/* Instructor Link */}
+      {showInstructorLink && (
+        <div className="p-3 border-t border-border">
+          <Link to="/instructor">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-secondary hover:text-secondary hover:bg-secondary/10"
+            >
+              <GraduationCap className="w-5 h-5" />
+              {instructorProfile?.status === 'pending' ? 'Solicitud Pendiente' : 'Panel Instructor'}
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Admin Link */}
       {isAdmin && (
         <div className="p-3 border-t border-border">
@@ -105,6 +127,21 @@ export const StudentSidebar = () => {
             >
               <Shield className="w-5 h-5" />
               Panel Admin
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {/* Become Instructor Link - show only if not already an instructor */}
+      {!showInstructorLink && (
+        <div className="p-3 border-t border-border">
+          <Link to="/instructor">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+            >
+              <GraduationCap className="w-5 h-5" />
+              Ser Instructor
             </Button>
           </Link>
         </div>

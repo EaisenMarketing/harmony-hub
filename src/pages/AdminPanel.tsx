@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin, useAdminStats } from '@/hooks/useAdminData';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminStats } from '@/components/admin/AdminStats';
+import { AdminDashboardCharts } from '@/components/admin/AdminDashboardCharts';
+import { InstructorsManagement } from '@/components/admin/InstructorsManagement';
 import { CoursesTable } from '@/components/admin/CoursesTable';
 import { LiveClassesTable } from '@/components/admin/LiveClassesTable';
 import { StudentsTable } from '@/components/admin/StudentsTable';
@@ -44,6 +46,9 @@ const AdminPanel = () => {
   const currentPath = location.pathname;
 
   const renderContent = () => {
+    if (currentPath === '/admin/instructores') {
+      return <InstructorsManagement />;
+    }
     if (currentPath === '/admin/cursos') {
       return <CoursesTable />;
     }
@@ -65,27 +70,15 @@ const AdminPanel = () => {
             upcomingClasses={stats?.upcomingClasses || 0}
             completedLessons={stats?.completedLessons || 0}
           />
-          <div className="grid lg:grid-cols-2 gap-6">
-            <div className="h-64 bg-muted/30 rounded-lg border border-dashed border-border flex items-center justify-center">
-              <p className="text-muted-foreground">Gráfico de ingresos (próximamente)</p>
-            </div>
-            <div className="h-64 bg-muted/30 rounded-lg border border-dashed border-border flex items-center justify-center">
-              <p className="text-muted-foreground">Gráfico de retención (próximamente)</p>
-            </div>
-          </div>
+          <AdminDashboardCharts />
         </div>
       );
     }
 
-    // Dashboard home
+    // Dashboard home - Show instructor activity dashboard
     return (
       <div className="space-y-8">
-        <AdminStats
-          totalCourses={stats?.totalCourses || 0}
-          totalStudents={stats?.totalStudents || 0}
-          upcomingClasses={stats?.upcomingClasses || 0}
-          completedLessons={stats?.completedLessons || 0}
-        />
+        <AdminDashboardCharts />
         <div className="grid lg:grid-cols-2 gap-6">
           <CoursesTable />
           <LiveClassesTable />
@@ -93,6 +86,31 @@ const AdminPanel = () => {
       </div>
     );
   };
+
+  const getPageInfo = () => {
+    switch (currentPath) {
+      case '/admin':
+        return { title: 'Panel de Administración', subtitle: 'Visualiza la actividad de instructores y gestiona la plataforma' };
+      case '/admin/instructores':
+        return { title: 'Gestión de Instructores', subtitle: 'Autoriza y gestiona los maestros por instrumento' };
+      case '/admin/cursos':
+        return { title: 'Gestión de Cursos', subtitle: 'Administra todos los cursos de la plataforma' };
+      case '/admin/videos':
+        return { title: 'Biblioteca de Videos', subtitle: 'Visualiza todos los videos organizados por instrumento' };
+      case '/admin/clases':
+        return { title: 'Clases en Vivo', subtitle: 'Gestiona las clases en vivo programadas' };
+      case '/admin/estudiantes':
+        return { title: 'Estudiantes', subtitle: 'Visualiza todos los estudiantes registrados' };
+      case '/admin/estadisticas':
+        return { title: 'Estadísticas', subtitle: 'Métricas y gráficas de la plataforma' };
+      case '/admin/configuracion':
+        return { title: 'Configuración', subtitle: 'Configuración general de la plataforma' };
+      default:
+        return { title: 'Panel de Administración', subtitle: 'Gestiona todo el contenido de la plataforma' };
+    }
+  };
+
+  const pageInfo = getPageInfo();
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -107,18 +125,10 @@ const AdminPanel = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                {currentPath === '/admin' && 'Panel de Administración'}
-                {currentPath === '/admin/cursos' && 'Gestión de Cursos'}
-                {currentPath === '/admin/videos' && 'Biblioteca de Videos'}
-                {currentPath === '/admin/clases' && 'Clases en Vivo'}
-                {currentPath === '/admin/estudiantes' && 'Estudiantes'}
-                {currentPath === '/admin/estadisticas' && 'Estadísticas'}
-                {currentPath === '/admin/configuracion' && 'Configuración'}
+                {pageInfo.title}
               </h1>
               <p className="text-muted-foreground text-sm">
-                {currentPath === '/admin/videos' 
-                  ? 'Visualiza todos los videos organizados por instrumento'
-                  : 'Gestiona todo el contenido de la plataforma'}
+                {pageInfo.subtitle}
               </p>
             </div>
           </header>
