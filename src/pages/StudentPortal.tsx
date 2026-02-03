@@ -11,12 +11,15 @@ import { CalendarSection } from '@/components/student/CalendarSection';
 import { CertificatesPage } from '@/components/student/CertificatesPage';
 import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
+import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
+import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
 import { 
   useStudentProfile, 
   useStudentCourses, 
   useUpcomingClasses, 
   useStudentStats 
 } from '@/hooks/useStudentData';
+import { useUserPlan } from '@/hooks/useCourseViewer';
 
 const StudentPortal = () => {
   const { user, loading } = useAuth();
@@ -27,6 +30,7 @@ const StudentPortal = () => {
   const { data: courses = [], isLoading: coursesLoading } = useStudentCourses();
   const { data: classes = [], isLoading: classesLoading } = useUpcomingClasses();
   const { data: stats } = useStudentStats();
+  const { data: userPlan = 'basic' } = useUserPlan();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -72,13 +76,19 @@ const StudentPortal = () => {
         return (
           <>
             {/* Welcome Header */}
-            <header>
-              <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                {greeting()}, {profile?.full_name?.split(' ')[0] || 'Estudiante'}! 👋
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Continúa donde lo dejaste y alcanza tus metas musicales.
-              </p>
+            <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                  {greeting()}, {profile?.full_name?.split(' ')[0] || 'Estudiante'}! 👋
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Continúa donde lo dejaste y alcanza tus metas musicales.
+                </p>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <ChordGeneratorModal userPlan={userPlan} />
+                <MusicTheoryAssistant userPlan={userPlan} />
+              </div>
             </header>
 
             {/* Stats */}
