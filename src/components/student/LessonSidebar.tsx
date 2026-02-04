@@ -24,6 +24,8 @@ interface LessonSidebarProps {
   currentLessonId: string;
   completedLessons: string[];
   userPlan: string;
+  userInstrument: string | null;
+  courseInstrument: string;
   onSelectLesson: (lessonId: string) => void;
 }
 
@@ -40,10 +42,18 @@ export const LessonSidebar = ({
   currentLessonId,
   completedLessons,
   userPlan,
+  userInstrument,
+  courseInstrument,
   onSelectLesson,
 }: LessonSidebarProps) => {
   const navigate = useNavigate();
-  const hasFullAccess = planHierarchy[userPlan] >= planHierarchy['standard'];
+  
+  const hasProAccess = planHierarchy[userPlan] >= planHierarchy['pro'];
+  const hasStandardAccess = planHierarchy[userPlan] >= planHierarchy['standard'];
+  
+  // Standard users can only access their preferred instrument
+  const hasInstrumentAccess = hasProAccess || 
+    (hasStandardAccess && courseInstrument === userInstrument);
   
   // Count total lessons to track the global index
   let globalLessonIndex = 0;
@@ -78,11 +88,14 @@ export const LessonSidebar = ({
                   const hasVideo = !!lesson.video_url;
                   
                   // For Basic plan: lock lessons after the first 3 (unless it's free preview)
-                  const isLockedForBasicPlan = !hasFullAccess && 
+                  const isLockedForBasicPlan = !hasStandardAccess && 
                     currentGlobalIndex >= FREE_LESSONS_FOR_BASIC && 
                     !lesson.is_free_preview;
                   
-                  const isLocked = isLockedForBasicPlan;
+                  // For Standard plan: lock if not their instrument
+                  const isLockedForWrongInstrument = hasStandardAccess && !hasProAccess && !hasInstrumentAccess;
+                  
+                  const isLocked = isLockedForBasicPlan || (isLockedForWrongInstrument && !lesson.is_free_preview);
 
                   return (
                     <button
@@ -150,22 +163,26 @@ export const LessonSidebar = ({
             </div>
           ))}
           
-          {/* Upgrade Banner for Basic Users */}
-          {!hasFullAccess && (
+          {/* Upgrade Banner */}
+          {(!hasStandardAccess || (hasStandardAccess && !hasProAccess && !hasInstrumentAccess)) && (
             <div className="mx-2 mt-4 p-4 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <Crown className="w-5 h-5 text-primary" />
-                <h4 className="font-semibold text-foreground">¡Desbloquea todo!</h4>
+                <h4 className="font-semibold text-foreground">
+                  {!hasStandardAccess ? '¡Desbloquea todo!' : '¡Accede a más instrumentos!'}
+                </h4>
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                Obtén la suscripción Estándar para acceder a todas las lecciones y herramientas de IA.
+                {!hasStandardAccess 
+                  ? 'Obtén la suscripción Estándar para acceder a todas las lecciones y herramientas de IA.'
+                  : 'Actualiza al plan Pro para acceder a todos los instrumentos.'}
               </p>
               <Button 
                 size="sm" 
                 className="w-full"
                 onClick={() => navigate('/portal/pagos')}
               >
-                Ver planes desde $120/mes
+                {!hasStandardAccess ? 'Ver planes desde $120/mes' : 'Obtener Plan Pro'}
               </Button>
             </div>
           )}

@@ -10,7 +10,7 @@ import {
   useCourseDetails, 
   useCourseContent, 
   useUserProgress, 
-  useUserPlan,
+  useUserProfile,
   useUpdateLessonProgress 
 } from '@/hooks/useCourseViewer';
 import { useToast } from '@/hooks/use-toast';
@@ -25,7 +25,7 @@ const CourseViewer = () => {
   const { data: course, isLoading: courseLoading } = useCourseDetails(courseId);
   const { data: modules = [], isLoading: contentLoading } = useCourseContent(courseId);
   const { data: userProgress } = useUserProgress(courseId);
-  const { data: userPlan = 'basic' } = useUserPlan();
+  const { data: userProfile } = useUserProfile();
   const updateProgress = useUpdateLessonProgress();
 
   // Get all lessons in order
@@ -107,9 +107,21 @@ const CourseViewer = () => {
   };
 
   const selectedLesson = allLessons.find(l => l.id === selectedLessonId);
+  const userPlan = userProfile?.plan || 'basic';
+  const userInstrument = userProfile?.preferredInstrument || null;
+  
+  // Check access based on plan and instrument
   const planHierarchy: Record<string, number> = { basic: 1, standard: 2, pro: 3 };
+  const hasFullAccess = planHierarchy[userPlan] >= planHierarchy['pro'];
+  const hasStandardAccess = planHierarchy[userPlan] >= planHierarchy['standard'];
+  
+  // Standard users can only access their preferred instrument
+  const hasInstrumentAccess = hasFullAccess || 
+    (hasStandardAccess && course?.instrument === userInstrument) ||
+    userPlan === 'basic'; // Basic users are limited by lesson count, not instrument
+  
   const isLocked = selectedLesson && !selectedLesson.is_free_preview && 
-    planHierarchy[userPlan] < planHierarchy[course?.required_plan || 'basic'];
+    (!hasInstrumentAccess || (userPlan === 'basic'));
 
   if (authLoading || courseLoading || contentLoading) {
     return (
@@ -233,6 +245,8 @@ const CourseViewer = () => {
         currentLessonId={selectedLessonId || ''}
         completedLessons={userProgress?.completedLessons || []}
         userPlan={userPlan}
+        userInstrument={userInstrument}
+        courseInstrument={course.instrument}
         onSelectLesson={handleSelectLesson}
       />
     </div>
