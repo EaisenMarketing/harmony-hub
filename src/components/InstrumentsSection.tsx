@@ -3,8 +3,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import guitarImage from '@/assets/guitar-card.jpg';
 import pianoImage from '@/assets/piano-card.jpg';
-import drumsImage from '@/assets/drums-card.jpg';
-import banjoImage from '@/assets/banjo-card.jpg';
 
 const instruments = [
   {
@@ -22,22 +20,6 @@ const instruments = [
     levels: ['Básico', 'Intermedio', 'Avanzado'],
     courses: 18,
     color: 'from-indigo-500 to-purple-600',
-  },
-  {
-    name: 'Batería',
-    description: 'Ritmos, fills y técnicas de profesionales del rock y jazz.',
-    image: drumsImage,
-    levels: ['Básico', 'Intermedio', 'Avanzado'],
-    courses: 16,
-    color: 'from-rose-500 to-red-600',
-  },
-  {
-    name: 'Banjo',
-    description: 'Bluegrass, folk y técnicas de fingerpicking auténticas.',
-    image: banjoImage,
-    levels: ['Básico', 'Intermedio', 'Avanzado'],
-    courses: 12,
-    color: 'from-emerald-500 to-teal-600',
   },
 ];
 
