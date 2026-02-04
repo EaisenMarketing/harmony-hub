@@ -22,8 +22,8 @@ const upcomingClasses = [
     spots: 8,
   },
   {
-    title: 'Batería: Grooves de Funk',
-    instructor: 'Roberto Silva',
+    title: 'Guitarra: Blues para Principiantes',
+    instructor: 'Carlos Martínez',
     date: 'Mié 17 Ene',
     time: '8:00 PM',
     timezone: 'CDMX',
@@ -31,7 +31,7 @@ const upcomingClasses = [
     spots: 15,
   },
   {
-    title: 'Banjo: Fingerpicking Bluegrass',
+    title: 'Piano: Lectura de Partituras',
     instructor: 'Ana López',
     date: 'Jue 18 Ene',
     time: '5:00 PM',

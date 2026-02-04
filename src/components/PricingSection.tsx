@@ -5,15 +5,15 @@ import { Check, X, Sparkles, Zap, Crown } from 'lucide-react';
 const plans = [
   {
     name: 'Básico',
-    price: '$19.99',
+    price: '$0',
     period: '/mes',
     description: 'Perfecto para comenzar tu viaje musical',
     icon: Zap,
     features: [
-      { text: 'Cursos grabados intro', included: true },
+      { text: 'Primeras 3 lecciones de cada curso', included: true },
       { text: 'Calendario visible', included: true },
       { text: 'Clases en vivo', included: false },
-      { text: 'Material descargable', included: false },
+      { text: 'Herramientas de IA', included: false },
       { text: 'Certificados', included: false },
     ],
     popular: false,
@@ -22,37 +22,37 @@ const plans = [
   },
   {
     name: 'Estándar',
-    price: '$49.99',
+    price: '$120',
     period: '/mes',
     description: 'Para estudiantes comprometidos',
     icon: Sparkles,
     features: [
-      { text: 'Todo lo del plan Básico', included: true },
-      { text: '2 clases en vivo / mes', included: true },
+      { text: 'Acceso completo a todos los cursos', included: true },
+      { text: 'Clases en vivo ilimitadas', included: true },
+      { text: 'Herramientas de IA (acordes y teoría)', included: true },
       { text: 'Material descargable', included: true },
-      { text: 'Feedback 1:1', included: false },
       { text: 'Certificados', included: false },
     ],
-    popular: false,
+    popular: true,
     color: 'border-primary/50',
-    buttonVariant: 'default' as const,
+    buttonVariant: 'gradient' as const,
   },
   {
     name: 'Pro',
-    price: '$69.99',
+    price: '$150',
     period: '/mes',
     description: 'Acceso total y beneficios premium',
     icon: Crown,
     features: [
-      { text: 'Acceso total a cursos', included: true },
-      { text: 'Clases en vivo ilimitadas', included: true },
+      { text: 'Todo lo del plan Estándar', included: true },
       { text: 'Feedback 1:1 mensual', included: true },
       { text: 'Certificados oficiales', included: true },
       { text: 'Prioridad en soporte', included: true },
+      { text: 'Acceso anticipado a nuevos cursos', included: true },
     ],
-    popular: true,
+    popular: false,
     color: 'border-emerald-500',
-    buttonVariant: 'gradient' as const,
+    buttonVariant: 'default' as const,
   },
 ];
 
@@ -80,7 +80,7 @@ export function PricingSection() {
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {plans.map((plan, index) => (
+          {plans.map((plan) => (
             <div
               key={plan.name}
               className={`relative rounded-2xl border-2 ${plan.color} bg-white/5 backdrop-blur-sm p-8 transition-all duration-500 hover:-translate-y-2 ${
