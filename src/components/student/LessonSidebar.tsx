@@ -1,7 +1,9 @@
-import { Check, Lock, Play, Clock } from 'lucide-react';
+import { Check, Lock, Play, Clock, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface Lesson {
   id: string;
@@ -22,7 +24,6 @@ interface LessonSidebarProps {
   currentLessonId: string;
   completedLessons: string[];
   userPlan: string;
-  requiredPlan: string;
   onSelectLesson: (lessonId: string) => void;
 }
 
@@ -32,15 +33,20 @@ const planHierarchy: Record<string, number> = {
   pro: 3,
 };
 
+const FREE_LESSONS_FOR_BASIC = 3;
+
 export const LessonSidebar = ({
   modules,
   currentLessonId,
   completedLessons,
   userPlan,
-  requiredPlan,
   onSelectLesson,
 }: LessonSidebarProps) => {
-  const hasAccess = planHierarchy[userPlan] >= planHierarchy[requiredPlan];
+  const navigate = useNavigate();
+  const hasFullAccess = planHierarchy[userPlan] >= planHierarchy['standard'];
+  
+  // Count total lessons to track the global index
+  let globalLessonIndex = 0;
 
   return (
     <div className="w-full lg:w-80 bg-card border-l border-border">
@@ -64,10 +70,19 @@ export const LessonSidebar = ({
 
               <div className="space-y-1">
                 {module.lessons.map((lesson, lessonIndex) => {
+                  const currentGlobalIndex = globalLessonIndex;
+                  globalLessonIndex++;
+                  
                   const isCompleted = completedLessons.includes(lesson.id);
                   const isCurrent = lesson.id === currentLessonId;
-                  const isLocked = !hasAccess && !lesson.is_free_preview;
                   const hasVideo = !!lesson.video_url;
+                  
+                  // For Basic plan: lock lessons after the first 3 (unless it's free preview)
+                  const isLockedForBasicPlan = !hasFullAccess && 
+                    currentGlobalIndex >= FREE_LESSONS_FOR_BASIC && 
+                    !lesson.is_free_preview;
+                  
+                  const isLocked = isLockedForBasicPlan;
 
                   return (
                     <button
@@ -117,6 +132,11 @@ export const LessonSidebar = ({
                               Gratis
                             </Badge>
                           )}
+                          {isLocked && (
+                            <Badge variant="secondary" className="text-xs py-0 h-5">
+                              Premium
+                            </Badge>
+                          )}
                         </div>
                       </div>
 
@@ -129,6 +149,26 @@ export const LessonSidebar = ({
               </div>
             </div>
           ))}
+          
+          {/* Upgrade Banner for Basic Users */}
+          {!hasFullAccess && (
+            <div className="mx-2 mt-4 p-4 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Crown className="w-5 h-5 text-primary" />
+                <h4 className="font-semibold text-foreground">¡Desbloquea todo!</h4>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Obtén la suscripción Estándar para acceder a todas las lecciones y herramientas de IA.
+              </p>
+              <Button 
+                size="sm" 
+                className="w-full"
+                onClick={() => navigate('/portal/pagos')}
+              >
+                Ver planes desde $120/mes
+              </Button>
+            </div>
+          )}
         </div>
       </ScrollArea>
     </div>

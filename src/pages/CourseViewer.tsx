@@ -233,7 +233,6 @@ const CourseViewer = () => {
         currentLessonId={selectedLessonId || ''}
         completedLessons={userProgress?.completedLessons || []}
         userPlan={userPlan}
-        requiredPlan={course.required_plan || 'basic'}
         onSelectLesson={handleSelectLesson}
       />
     </div>
