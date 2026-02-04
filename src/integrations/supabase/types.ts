@@ -581,6 +581,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          preferred_instrument: string | null
           preferred_language: string | null
           subscription_expires_at: string | null
           subscription_plan:
@@ -597,6 +598,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          preferred_instrument?: string | null
           preferred_language?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:
@@ -613,6 +615,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          preferred_instrument?: string | null
           preferred_language?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:

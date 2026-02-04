@@ -151,6 +151,30 @@ export const useUserPlan = () => {
   });
 };
 
+export const useUserProfile = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['user-profile-full', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('subscription_plan, preferred_instrument')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      return {
+        plan: data?.subscription_plan || 'basic',
+        preferredInstrument: data?.preferred_instrument || null,
+      };
+    },
+    enabled: !!user?.id,
+  });
+};
+
 export const useUpdateLessonProgress = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
