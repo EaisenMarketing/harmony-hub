@@ -123,10 +123,13 @@ export function CalendarSection() {
         {/* CTA */}
         <div className="text-center mt-12">
           <Link to="/auth">
-            <Button variant="gradient" size="lg">
+            <Button variant="gradient" size="lg" className="group">
               Ver calendario completo
             </Button>
           </Link>
+          <p className="text-sm text-muted-foreground mt-3">
+            Inicia sesión para ver todas las clases disponibles
+          </p>
         </div>
       </div>
     </section>
