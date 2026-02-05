@@ -25,6 +25,7 @@ export interface UpcomingClass {
   max_attendees: number | null;
   zoom_join_url: string | null;
   isRegistered: boolean;
+  registeredCount: number;
 }
 
 export interface AvailableCourse {
@@ -149,11 +150,27 @@ export const useUpcomingClasses = () => {
 
       if (regError) throw regError;
 
-      const registeredClassIds = registrations?.map(r => r.live_class_id) || [];
+      const registeredClassIds = new Set(registrations?.map(r => r.live_class_id) || []);
+
+      // Get registration counts for all classes
+      const classIds = classes?.map(c => c.id) || [];
+      const { data: allRegistrations, error: countError } = await supabase
+        .from('live_class_registrations')
+        .select('live_class_id')
+        .in('live_class_id', classIds);
+
+      if (countError) throw countError;
+
+      // Count registrations per class
+      const registrationCounts: Record<string, number> = {};
+      allRegistrations?.forEach(reg => {
+        registrationCounts[reg.live_class_id] = (registrationCounts[reg.live_class_id] || 0) + 1;
+      });
 
       const upcomingClasses: UpcomingClass[] = classes?.map(cls => ({
         ...cls,
-        isRegistered: registeredClassIds.includes(cls.id),
+        isRegistered: registeredClassIds.has(cls.id),
+        registeredCount: registrationCounts[cls.id] || 0,
       })) || [];
 
       return upcomingClasses;
