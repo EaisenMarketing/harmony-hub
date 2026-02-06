@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -23,27 +23,44 @@ serve(async (req) => {
     }
 
     const systemPrompt = instrument === 'piano' 
-      ? `Eres un experto en teoría musical y piano. Cuando el usuario te pida un acorde, debes responder SOLO en formato JSON con la siguiente estructura:
+      ? `Eres un experto en teoría musical y PIANO. Cuando el usuario te pida un acorde, debes responder SOLO en formato JSON con la siguiente estructura:
 {
   "chordName": "nombre del acorde",
   "notes": ["lista", "de", "notas"],
-  "fingers": "descripción de qué dedos usar (1=pulgar, 2=índice, 3=medio, 4=anular, 5=meñique)",
-  "keyPositions": "descripción de las teclas a presionar de izquierda a derecha",
-  "tips": "consejos adicionales para tocar el acorde",
-  "variations": ["variaciones comunes del acorde"]
+  "fingers": "descripción de qué dedos usar en el TECLADO (1=pulgar, 2=índice, 3=medio, 4=anular, 5=meñique)",
+  "keyPositions": "descripción de las TECLAS a presionar de izquierda a derecha",
+  "tips": "consejos específicos para PIANO sobre posición de manos, relajación de muñeca, transiciones entre TECLAS, etc. NUNCA menciones cuerdas, trastes o guitarra.",
+  "variations": ["variaciones comunes del acorde en piano"]
 }
+
+IMPORTANTE: 
+- Todos los consejos deben ser ESPECÍFICOS para PIANO y TECLADO
+- NUNCA uses términos de guitarra como "cuerda", "traste", "rasgueo", "cejilla"
+- Usa términos de piano como "tecla", "octava", "digitación", "posición de mano"
+- Los consejos deben hablar sobre presión de teclas, independencia de dedos, postura de mano en el teclado
+
 No incluyas texto adicional fuera del JSON.`
-      : `Eres un experto en teoría musical y guitarra. Cuando el usuario te pida un acorde, debes responder SOLO en formato JSON con la siguiente estructura:
+      : `Eres un experto en teoría musical y GUITARRA. Cuando el usuario te pida un acorde, debes responder SOLO en formato JSON con la siguiente estructura:
 {
   "chordName": "nombre del acorde",
-  "notes": ["lista", "de", "notas"],
-  "frets": [posición de cada cuerda desde la 6ta a la 1ra, usar -1 para cuerdas que no se tocan],
-  "fingers": [dedo a usar en cada cuerda, 0=no tocar, 1=índice, 2=medio, 3=anular, 4=meñique],
+  "notes": ["lista", "de", "notas que suenan"],
+  "frets": [posición de cada cuerda desde la 6ta (E grave) a la 1ra (e agudo), usar -1 para cuerdas que no se tocan, 0 para cuerdas al aire],
+  "fingers": [dedo a usar en cada cuerda, 0=no tocar/al aire, 1=índice, 2=medio, 3=anular, 4=meñique],
   "barreInfo": "información sobre cejilla si aplica, o null",
-  "tips": "consejos adicionales para tocar el acorde",
+  "tips": "consejos específicos para GUITARRA sobre posición de dedos, evitar mutear cuerdas al aire, ángulo de los dedos en los trastes, presión adecuada, etc. NUNCA menciones teclas o piano.",
   "strumPattern": "patrón de rasgueo sugerido"
 }
+
+IMPORTANTE:
+- Todos los consejos deben ser ESPECÍFICOS para GUITARRA
+- NUNCA uses términos de piano como "tecla", "teclado", "octava"
+- Usa términos de guitarra como "cuerda", "traste", "mástil", "cejilla", "rasgueo", "punteo"
+- Los consejos deben hablar sobre posición de dedos en trastes, cuerdas al aire, cómo no mutear cuerdas, presión en el mástil
+- Asegúrate de que los dedos no muteen cuerdas que deben sonar al aire
+
 No incluyas texto adicional fuera del JSON.`;
+
+    console.log(`Generating ${instrument} chord for: ${chordName}`);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -62,6 +79,24 @@ No incluyas texto adicional fuera del JSON.`;
     });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Límite de solicitudes excedido. Intenta de nuevo en unos segundos.' 
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Se requiere agregar créditos para continuar usando esta función.' 
+        }), {
+          status: 402,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       const errorText = await response.text();
       throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
@@ -72,6 +107,8 @@ No incluyas texto adicional fuera del JSON.`;
     if (!content) {
       throw new Error('No response from AI');
     }
+
+    console.log('AI Response:', content);
 
     // Parse the JSON response
     let chordData;
