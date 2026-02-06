@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Music, Piano, Guitar, Loader2, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { GuitarChordDiagram } from './GuitarChordDiagram';
+import { PianoChordDiagram } from './PianoChordDiagram';
 
 interface ChordData {
   chordName: string;
@@ -71,46 +73,6 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
     }
   };
 
-  const renderGuitarFrets = (frets: number[], fingers?: number[]) => {
-    const strings = ['E', 'A', 'D', 'G', 'B', 'e'];
-    return (
-      <div className="bg-muted/50 rounded-lg p-4 font-mono text-sm">
-        <div className="text-center mb-2 font-semibold">Diagrama de Guitarra</div>
-        <div className="flex justify-center gap-4">
-          {frets.map((fret, idx) => (
-            <div key={idx} className="flex flex-col items-center">
-              <span className="text-muted-foreground text-xs">{strings[idx]}</span>
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary">
-                {fret === -1 ? 'X' : fret === 0 ? 'O' : fret}
-              </div>
-              {fingers && fingers[idx] > 0 && (
-                <span className="text-xs text-muted-foreground mt-1">D{fingers[idx]}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderPianoKeys = (notes: string[]) => {
-    return (
-      <div className="bg-muted/50 rounded-lg p-4">
-        <div className="text-center mb-2 font-semibold">Notas en el Piano</div>
-        <div className="flex justify-center gap-2 flex-wrap">
-          {notes.map((note, idx) => (
-            <div
-              key={idx}
-              className="w-12 h-16 bg-background border-2 border-primary rounded flex items-end justify-center pb-2 font-semibold text-primary"
-            >
-              {note}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   if (!hasAccess) {
     return (
       <Dialog>
@@ -147,7 +109,7 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
           Generador de Acordes
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Music className="w-5 h-5" />
@@ -183,20 +145,17 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
             <TabsContent value="piano" className="mt-0">
               {chordData && chordData.notes && (
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">{chordData.chordName}</h3>
-                  {renderPianoKeys(chordData.notes)}
+                  {/* Visual Piano Diagram */}
+                  <PianoChordDiagram 
+                    notes={chordData.notes}
+                    chordName={chordData.chordName}
+                    fingers={chordData.fingers}
+                  />
                   
                   {chordData.keyPositions && (
                     <div className="bg-muted/30 rounded-lg p-3">
                       <p className="font-medium mb-1">Posición de teclas:</p>
                       <p className="text-sm text-muted-foreground">{chordData.keyPositions}</p>
-                    </div>
-                  )}
-                  
-                  {chordData.fingers && (
-                    <div className="bg-muted/30 rounded-lg p-3">
-                      <p className="font-medium mb-1">Digitación:</p>
-                      <p className="text-sm text-muted-foreground">{chordData.fingers}</p>
                     </div>
                   )}
                   
@@ -222,20 +181,18 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
             <TabsContent value="guitar" className="mt-0">
               {chordData && chordData.frets && (
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">{chordData.chordName}</h3>
-                  {renderGuitarFrets(chordData.frets, chordData.fingers as unknown as number[])}
+                  {/* Visual Guitar Diagram */}
+                  <GuitarChordDiagram
+                    frets={chordData.frets}
+                    fingers={chordData.fingers as unknown as number[]}
+                    chordName={chordData.chordName}
+                    barreInfo={chordData.barreInfo}
+                  />
                   
                   {chordData.notes && (
                     <div className="bg-muted/30 rounded-lg p-3">
                       <p className="font-medium mb-1">Notas:</p>
                       <p className="text-sm text-muted-foreground">{chordData.notes.join(' - ')}</p>
-                    </div>
-                  )}
-                  
-                  {chordData.barreInfo && (
-                    <div className="bg-muted/30 rounded-lg p-3">
-                      <p className="font-medium mb-1">Cejilla:</p>
-                      <p className="text-sm text-muted-foreground">{chordData.barreInfo}</p>
                     </div>
                   )}
                   
