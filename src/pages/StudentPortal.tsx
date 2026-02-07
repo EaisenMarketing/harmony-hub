@@ -13,6 +13,7 @@ import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
+import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
 import { 
   useStudentProfile, 
   useStudentCourses, 
@@ -88,6 +89,7 @@ const StudentPortal = () => {
               <div className="flex gap-2 flex-wrap">
                 <ChordGeneratorModal userPlan={userPlan} />
                 <MusicTheoryAssistant userPlan={userPlan} />
+                <SongAnalyzerModal userPlan={userPlan} />
               </div>
             </header>
 
