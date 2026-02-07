@@ -628,6 +628,66 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_songs: {
+        Row: {
+          artist: string
+          chords: string[] | null
+          created_at: string
+          difficulty: string | null
+          id: string
+          key: string | null
+          progression: Json | null
+          similar_songs: string[] | null
+          song_title: string
+          structure: Json | null
+          tempo: string | null
+          time_signature: string | null
+          tips: string[] | null
+          updated_at: string
+          user_id: string
+          video_id: string | null
+          youtube_url: string
+        }
+        Insert: {
+          artist: string
+          chords?: string[] | null
+          created_at?: string
+          difficulty?: string | null
+          id?: string
+          key?: string | null
+          progression?: Json | null
+          similar_songs?: string[] | null
+          song_title: string
+          structure?: Json | null
+          tempo?: string | null
+          time_signature?: string | null
+          tips?: string[] | null
+          updated_at?: string
+          user_id: string
+          video_id?: string | null
+          youtube_url: string
+        }
+        Update: {
+          artist?: string
+          chords?: string[] | null
+          created_at?: string
+          difficulty?: string | null
+          id?: string
+          key?: string | null
+          progression?: Json | null
+          similar_songs?: string[] | null
+          song_title?: string
+          structure?: Json | null
+          tempo?: string | null
+          time_signature?: string | null
+          tips?: string[] | null
+          updated_at?: string
+          user_id?: string
+          video_id?: string | null
+          youtube_url?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed: boolean | null

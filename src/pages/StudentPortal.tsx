@@ -14,6 +14,7 @@ import { SettingsSection } from '@/components/student/SettingsSection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
+import { SongLibraryModal } from '@/components/student/SongLibraryModal';
 import { 
   useStudentProfile, 
   useStudentCourses, 
@@ -90,6 +91,7 @@ const StudentPortal = () => {
                 <ChordGeneratorModal userPlan={userPlan} />
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <SongAnalyzerModal userPlan={userPlan} />
+                <SongLibraryModal userPlan={userPlan} />
               </div>
             </header>
 
