@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp } from 'lucide-react';
+import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp, FileDown, Save, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
+import jsPDF from 'jspdf';
 
 interface SongAnalysis {
   songTitle: string;
@@ -39,11 +41,15 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
   const [open, setOpen] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [analysis, setAnalysis] = useState<SongAnalysis | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const allowedPlans = ['standard', 'pro'];
   const hasAccess = allowedPlans.includes(userPlan);
+  const isPro = userPlan === 'pro';
 
   const extractVideoInfo = (url: string): string | null => {
     const patterns = [
@@ -102,6 +108,168 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (!analysis) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 20;
+
+    // Title
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(analysis.songTitle, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'normal');
+    doc.text(analysis.artist, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 15;
+
+    // Info line
+    doc.setFontSize(10);
+    const infoText = `Tonalidad: ${analysis.key} | Tempo: ${analysis.tempo} | Compas: ${analysis.timeSignature} | Dificultad: ${analysis.difficulty}`;
+    doc.text(infoText, pageWidth / 2, yPos, { align: 'center' });
+    yPos += 15;
+
+    // Chords
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Acordes Utilizados:', 20, yPos);
+    yPos += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text(analysis.chords.join('  -  '), 20, yPos);
+    yPos += 12;
+
+    // Progression
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Progresion Armonica:', 20, yPos);
+    yPos += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text(`${analysis.progression.name}: ${analysis.progression.numerals}`, 20, yPos);
+    yPos += 6;
+    
+    const descLines = doc.splitTextToSize(analysis.progression.description, pageWidth - 40);
+    doc.setFontSize(10);
+    doc.text(descLines, 20, yPos);
+    yPos += descLines.length * 5 + 10;
+
+    // Structure
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Estructura de la Cancion:', 20, yPos);
+    yPos += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+
+    analysis.structure.forEach((section) => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.text(`${section.section}: ${section.chords.join(' -> ')} (${section.bars} compases)`, 25, yPos);
+      yPos += 6;
+    });
+    yPos += 8;
+
+    // Tips
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Consejos para Tocarla:', 20, yPos);
+    yPos += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+
+    analysis.tips.forEach((tip) => {
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+      const tipLines = doc.splitTextToSize(`• ${tip}`, pageWidth - 45);
+      doc.text(tipLines, 25, yPos);
+      yPos += tipLines.length * 5 + 2;
+    });
+    yPos += 8;
+
+    // Similar Songs
+    if (analysis.similarSongs && analysis.similarSongs.length > 0) {
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Canciones con Progresion Similar:', 20, yPos);
+      yPos += 7;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(analysis.similarSongs.join(', '), 25, yPos);
+    }
+
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(128);
+    doc.text('Generado con Escuela de Musica - Analizador de Canciones IA', pageWidth / 2, 285, { align: 'center' });
+
+    doc.save(`${analysis.songTitle} - ${analysis.artist} - Analisis.pdf`);
+
+    toast({
+      title: 'PDF Exportado',
+      description: 'El análisis ha sido descargado como PDF.',
+    });
+  };
+
+  const handleSaveToLibrary = async () => {
+    if (!analysis || !user) return;
+
+    setSaving(true);
+    try {
+      const videoId = extractVideoInfo(youtubeUrl);
+      
+      const { error } = await supabase.from('saved_songs').insert({
+        user_id: user.id,
+        youtube_url: youtubeUrl,
+        video_id: videoId,
+        song_title: analysis.songTitle,
+        artist: analysis.artist,
+        key: analysis.key,
+        tempo: analysis.tempo,
+        time_signature: analysis.timeSignature,
+        chords: analysis.chords,
+        structure: analysis.structure,
+        progression: analysis.progression,
+        difficulty: analysis.difficulty,
+        tips: analysis.tips,
+        similar_songs: analysis.similarSongs,
+      });
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['saved-songs'] });
+
+      toast({
+        title: 'Canción Guardada',
+        description: 'La canción ha sido añadida a tu biblioteca.',
+      });
+    } catch (error) {
+      console.error('Error saving song:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo guardar la canción.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -173,6 +341,27 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
 
           {analysis && (
             <div className="space-y-4 animate-in fade-in-50 duration-300">
+              {/* Pro Actions */}
+              <div className="flex flex-wrap gap-2 justify-end">
+                {isPro ? (
+                  <>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPDF}>
+                      <FileDown className="w-4 h-4" />
+                      Exportar PDF
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleSaveToLibrary} disabled={saving}>
+                      {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      Guardar en Biblioteca
+                    </Button>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
+                    <Crown className="w-3 h-3" />
+                    Exportar PDF y guardar en biblioteca disponible en Pro
+                  </div>
+                )}
+              </div>
+
               {/* Song Info Header */}
               <Card className="bg-gradient-to-r from-primary/10 to-primary/5">
                 <CardContent className="pt-4">
