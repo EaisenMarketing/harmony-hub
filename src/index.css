@@ -120,11 +120,13 @@
 
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -134,6 +136,10 @@
 }
 
 @layer components {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   .gradient-text {
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-primary);
