@@ -49,7 +49,7 @@ export const StudentSidebar = () => {
   const showInstructorLink = isInstructor || instructorProfile;
 
   return (
-    <aside className="w-64 bg-card border-r border-border h-screen sticky top-0 flex flex-col">
+    <aside className="hidden md:flex w-64 bg-card border-r border-border h-screen sticky top-0 flex-col">
       {/* Logo */}
       <div className="p-4 border-b border-border">
         <Link to="/" className="flex items-center gap-2">
