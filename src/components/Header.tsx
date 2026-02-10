@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Music2, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User } from 'lucide-react';
+import acordeLogo from '@/assets/acorde-live-logo.png';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -55,9 +56,7 @@ export function Header() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-emerald-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-              <Music2 className="w-6 h-6 text-white" />
-            </div>
+            <img src={acordeLogo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
             <span className="text-xl font-bold text-white hidden sm:block">
               Acorde Live
             </span>
