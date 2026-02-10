@@ -146,7 +146,7 @@ const Auth = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-bg mb-4">
             <Music className="h-8 w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Escuela Virtual de Música</h1>
+          <h1 className="text-2xl font-bold text-foreground">Acorde Live</h1>
           <p className="text-muted-foreground mt-2">Aprende música desde cualquier lugar</p>
         </div>
 

@@ -55,7 +55,7 @@ export function Footer() {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-emerald-500 flex items-center justify-center">
                 <Music2 className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold">Escuela Virtual de Música</span>
+              <span className="text-xl font-bold">Acorde Live</span>
             </a>
             <p className="text-white/60 mb-6 max-w-sm">
               Aprende música desde cualquier lugar con profesores reales. Clases en vivo, cursos grabados y una comunidad que te apoya.
@@ -63,9 +63,9 @@ export function Footer() {
 
             {/* Contact Info */}
             <div className="space-y-3">
-              <a href="mailto:hola@escuelavirtual.com" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors">
+              <a href="mailto:hola@acordelive.com" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors">
                 <Mail className="w-5 h-5" />
-                <span>hola@escuelavirtual.com</span>
+                <span>hola@acordelive.com</span>
               </a>
               <a href="#" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors">
                 <Phone className="w-5 h-5" />
@@ -134,7 +134,7 @@ export function Footer() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-white/40 text-sm">
-              © 2026 Escuela Virtual de Música. Todos los derechos reservados.
+              © 2026 Acorde Live. Todos los derechos reservados.
             </p>
             <div className="flex items-center gap-4">
               <button className="px-3 py-1 rounded-md bg-white/10 text-sm hover:bg-white/20 transition-colors">
