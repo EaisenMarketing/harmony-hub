@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Music2, Mail, Phone, Instagram, Youtube } from 'lucide-react';
+import { Mail, Phone, Instagram, Youtube } from 'lucide-react';
+import acordeLogo from '@/assets/acorde-live-logo.png';
 import { Button } from '@/components/ui/button';
 
 const footerLinks = {
@@ -52,9 +53,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-emerald-500 flex items-center justify-center">
-                <Music2 className="w-6 h-6 text-white" />
-              </div>
+              <img src={acordeLogo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
               <span className="text-xl font-bold">Acorde Live</span>
             </a>
             <p className="text-white/60 mb-6 max-w-sm">
