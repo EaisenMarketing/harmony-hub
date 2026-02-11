@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, Bell, Shield, Globe, Save, Camera } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { User, Bell, Shield, Globe, Save, Camera, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,6 +29,8 @@ export const SettingsSection = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [timezone, setTimezone] = useState('America/Mexico_City');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form when profile loads
   useState(() => {
@@ -60,6 +62,55 @@ export const SettingsSection = () => {
       toast({ title: 'Error', description: 'No se pudo actualizar el perfil.', variant: 'destructive' });
     },
   });
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'Error', description: 'La imagen debe ser menor a 2MB.', variant: 'destructive' });
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+      toast({ title: 'Error', description: 'Solo se permiten archivos JPG, PNG o GIF.', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = `${publicUrl}?t=${Date.now()}`;
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      queryClient.invalidateQueries({ queryKey: ['student-profile'] });
+      toast({ title: 'Foto actualizada', description: 'Tu foto de perfil ha sido cambiada.' });
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast({ title: 'Error', description: 'No se pudo subir la foto.', variant: 'destructive' });
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -126,9 +177,25 @@ export const SettingsSection = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <Button variant="outline" size="sm">
-                    <Camera className="w-4 h-4 mr-2" />
-                    Cambiar Foto
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                  >
+                    {uploadingAvatar ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4 mr-2" />
+                    )}
+                    {uploadingAvatar ? 'Subiendo...' : 'Cambiar Foto'}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-1">
                     JPG, PNG o GIF. Máximo 2MB.
@@ -179,6 +246,12 @@ export const SettingsSection = () => {
                       <SelectItem value="America/Monterrey">Monterrey</SelectItem>
                       <SelectItem value="America/Tijuana">Tijuana</SelectItem>
                       <SelectItem value="America/Cancun">Cancún</SelectItem>
+                      <SelectItem value="America/New_York">Nueva York (EST)</SelectItem>
+                      <SelectItem value="America/Chicago">Chicago (CST)</SelectItem>
+                      <SelectItem value="America/Denver">Denver (MST)</SelectItem>
+                      <SelectItem value="America/Los_Angeles">Los Ángeles (PST)</SelectItem>
+                      <SelectItem value="America/Anchorage">Alaska</SelectItem>
+                      <SelectItem value="Pacific/Honolulu">Hawái</SelectItem>
                       <SelectItem value="America/Bogota">Bogotá</SelectItem>
                       <SelectItem value="America/Lima">Lima</SelectItem>
                       <SelectItem value="America/Santiago">Santiago</SelectItem>
