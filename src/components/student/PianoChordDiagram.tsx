@@ -6,7 +6,6 @@ interface PianoChordDiagramProps {
   fingers?: string;
 }
 
-// Piano key layout - two octaves
 const PIANO_KEYS = [
   { note: 'C', isBlack: false },
   { note: 'C#', isBlack: true },
@@ -22,135 +21,91 @@ const PIANO_KEYS = [
   { note: 'B', isBlack: false },
 ];
 
-// Normalize note names for comparison
 const normalizeNote = (note: string): string => {
   return note
     .replace(/♯/g, '#')
     .replace(/♭/g, 'b')
-    .replace(/mayor/gi, '')
-    .replace(/menor/gi, '')
-    .replace(/m$/i, '')
     .trim()
     .toUpperCase();
 };
 
-// Check if a piano key matches any of the chord notes
-const isNotePressed = (keyNote: string, chordNotes: string[]): boolean => {
-  const normalizedKey = normalizeNote(keyNote);
-  return chordNotes.some(note => {
-    const normalized = normalizeNote(note);
-    // Handle enharmonic equivalents
-    const enharmonics: Record<string, string> = {
-      'C#': 'DB', 'DB': 'C#',
-      'D#': 'EB', 'EB': 'D#',
-      'F#': 'GB', 'GB': 'F#',
-      'G#': 'AB', 'AB': 'G#',
-      'A#': 'BB', 'BB': 'A#',
-    };
-    return normalized === normalizedKey || 
-           normalized === enharmonics[normalizedKey] ||
-           normalizedKey === enharmonics[normalized];
-  });
+// Map flat notes to sharp equivalents
+const flatToSharp: Record<string, string> = {
+  'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#',
 };
 
-// Get finger number for a note (1=thumb, 2=index, etc.)
+const resolveNote = (note: string): string => {
+  const n = normalizeNote(note);
+  return flatToSharp[n] || n;
+};
+
+const fingerColors: Record<number, string> = {
+  1: 'bg-blue-500',
+  2: 'bg-green-500',
+  3: 'bg-orange-500',
+  4: 'bg-red-500',
+  5: 'bg-purple-500',
+};
+
 const getFingerForNote = (noteIndex: number, totalNotes: number): number => {
-  if (totalNotes === 3) {
-    return [1, 3, 5][noteIndex] || 0;
-  } else if (totalNotes === 4) {
-    return [1, 2, 3, 5][noteIndex] || 0;
-  }
+  if (totalNotes === 3) return [1, 3, 5][noteIndex] || noteIndex + 1;
+  if (totalNotes === 4) return [1, 2, 3, 5][noteIndex] || noteIndex + 1;
+  if (totalNotes === 5) return [1, 2, 3, 4, 5][noteIndex] || noteIndex + 1;
   return noteIndex + 1;
 };
 
 export const PianoChordDiagram = ({ notes, chordName, fingers }: PianoChordDiagramProps) => {
-  // Create two octaves of keys
   const allKeys = [...PIANO_KEYS, ...PIANO_KEYS];
-  
-  // Get only the white keys for layout
-  const whiteKeys = allKeys.filter(k => !k.isBlack);
-  
-  // Pre-calculate which keys are pressed and assign finger numbers
-  const pressedWhiteKeys = new Map<number, number>();
-  const pressedBlackKeys = new Map<string, number>();
-  let noteIdx = 0;
-  
-  // First pass: identify pressed white keys
-  whiteKeys.forEach((key, idx) => {
-    if (isNotePressed(key.note, notes)) {
-      pressedWhiteKeys.set(idx, getFingerForNote(noteIdx, notes.length));
-      noteIdx++;
-    }
-  });
-  
-  // Second pass: identify pressed black keys
-  noteIdx = 0;
-  let _blackNoteIdx = pressedWhiteKeys.size; // Start after white key assignments
-  whiteKeys.forEach((key, idx) => {
-    const hasBlackKey = !['E', 'B'].includes(key.note);
-    if (!hasBlackKey) return;
-    const blackNote = key.note + '#';
-    if (isNotePressed(blackNote, notes)) {
-      // Find the correct finger index for this note
-      let fingerIdx = 0;
-      for (const note of notes) {
-        const normalized = normalizeNote(note);
-        const normalizedBlack = normalizeNote(blackNote);
-        if (normalized === normalizedBlack || 
-            normalized === ({ 'C#': 'DB', 'D#': 'EB', 'F#': 'GB', 'G#': 'AB', 'A#': 'BB' } as Record<string, string>)[normalizedBlack]) {
-          break;
-        }
-        fingerIdx++;
-      }
-      pressedBlackKeys.set(`${idx}-${blackNote}`, getFingerForNote(fingerIdx, notes.length));
-    }
+
+  // Resolve all chord notes to sharp notation
+  const resolvedNotes = notes.map(n => resolveNote(n));
+
+  // Build a map: resolved note name -> { fingerNum, originalNote, noteIndex }
+  const noteMap = new Map<string, { fingerNum: number; original: string }>();
+  resolvedNotes.forEach((rn, idx) => {
+    noteMap.set(rn, { fingerNum: getFingerForNote(idx, notes.length), original: notes[idx] });
   });
 
-  // Finger colors for visual distinction (matching guitar style)
-  const fingerColors: Record<number, string> = {
-    1: 'bg-blue-500',
-    2: 'bg-green-500',
-    3: 'bg-orange-500',
-    4: 'bg-red-500',
-    5: 'bg-purple-500',
-  };
+  // White and black key data with press info
+  const whiteKeys = allKeys.filter(k => !k.isBlack);
 
   return (
-    <div className="bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-xl p-4 sm:p-6 border border-slate-300 dark:border-slate-700">
+    <div className="bg-gradient-to-b from-muted/50 to-muted rounded-xl p-4 sm:p-6 border border-border">
       <div className="text-center mb-4">
         <h4 className="font-bold text-lg text-foreground">{chordName}</h4>
         <p className="text-xs text-muted-foreground">Diagrama de Piano</p>
       </div>
-      
+
       <div className="flex justify-center overflow-x-auto pb-2">
         <div className="relative inline-flex">
           {/* White keys */}
           <div className="flex">
             {whiteKeys.map((key, idx) => {
-              const isPressed = pressedWhiteKeys.has(idx);
-              const fingerNum = pressedWhiteKeys.get(idx) || 0;
-              
+              const info = noteMap.get(key.note);
+              const isPressed = !!info;
+              const fingerNum = info?.fingerNum || 0;
+
               return (
                 <div
                   key={`white-${idx}`}
                   className={cn(
-                    "w-8 sm:w-10 h-28 sm:h-32 border border-slate-300 dark:border-slate-600 rounded-b-lg flex flex-col items-center justify-end pb-2 transition-all relative",
-                    isPressed 
-                      ? "bg-primary shadow-lg shadow-primary/30 border-primary" 
+                    "w-8 sm:w-10 h-28 sm:h-32 border border-border rounded-b-lg flex flex-col items-center justify-end pb-2 transition-all relative",
+                    isPressed
+                      ? "bg-primary/20 border-primary shadow-lg shadow-primary/20"
                       : "bg-white dark:bg-slate-100"
                   )}
                 >
                   {isPressed && (
                     <div className={cn(
-                      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow-lg text-white font-bold text-xs sm:text-sm",
+                      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-lg text-white font-bold text-sm sm:text-base ring-2 ring-white/50",
                       fingerColors[fingerNum] || 'bg-primary'
                     )}>
                       {fingerNum}
                     </div>
                   )}
                   <span className={cn(
-                    "text-[10px] sm:text-xs font-medium",
-                    isPressed ? "text-white" : "text-slate-600 dark:text-slate-800"
+                    "text-[10px] sm:text-xs font-semibold",
+                    isPressed ? "text-primary" : "text-slate-500 dark:text-slate-700"
                   )}>
                     {key.note}
                   </span>
@@ -158,37 +113,39 @@ export const PianoChordDiagram = ({ notes, chordName, fingers }: PianoChordDiagr
               );
             })}
           </div>
-          
+
           {/* Black keys overlay */}
           <div className="absolute top-0 left-0 flex pointer-events-none">
             {whiteKeys.map((key, idx) => {
               const hasBlackKey = !['E', 'B'].includes(key.note);
               if (!hasBlackKey) return <div key={`space-${idx}`} className="w-8 sm:w-10" />;
-              
+
               const blackNote = key.note + '#';
-              const blackKey = `${idx}-${blackNote}`;
-              const isPressed = pressedBlackKeys.has(blackKey);
-              const fingerNum = pressedBlackKeys.get(blackKey) || 0;
-              
+              const info = noteMap.get(blackNote);
+              const isPressed = !!info;
+              const fingerNum = info?.fingerNum || 0;
+
               return (
                 <div key={`black-container-${idx}`} className="w-8 sm:w-10 relative">
                   <div
                     className={cn(
-                      "absolute -right-2.5 sm:-right-3 top-0 w-5 sm:w-6 h-16 sm:h-20 rounded-b-md z-10 flex flex-col items-center justify-end pb-1 transition-all",
+                      "absolute -right-2.5 sm:-right-3 top-0 w-5 sm:w-6 h-16 sm:h-20 rounded-b-md z-10 flex flex-col items-center justify-center transition-all",
                       isPressed
-                        ? "bg-primary shadow-lg shadow-primary/50"
+                        ? "bg-primary shadow-lg shadow-primary/50 ring-2 ring-primary/30"
                         : "bg-slate-900 dark:bg-slate-950"
                     )}
                   >
                     {isPressed && (
                       <div className={cn(
-                        "w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center mb-1 text-white font-bold shadow-lg",
+                        "w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-white font-bold shadow-lg ring-1 ring-white/30",
                         fingerColors[fingerNum] || 'bg-primary'
                       )}>
-                        <span className="text-[9px] sm:text-[10px]">{fingerNum}</span>
+                        <span className="text-[10px] sm:text-xs">{fingerNum}</span>
                       </div>
                     )}
-                    <span className="text-[7px] sm:text-[8px] text-white font-medium">{blackNote}</span>
+                    {!isPressed && (
+                      <span className="text-[7px] sm:text-[8px] text-white/60 font-medium mt-auto mb-1">{blackNote}</span>
+                    )}
                   </div>
                 </div>
               );
@@ -196,20 +153,29 @@ export const PianoChordDiagram = ({ notes, chordName, fingers }: PianoChordDiagr
           </div>
         </div>
       </div>
-      
+
       {/* Notes display */}
       <div className="mt-4 flex justify-center gap-2 flex-wrap">
-        {notes.map((note, idx) => (
-          <div
-            key={idx}
-            className="px-3 py-1.5 bg-primary/20 rounded-full text-sm font-medium text-primary border border-primary/30"
-          >
-            {note}
-          </div>
-        ))}
+        {notes.map((note, idx) => {
+          const fingerNum = getFingerForNote(idx, notes.length);
+          return (
+            <div
+              key={idx}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-muted rounded-full border border-border"
+            >
+              <div className={cn(
+                "w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold",
+                fingerColors[fingerNum] || 'bg-primary'
+              )}>
+                {fingerNum}
+              </div>
+              <span className="text-sm font-medium text-foreground">{note}</span>
+            </div>
+          );
+        })}
       </div>
-      
-      {/* Finger legend with colors */}
+
+      {/* Finger legend */}
       <div className="mt-4 flex justify-center gap-2 sm:gap-3 flex-wrap">
         <span className="text-xs text-muted-foreground">Dedos:</span>
         {[
@@ -225,9 +191,9 @@ export const PianoChordDiagram = ({ notes, chordName, fingers }: PianoChordDiagr
           </div>
         ))}
       </div>
-      
+
       {fingers && (
-        <div className="mt-3 text-center text-sm text-muted-foreground bg-muted/30 rounded-lg p-2">
+        <div className="mt-3 text-center text-sm text-muted-foreground bg-muted/50 rounded-lg p-2 border border-border">
           🎹 {fingers}
         </div>
       )}
