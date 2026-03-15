@@ -5,9 +5,9 @@ import {
   BookOpen, 
   Video, 
   LogOut,
-  Music,
   Home
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInstructorProfile } from '@/hooks/useInstructorData';
@@ -48,9 +48,7 @@ export const InstructorSidebar = () => {
       {/* Logo */}
       <div className="p-4 border-b border-white/10">
         <Link to="/instructor" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <Music className="w-5 h-5 text-white" />
-          </div>
+          <img src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
           <div>
             <span className="font-bold text-lg text-white">Instructor</span>
             <p className="text-xs text-white/60">

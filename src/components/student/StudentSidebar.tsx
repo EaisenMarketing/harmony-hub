@@ -7,10 +7,10 @@ import {
   Settings, 
   CreditCard,
   LogOut,
-  Music,
   Shield,
   GraduationCap
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -53,10 +53,8 @@ export const StudentSidebar = () => {
       {/* Logo */}
       <div className="p-4 border-b border-border">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <Music className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-lg text-foreground">MusicSchool</span>
+          <img src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
+          <span className="font-bold text-lg text-foreground">Acorde Live</span>
         </Link>
       </div>
 
