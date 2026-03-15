@@ -146,7 +146,8 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
               {chordData && chordData.notes && (
                 <div className="space-y-4">
                   {/* Visual Piano Diagram */}
-                  <PianoChordDiagram 
+                  <PianoChordDiagram
+                    key={`${chordData.chordName}-${chordData.notes.join('-')}`}
                     notes={chordData.notes}
                     chordName={chordData.chordName}
                     fingers={chordData.fingers}
