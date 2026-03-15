@@ -6,10 +6,10 @@ import {
   Users, 
   Settings,
   LogOut,
-  Music,
   BarChart3,
   Film
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
