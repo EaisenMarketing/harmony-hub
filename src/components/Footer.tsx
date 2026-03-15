@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, Instagram, Youtube } from 'lucide-react';
-import acordeLogo from '@/assets/acorde-live-logo.png';
+import logo from '@/assets/logo.png';
 import { Button } from '@/components/ui/button';
 
 const footerLinks = {
