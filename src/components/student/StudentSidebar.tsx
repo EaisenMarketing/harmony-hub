@@ -7,10 +7,10 @@ import {
   Settings, 
   CreditCard,
   LogOut,
-  Music,
   Shield,
   GraduationCap
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
