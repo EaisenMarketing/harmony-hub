@@ -47,7 +47,7 @@ export const ProtectedVideoPlayer = ({
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const hasAccess = !isLocked || planHierarchy[currentPlan] >= planHierarchy[requiredPlan];
 
