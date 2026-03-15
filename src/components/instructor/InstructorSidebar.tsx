@@ -5,9 +5,9 @@ import {
   BookOpen, 
   Video, 
   LogOut,
-  Music,
   Home
 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInstructorProfile } from '@/hooks/useInstructorData';
