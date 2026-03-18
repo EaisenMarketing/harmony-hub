@@ -3,6 +3,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import guitarImage from '@/assets/guitar-card.jpg';
 import pianoImage from '@/assets/piano-card.jpg';
+import drumsImage from '@/assets/drums-card.jpg';
+import banjoImage from '@/assets/banjo-card.jpg';
+import { ScrollReveal, Parallax } from '@/components/landing/ScrollReveal';
+import { motion } from 'framer-motion';
 
 const instruments = [
   {
@@ -11,7 +15,8 @@ const instruments = [
     image: guitarImage,
     levels: ['Básico', 'Intermedio', 'Avanzado'],
     courses: 24,
-    color: 'from-orange-500 to-amber-600',
+    gradient: 'from-orange-500/80 to-amber-600/80',
+    accent: 'hsl(30, 100%, 50%)',
   },
   {
     name: 'Piano',
@@ -19,89 +24,127 @@ const instruments = [
     image: pianoImage,
     levels: ['Básico', 'Intermedio', 'Avanzado'],
     courses: 18,
-    color: 'from-indigo-500 to-purple-600',
+    gradient: 'from-indigo-500/80 to-purple-600/80',
+    accent: 'hsl(239, 84%, 67%)',
+  },
+  {
+    name: 'Batería',
+    description: 'Ritmos fundamentales, técnicas avanzadas y coordinación.',
+    image: drumsImage,
+    levels: ['Básico', 'Intermedio', 'Avanzado'],
+    courses: 15,
+    gradient: 'from-rose-500/80 to-red-600/80',
+    accent: 'hsl(350, 89%, 60%)',
+  },
+  {
+    name: 'Banjo',
+    description: 'Bluegrass, folk y fingerpicking. Estilo auténtico americano.',
+    image: banjoImage,
+    levels: ['Básico', 'Intermedio'],
+    courses: 10,
+    gradient: 'from-emerald-500/80 to-teal-600/80',
+    accent: 'hsl(160, 84%, 39%)',
   },
 ];
 
 export function InstrumentsSection() {
   return (
-    <section id="instrumentos" className="py-24 bg-background relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)`,
-          backgroundSize: '40px 40px',
-        }} />
+    <section id="instrumentos" className="py-32 bg-[hsl(222,47%,7%)] relative overflow-hidden">
+      {/* Dramatic background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px]" />
       </div>
 
-      <div className="container mx-auto px-4 relative">
+      <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-            Instrumentos
-          </span>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Elige tu instrumento y{' '}
-            <span className="gradient-text">comienza hoy</span>
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Cursos estructurados por niveles con material descargable, ejercicios prácticos y feedback personalizado.
-          </p>
-        </div>
+        <ScrollReveal>
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <motion.span 
+              className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6 border border-primary/20"
+              whileHover={{ scale: 1.05 }}
+            >
+              Instrumentos
+            </motion.span>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight">
+              Elige tu instrumento y{' '}
+              <span className="gradient-text">comienza hoy</span>
+            </h2>
+            <p className="text-lg text-white/50">
+              Cursos estructurados por niveles con material descargable, ejercicios prácticos y feedback personalizado.
+            </p>
+          </div>
+        </ScrollReveal>
 
-        {/* Instruments Grid */}
+        {/* Instruments Grid - Cinematic Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {instruments.map((instrument, index) => (
-            <div
-              key={instrument.name}
-              className="group relative bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              {/* Image */}
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={instrument.image}
-                  alt={instrument.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-t ${instrument.color} opacity-0 group-hover:opacity-40 transition-opacity duration-500`} />
-                
-                {/* Course Count Badge */}
-                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-sm font-medium">
-                  {instrument.courses} cursos
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-card-foreground mb-2">
-                  {instrument.name}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {instrument.description}
-                </p>
-
-                {/* Levels */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {instrument.levels.map((level) => (
-                    <span
-                      key={level}
-                      className="px-2 py-1 text-xs font-medium rounded-md bg-muted text-muted-foreground"
+            <ScrollReveal key={instrument.name} delay={index * 0.15} direction={index % 2 === 0 ? 'up' : 'down'}>
+              <Parallax speed={0.2 * (index % 2 === 0 ? 1 : -1)}>
+                <motion.div
+                  whileHover={{ y: -12, scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  className="group relative bg-white/[0.03] backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/20"
+                >
+                  {/* Image with parallax zoom */}
+                  <div className="relative h-64 overflow-hidden">
+                    <motion.img
+                      src={instrument.image}
+                      alt={instrument.name}
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.15 }}
+                      transition={{ duration: 0.7 }}
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${instrument.gradient} opacity-40 group-hover:opacity-60 transition-opacity duration-500`} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[hsl(222,47%,7%)] via-transparent to-transparent" />
+                    
+                    {/* Floating badge */}
+                    <motion.div 
+                      className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white text-sm font-bold border border-white/10"
+                      whileHover={{ scale: 1.1 }}
                     >
-                      {level}
-                    </span>
-                  ))}
-                </div>
+                      {instrument.courses} cursos
+                    </motion.div>
 
-                {/* CTA */}
-                <Link to="/auth">
-                  <Button variant="outline" className="w-full group/btn">
-                    Ver cursos
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
+                    {/* Glow effect on hover */}
+                    <div 
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"
+                      style={{ backgroundColor: instrument.accent }}
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:gradient-text transition-all duration-300">
+                      {instrument.name}
+                    </h3>
+                    <p className="text-sm text-white/40 mb-4 leading-relaxed">
+                      {instrument.description}
+                    </p>
+
+                    {/* Levels */}
+                    <div className="flex flex-wrap gap-2 mb-5">
+                      {instrument.levels.map((level) => (
+                        <span
+                          key={level}
+                          className="px-2.5 py-1 text-xs font-medium rounded-md bg-white/5 text-white/50 border border-white/5"
+                        >
+                          {level}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* CTA */}
+                    <Link to="/auth">
+                      <Button variant="outline" className="w-full group/btn border-white/10 text-white/70 hover:text-white hover:bg-white/5 hover:border-white/20">
+                        Ver cursos
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                </motion.div>
+              </Parallax>
+            </ScrollReveal>
           ))}
         </div>
       </div>
