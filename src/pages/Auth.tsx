@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
@@ -143,8 +144,8 @@ const Auth = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-bg mb-4">
-            <Music className="h-8 w-8 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl mb-4">
+            <img src={logo} alt="Acorde Live" className="w-24 h-24 rounded-2xl object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Acorde Live</h1>
           <p className="text-muted-foreground mt-2">Aprende música desde cualquier lugar</p>
