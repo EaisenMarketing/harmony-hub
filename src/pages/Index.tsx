@@ -6,17 +6,25 @@ import { PricingSection } from '@/components/PricingSection';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { FAQSection } from '@/components/FAQSection';
 import { Footer } from '@/components/Footer';
+import { MusicParticles } from '@/components/landing/MusicParticles';
+import { CinematicDivider } from '@/components/landing/ScrollReveal';
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[hsl(222,47%,5%)]">
+      <MusicParticles />
       <Header />
       <main>
         <HeroSection />
+        <CinematicDivider />
         <InstrumentsSection />
+        <CinematicDivider />
         <CalendarSection />
+        <CinematicDivider />
         <PricingSection />
+        <CinematicDivider />
         <TestimonialsSection />
+        <CinematicDivider />
         <FAQSection />
       </main>
       <Footer />
