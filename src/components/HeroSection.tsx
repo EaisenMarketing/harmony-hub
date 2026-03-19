@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Video, Clock, Award, CheckCircle2, Play } from 'lucide-react';
-import { ScrollReveal } from '@/components/landing/ScrollReveal';
+
 import { motion } from 'framer-motion';
 import producerImage from '@/assets/producer-studio.jpg';
 
