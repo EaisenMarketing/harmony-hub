@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Video, Clock, Award, CheckCircle2, Play } from 'lucide-react';
-import { AudioVisualizer3D } from '@/components/landing/AudioVisualizer3D';
-import { ScrollReveal } from '@/components/landing/ScrollReveal';
+
 import { motion } from 'framer-motion';
+import producerImage from '@/assets/producer-studio.jpg';
 
 const badges = [
   { icon: Video, text: 'Clases en vivo por Zoom' },
@@ -15,28 +15,27 @@ const stats = [
   { value: '10K+', label: 'Estudiantes' },
   { value: '500+', label: 'Clases grabadas' },
   { value: '98%', label: 'Satisfacción' },
-  { value: '4', label: 'Instrumentos' },
+  { value: '3', label: 'Programas' },
 ];
 
 export function HeroSection() {
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Deep dark cinematic background */}
-      <div className="absolute inset-0 bg-[hsl(222,47%,5%)]">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsl(222,47%,5%)]/30 to-[hsl(222,47%,5%)]" />
+      {/* Background image */}
+      <div className="absolute inset-0">
+        <img
+          src={producerImage}
+          alt="Productor musical en estudio"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-[hsl(222,47%,5%)]/75" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(222,47%,5%)] via-[hsl(222,47%,5%)]/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(222,47%,5%)] via-transparent to-[hsl(222,47%,5%)]/40" />
       </div>
 
-      {/* 3D Audio Visualizer */}
-      <AudioVisualizer3D />
-
-      {/* Cinematic overlay gradients */}
-      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[hsl(222,47%,5%)]/80 via-transparent to-[hsl(222,47%,5%)]/60" />
-      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[hsl(222,47%,5%)] via-transparent to-transparent" />
-
-      {/* Lens flare effect */}
-      <div className="absolute top-1/3 right-1/3 w-[600px] h-[600px] z-[1] opacity-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle,hsla(239,84%,67%,0.3)_0%,transparent_70%)]" />
-      </div>
+      {/* Subtle glow accents */}
+      <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[150px] z-[1]" />
+      <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full bg-secondary/8 blur-[120px] z-[1]" />
 
       {/* Content */}
       <div className="container relative mx-auto px-4 pt-32 pb-20 z-[2]">
@@ -54,7 +53,7 @@ export function HeroSection() {
             </span>
           </motion.div>
 
-          {/* Heading with stagger */}
+          {/* Heading */}
           <motion.h1 
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -81,7 +80,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.6 }}
             className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl leading-relaxed"
           >
-            Clases de guitarra, piano, batería y banjo con profesores profesionales. 
+            Clases de guitarra, piano y producción musical con profesores profesionales. 
             Desde principiante hasta avanzado, a tu ritmo.
           </motion.p>
 
