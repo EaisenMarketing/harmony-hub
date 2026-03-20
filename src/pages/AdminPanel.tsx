@@ -10,6 +10,7 @@ import { CoursesTable } from '@/components/admin/CoursesTable';
 import { LiveClassesTable } from '@/components/admin/LiveClassesTable';
 import { StudentsTable } from '@/components/admin/StudentsTable';
 import { VideoLibrary } from '@/components/admin/VideoLibrary';
+import { ProductionManagement } from '@/components/admin/ProductionManagement';
 import { Shield } from 'lucide-react';
 
 const AdminPanel = () => {
