@@ -38,23 +38,6 @@ const plans = [
     buttonVariant: 'outline' as const,
   },
   {
-    name: 'Producción Musical',
-    price: '$99',
-    period: '/mes',
-    description: 'Todo lo del Pro + clases de producción',
-    icon: Crown,
-    features: [
-      { text: 'Todo lo incluido en el plan Pro', included: true },
-      { text: 'Clases de producción musical mensual', included: true },
-      { text: 'Acceso a DAWs, mezcla y mastering', included: true },
-      { text: 'Tareas y material descargable (PDF)', included: true },
-      { text: 'Grabación y técnicas de estudio', included: true },
-    ],
-    popular: false,
-    color: 'border-emerald-500',
-    buttonVariant: 'default' as const,
-  },
-  {
     name: 'Pro',
     price: '$75',
     period: '/mes',
@@ -70,6 +53,23 @@ const plans = [
     popular: true,
     color: 'border-primary/50',
     buttonVariant: 'gradient' as const,
+  },
+  {
+    name: 'Producción Musical',
+    price: '$99',
+    period: '/mes',
+    description: 'Todo lo del Pro + clases de producción',
+    icon: Crown,
+    features: [
+      { text: 'Todo lo incluido en el plan Pro', included: true },
+      { text: 'Clases de producción musical mensual', included: true },
+      { text: 'Acceso a DAWs, mezcla y mastering', included: true },
+      { text: 'Tareas y material descargable (PDF)', included: true },
+      { text: 'Grabación y técnicas de estudio', included: true },
+    ],
+    popular: false,
+    color: 'border-emerald-500',
+    buttonVariant: 'default' as const,
   },
 ];
 
