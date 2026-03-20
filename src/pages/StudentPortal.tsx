@@ -75,6 +75,8 @@ const StudentPortal = () => {
         return <PaymentsSection />;
       case '/portal/configuracion':
         return <SettingsSection />;
+      case '/portal/produccion':
+        return <ProductionClassesSection />;
       default:
         // Dashboard
         return (

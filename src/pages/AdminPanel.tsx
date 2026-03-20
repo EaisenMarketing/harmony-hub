@@ -101,6 +101,8 @@ const AdminPanel = () => {
         return { title: 'Gestión de Cursos', subtitle: 'Administra todos los cursos de la plataforma' };
       case '/admin/videos':
         return { title: 'Biblioteca de Videos', subtitle: 'Visualiza todos los videos organizados por instrumento' };
+      case '/admin/produccion':
+        return { title: 'Producción Musical', subtitle: 'Gestiona clases, videos, tareas y material de producción' };
       case '/admin/clases':
         return { title: 'Clases en Vivo', subtitle: 'Gestiona las clases en vivo programadas' };
       case '/admin/estudiantes':
