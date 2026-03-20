@@ -38,23 +38,6 @@ const plans = [
     buttonVariant: 'outline' as const,
   },
   {
-    name: 'Pro',
-    price: '$75',
-    period: '/mes',
-    description: 'Acceso total a todos los instrumentos',
-    icon: Crown,
-    features: [
-      { text: 'Acceso a TODOS los instrumentos', included: true },
-      { text: '1 clase grupal en vivo por semana (1hr)', included: true },
-      { text: 'Feedback 1:1 mensual', included: true },
-      { text: 'Certificados oficiales', included: true },
-      { text: 'Prioridad en soporte', included: true },
-    ],
-    popular: true,
-    color: 'border-primary/50',
-    buttonVariant: 'gradient' as const,
-  },
-  {
     name: 'Producción Musical',
     price: '$99',
     period: '/mes',
@@ -70,6 +53,23 @@ const plans = [
     popular: false,
     color: 'border-emerald-500',
     buttonVariant: 'default' as const,
+  },
+  {
+    name: 'Pro',
+    price: '$75',
+    period: '/mes',
+    description: 'Acceso total a todos los instrumentos',
+    icon: Crown,
+    features: [
+      { text: 'Acceso a TODOS los instrumentos', included: true },
+      { text: '1 clase grupal en vivo por semana (1hr)', included: true },
+      { text: 'Feedback 1:1 mensual', included: true },
+      { text: 'Certificados oficiales', included: true },
+      { text: 'Prioridad en soporte', included: true },
+    ],
+    popular: true,
+    color: 'border-primary/50',
+    buttonVariant: 'gradient' as const,
   },
 ];
 
@@ -96,7 +96,7 @@ export function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.name}
