@@ -8,7 +8,8 @@ import {
   CreditCard,
   LogOut,
   Shield,
-  GraduationCap
+  GraduationCap,
+  Headphones
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
