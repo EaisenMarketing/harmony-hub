@@ -7,7 +7,8 @@ import {
   Settings,
   LogOut,
   BarChart3,
-  Film
+  Film,
+  Headphones
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Instructores', href: '/admin/instructores', icon: Users },
   { name: 'Cursos', href: '/admin/cursos', icon: BookOpen },
   { name: 'Biblioteca Videos', href: '/admin/videos', icon: Film },
+  { name: 'Producción Musical', href: '/admin/produccion', icon: Headphones },
   { name: 'Clases en Vivo', href: '/admin/clases', icon: Video },
   { name: 'Estudiantes', href: '/admin/estudiantes', icon: Users },
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },

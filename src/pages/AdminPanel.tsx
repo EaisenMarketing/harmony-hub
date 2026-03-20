@@ -10,6 +10,7 @@ import { CoursesTable } from '@/components/admin/CoursesTable';
 import { LiveClassesTable } from '@/components/admin/LiveClassesTable';
 import { StudentsTable } from '@/components/admin/StudentsTable';
 import { VideoLibrary } from '@/components/admin/VideoLibrary';
+import { ProductionManagement } from '@/components/admin/ProductionManagement';
 import { Shield } from 'lucide-react';
 
 const AdminPanel = () => {
@@ -55,6 +56,9 @@ const AdminPanel = () => {
     if (currentPath === '/admin/videos') {
       return <VideoLibrary />;
     }
+    if (currentPath === '/admin/produccion') {
+      return <ProductionManagement />;
+    }
     if (currentPath === '/admin/clases') {
       return <LiveClassesTable />;
     }
@@ -97,6 +101,8 @@ const AdminPanel = () => {
         return { title: 'Gestión de Cursos', subtitle: 'Administra todos los cursos de la plataforma' };
       case '/admin/videos':
         return { title: 'Biblioteca de Videos', subtitle: 'Visualiza todos los videos organizados por instrumento' };
+      case '/admin/produccion':
+        return { title: 'Producción Musical', subtitle: 'Gestiona clases, videos, tareas y material de producción' };
       case '/admin/clases':
         return { title: 'Clases en Vivo', subtitle: 'Gestiona las clases en vivo programadas' };
       case '/admin/estudiantes':

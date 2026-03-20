@@ -2,8 +2,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BookOpen, 
+  Headphones,
   Calendar, 
-  Award, 
   Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,8 +11,8 @@ import { cn } from '@/lib/utils';
 const tabs = [
   { name: 'Inicio', href: '/portal', icon: LayoutDashboard },
   { name: 'Cursos', href: '/portal/cursos', icon: BookOpen },
+  { name: 'Producción', href: '/portal/produccion', icon: Headphones },
   { name: 'Calendario', href: '/portal/calendario', icon: Calendar },
-  { name: 'Certificados', href: '/portal/certificados', icon: Award },
   { name: 'Ajustes', href: '/portal/configuracion', icon: Settings },
 ];
 

@@ -11,6 +11,7 @@ import { CalendarSection } from '@/components/student/CalendarSection';
 import { CertificatesPage } from '@/components/student/CertificatesPage';
 import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
+import { ProductionClassesSection } from '@/components/student/ProductionClassesSection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
@@ -74,6 +75,8 @@ const StudentPortal = () => {
         return <PaymentsSection />;
       case '/portal/configuracion':
         return <SettingsSection />;
+      case '/portal/produccion':
+        return <ProductionClassesSection />;
       default:
         // Dashboard
         return (

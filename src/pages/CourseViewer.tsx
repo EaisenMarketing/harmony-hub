@@ -145,6 +145,18 @@ const CourseViewer = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
+      {/* Mobile Fixed Back Button */}
+      <div className="fixed top-4 left-4 z-50 lg:hidden">
+        <Button
+          variant="default"
+          size="icon"
+          className="rounded-full shadow-lg w-10 h-10"
+          onClick={() => navigate('/portal')}
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+      </div>
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -153,10 +165,11 @@ const CourseViewer = () => {
             variant="ghost"
             size="icon"
             onClick={() => navigate('/portal')}
+            className="hidden lg:flex"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pl-12 lg:pl-0">
             <h1 className="font-semibold text-foreground truncate">{course.title}</h1>
             {selectedLesson && (
               <p className="text-sm text-muted-foreground truncate">

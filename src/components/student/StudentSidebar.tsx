@@ -8,7 +8,8 @@ import {
   CreditCard,
   LogOut,
   Shield,
-  GraduationCap
+  GraduationCap,
+  Headphones
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,7 @@ import { useIsInstructor, useInstructorProfile } from '@/hooks/useInstructorData
 const navigation = [
   { name: 'Dashboard', href: '/portal', icon: LayoutDashboard },
   { name: 'Mis Cursos', href: '/portal/cursos', icon: BookOpen },
+  { name: 'Producción', href: '/portal/produccion', icon: Headphones },
   { name: 'Calendario', href: '/portal/calendario', icon: Calendar },
   { name: 'Certificados', href: '/portal/certificados', icon: Award },
   { name: 'Pagos', href: '/portal/pagos', icon: CreditCard },
