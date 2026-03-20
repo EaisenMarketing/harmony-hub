@@ -7,7 +7,8 @@ import {
   Settings,
   LogOut,
   BarChart3,
-  Film
+  Film,
+  Headphones
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
