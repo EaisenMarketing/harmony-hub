@@ -56,6 +56,9 @@ const AdminPanel = () => {
     if (currentPath === '/admin/videos') {
       return <VideoLibrary />;
     }
+    if (currentPath === '/admin/produccion') {
+      return <ProductionManagement />;
+    }
     if (currentPath === '/admin/clases') {
       return <LiveClassesTable />;
     }
