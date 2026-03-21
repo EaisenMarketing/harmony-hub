@@ -127,6 +127,20 @@ const StudentPortal = () => {
       <StudentSidebar />
       
       <main className="flex-1 overflow-y-auto">
+        {/* Mobile top header with logout */}
+        <div className="sticky top-0 z-40 flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
+          <span className="font-bold text-foreground">Acorde Live</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground gap-2"
+            onClick={signOut}
+          >
+            <LogOut className="w-4 h-4" />
+            Salir
+          </Button>
+        </div>
+
         <div className="max-w-6xl mx-auto p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 pb-24 md:pb-8">
           {renderContent()}
         </div>
