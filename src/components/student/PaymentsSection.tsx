@@ -82,7 +82,7 @@ export const PaymentsSection = () => {
             <div>
               <p className="text-sm text-muted-foreground mb-1">Tu plan actual</p>
               <h2 className="text-2xl font-bold text-foreground capitalize">
-                {currentPlan === 'basic' ? 'Básico' : currentPlan === 'standard' ? 'Estándar' : 'Pro'}
+                {currentPlan === 'basic' ? 'Básico' : currentPlan === 'standard' ? 'Estándar' : currentPlan === 'production' ? 'Producción Musical' : 'Pro'}
               </h2>
               {currentPlan !== 'basic' && profile?.subscription_expires_at && (
                 <p className="text-sm text-muted-foreground mt-1">
