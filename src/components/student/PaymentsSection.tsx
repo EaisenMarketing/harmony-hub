@@ -104,7 +104,7 @@ export const PaymentsSection = () => {
       {/* Plans */}
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4">Planes Disponibles</h2>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => {
             const isCurrentPlan = currentPlan === plan.id;
             const Icon = plan.icon;
