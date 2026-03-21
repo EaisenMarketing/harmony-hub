@@ -25,7 +25,7 @@ export const ProductionClassesSection = () => {
     enabled: !!user,
   });
 
-  const hasAccess = userPlan === 'pro'; // production plan maps to pro-level access for now
+  const hasAccess = userPlan === 'production';
 
   return (
     <div className="space-y-6">

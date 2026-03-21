@@ -225,9 +225,9 @@ export const CoursesSection = () => {
                         <BookOpen className="w-12 h-12 text-muted-foreground" />
                       </div>
                     )}
-                    {course.required_plan !== 'basic' && (
-                      <Badge className="absolute top-3 right-3" variant="secondary">
-                        {course.required_plan === 'pro' ? 'Pro' : 'Estándar'}
+                    {course.required_plan && course.required_plan !== 'basic' && (
+                      <Badge className="absolute top-3 right-3 bg-background/80 backdrop-blur-sm" variant="secondary">
+                        {course.required_plan === 'pro' ? '🔒 Pro' : course.required_plan === 'production' ? '🔒 Producción' : '🔒 Estándar'}
                       </Badge>
                     )}
                   </div>

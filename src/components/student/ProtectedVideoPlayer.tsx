@@ -16,17 +16,10 @@ interface ProtectedVideoPlayerProps {
   seekToTime?: number | null;
 }
 
-const planHierarchy: Record<string, number> = {
-  basic: 1,
-  standard: 2,
-  pro: 3,
-};
+import { PLAN_HIERARCHY, PLAN_LABELS, type PlanKey } from '@/lib/plans';
 
-const planLabels: Record<string, string> = {
-  basic: 'Basic',
-  standard: 'Standard',
-  pro: 'Pro',
-};
+const planLabels = PLAN_LABELS;
+const planHierarchy = PLAN_HIERARCHY;
 
 export const ProtectedVideoPlayer = ({
   videoUrl,

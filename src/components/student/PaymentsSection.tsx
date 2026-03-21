@@ -21,7 +21,7 @@ const plans = [
   {
     id: 'standard',
     name: 'Estándar',
-    price: 120,
+    price: 45,
     description: 'Acceso completo a un instrumento',
     icon: Star,
     popular: true,
@@ -35,7 +35,7 @@ const plans = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 150,
+    price: 75,
     description: 'Acceso total a todos los instrumentos',
     icon: Crown,
     features: [
@@ -44,6 +44,20 @@ const plans = [
       'Feedback 1:1 mensual',
       'Certificados oficiales',
       'Prioridad en soporte',
+    ],
+  },
+  {
+    id: 'production',
+    name: 'Producción Musical',
+    price: 99,
+    description: 'Todo lo del Pro + producción musical',
+    icon: Crown,
+    features: [
+      'Todo lo incluido en el plan Pro',
+      'Clases de producción musical mensual',
+      'Acceso a DAWs, mezcla y mastering',
+      'Tareas y material descargable (PDF)',
+      'Grabación y técnicas de estudio',
     ],
   },
 ];
@@ -68,7 +82,7 @@ export const PaymentsSection = () => {
             <div>
               <p className="text-sm text-muted-foreground mb-1">Tu plan actual</p>
               <h2 className="text-2xl font-bold text-foreground capitalize">
-                {currentPlan === 'basic' ? 'Básico' : currentPlan === 'standard' ? 'Estándar' : 'Pro'}
+                {currentPlan === 'basic' ? 'Básico' : currentPlan === 'standard' ? 'Estándar' : currentPlan === 'production' ? 'Producción Musical' : 'Pro'}
               </h2>
               {currentPlan !== 'basic' && profile?.subscription_expires_at && (
                 <p className="text-sm text-muted-foreground mt-1">
@@ -90,7 +104,7 @@ export const PaymentsSection = () => {
       {/* Plans */}
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4">Planes Disponibles</h2>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => {
             const isCurrentPlan = currentPlan === plan.id;
             const Icon = plan.icon;

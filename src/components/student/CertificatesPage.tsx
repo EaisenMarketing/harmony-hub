@@ -1,9 +1,10 @@
-import { Award, Download, Share2, Calendar, BookOpen } from 'lucide-react';
+import { Award, Download, Share2, Calendar, BookOpen, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useStudentCourses } from '@/hooks/useStudentData';
-
+import { useUserPlan } from '@/hooks/useCourseViewer';
+import { hasAccessToFeature, FEATURE_ACCESS, PLAN_LABELS } from '@/lib/plans';
 const instrumentLabels: Record<string, string> = {
   guitar: 'Guitarra',
   piano: 'Piano',
@@ -13,9 +14,35 @@ const instrumentLabels: Record<string, string> = {
 
 export const CertificatesPage = () => {
   const { data: courses = [] } = useStudentCourses();
+  const { data: userPlan = 'basic' } = useUserPlan();
+  const canAccess = hasAccessToFeature(userPlan, FEATURE_ACCESS.certificates);
   
   // Filter completed courses (100% progress)
   const completedCourses = courses.filter((course) => course.progress === 100);
+
+  if (!canAccess) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Mis Certificados</h1>
+          <p className="text-muted-foreground mt-1">Descarga y comparte tus logros</p>
+        </div>
+        <Card className="border-border/50">
+          <CardContent className="py-16 text-center">
+            <div className="p-4 bg-primary/10 rounded-full w-fit mx-auto mb-4">
+              <Lock className="w-12 h-12 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold text-foreground mb-2">Certificados Bloqueados</h3>
+            <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+              Los certificados oficiales están disponibles a partir del plan <strong>{PLAN_LABELS.pro}</strong>.
+              Tu plan actual es <strong>{PLAN_LABELS[userPlan as keyof typeof PLAN_LABELS] || userPlan}</strong>.
+            </p>
+            <Button>Actualizar Plan</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

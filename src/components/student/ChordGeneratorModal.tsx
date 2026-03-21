@@ -33,8 +33,7 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
   const [chordData, setChordData] = useState<ChordData | null>(null);
   const { toast } = useToast();
 
-  const allowedPlans = ['standard', 'pro'];
-  const hasAccess = allowedPlans.includes(userPlan);
+  const hasAccess = ['standard', 'pro', 'production'].includes(userPlan);
 
   const handleGenerateChord = async () => {
     if (!chordName.trim()) {
