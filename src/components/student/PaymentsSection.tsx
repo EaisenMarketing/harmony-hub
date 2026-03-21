@@ -21,7 +21,7 @@ const plans = [
   {
     id: 'standard',
     name: 'Estándar',
-    price: 120,
+    price: 45,
     description: 'Acceso completo a un instrumento',
     icon: Star,
     popular: true,
@@ -35,7 +35,7 @@ const plans = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 150,
+    price: 75,
     description: 'Acceso total a todos los instrumentos',
     icon: Crown,
     features: [
@@ -44,6 +44,20 @@ const plans = [
       'Feedback 1:1 mensual',
       'Certificados oficiales',
       'Prioridad en soporte',
+    ],
+  },
+  {
+    id: 'production',
+    name: 'Producción Musical',
+    price: 99,
+    description: 'Todo lo del Pro + producción musical',
+    icon: Crown,
+    features: [
+      'Todo lo incluido en el plan Pro',
+      'Clases de producción musical mensual',
+      'Acceso a DAWs, mezcla y mastering',
+      'Tareas y material descargable (PDF)',
+      'Grabación y técnicas de estudio',
     ],
   },
 ];
