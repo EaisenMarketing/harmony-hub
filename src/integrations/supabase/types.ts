@@ -772,7 +772,7 @@ export type Database = {
       course_level: "beginner" | "intermediate" | "advanced"
       instrument_type: "guitar" | "piano" | "drums" | "banjo"
       lead_status: "new" | "contacted" | "qualified" | "closed" | "lost"
-      subscription_plan: "basic" | "standard" | "pro"
+      subscription_plan: "basic" | "standard" | "pro" | "production"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -907,7 +907,7 @@ export const Constants = {
       course_level: ["beginner", "intermediate", "advanced"],
       instrument_type: ["guitar", "piano", "drums", "banjo"],
       lead_status: ["new", "contacted", "qualified", "closed", "lost"],
-      subscription_plan: ["basic", "standard", "pro"],
+      subscription_plan: ["basic", "standard", "pro", "production"],
     },
   },
 } as const
