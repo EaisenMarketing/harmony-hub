@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 import { StudentSidebar } from '@/components/student/StudentSidebar';
 import { DashboardStats } from '@/components/student/DashboardStats';
 import { ActiveCourses } from '@/components/student/ActiveCourses';
