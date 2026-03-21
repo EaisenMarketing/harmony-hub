@@ -128,7 +128,7 @@ const StudentPortal = () => {
       
       <main className="flex-1 overflow-y-auto">
         {/* Mobile top header with logout */}
-        <div className="sticky top-0 z-40 flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
+        <div className="sticky top-0 z-40 flex items-center justify-between px-4 pt-12 pb-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
           <span className="font-bold text-foreground">Acorde Live</span>
           <Button
             variant="ghost"
