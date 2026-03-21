@@ -28,7 +28,7 @@ import { useUserPlan } from '@/hooks/useCourseViewer';
 import { MobileBottomNav } from '@/components/student/MobileBottomNav';
 
 const StudentPortal = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
