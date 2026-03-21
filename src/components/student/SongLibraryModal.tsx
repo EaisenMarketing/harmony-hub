@@ -41,7 +41,7 @@ export const SongLibraryModal = ({ userPlan }: SongLibraryModalProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const isPro = userPlan === 'pro';
+  const isPro = ['pro', 'production'].includes(userPlan);
 
   const { data: savedSongs = [], isLoading } = useQuery({
     queryKey: ['saved-songs'],

@@ -25,8 +25,7 @@ export const MusicTheoryAssistant = ({ userPlan }: MusicTheoryAssistantProps) =>
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const allowedPlans = ['standard', 'pro'];
-  const hasAccess = allowedPlans.includes(userPlan);
+  const hasAccess = ['standard', 'pro', 'production'].includes(userPlan);
 
   useEffect(() => {
     if (scrollRef.current) {

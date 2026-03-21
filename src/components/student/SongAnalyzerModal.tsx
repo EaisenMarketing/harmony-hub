@@ -47,9 +47,8 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const allowedPlans = ['standard', 'pro'];
-  const hasAccess = allowedPlans.includes(userPlan);
-  const isPro = userPlan === 'pro';
+  const hasAccess = ['standard', 'pro', 'production'].includes(userPlan);
+  const isPro = ['pro', 'production'].includes(userPlan);
 
   const extractVideoInfo = (url: string): string | null => {
     const patterns = [
