@@ -1,9 +1,10 @@
-import { Award, Download, Share2, Calendar, BookOpen } from 'lucide-react';
+import { Award, Download, Share2, Calendar, BookOpen, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useStudentCourses } from '@/hooks/useStudentData';
-
+import { useUserPlan } from '@/hooks/useCourseViewer';
+import { hasAccessToFeature, FEATURE_ACCESS, PLAN_LABELS } from '@/lib/plans';
 const instrumentLabels: Record<string, string> = {
   guitar: 'Guitarra',
   piano: 'Piano',
