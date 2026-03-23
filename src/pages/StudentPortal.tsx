@@ -15,6 +15,7 @@ import { CertificatesPage } from '@/components/student/CertificatesPage';
 import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
 import { ProductionClassesSection } from '@/components/student/ProductionClassesSection';
+import { PracticeSection } from '@/components/student/PracticeSection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
