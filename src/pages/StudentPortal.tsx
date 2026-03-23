@@ -19,6 +19,7 @@ import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
 import { SongLibraryModal } from '@/components/student/SongLibraryModal';
+import { MetronomeTunerModal } from '@/components/student/MetronomeTunerModal';
 import { 
   useStudentProfile, 
   useStudentCourses, 
