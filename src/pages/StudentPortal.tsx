@@ -96,6 +96,7 @@ const StudentPortal = () => {
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
+                <MetronomeTunerModal />
                 <ChordGeneratorModal userPlan={userPlan} />
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <SongAnalyzerModal userPlan={userPlan} />
