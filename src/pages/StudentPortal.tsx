@@ -72,6 +72,8 @@ const StudentPortal = () => {
     switch (currentPath) {
       case '/portal/cursos':
         return <CoursesSection />;
+      case '/portal/practica':
+        return <PracticeSection />;
       case '/portal/calendario':
         return <CalendarSection />;
       case '/portal/certificados':

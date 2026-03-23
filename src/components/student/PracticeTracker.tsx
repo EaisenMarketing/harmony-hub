@@ -100,7 +100,6 @@ export const PracticeTracker = () => {
   // Streak calculation
   let streak = 0;
   const sortedDates = [...new Set(sessions.map(s => s.date))].sort().reverse();
-  const todayStr = format(today, 'yyyy-MM-dd');
   for (const date of sortedDates) {
     const expected = format(new Date(today.getTime() - streak * 86400000), 'yyyy-MM-dd');
     if (date === expected) streak++;
