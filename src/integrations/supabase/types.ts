@@ -574,6 +574,39 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_sessions: {
+        Row: {
+          created_at: string
+          date: string
+          duration_minutes: number
+          id: string
+          instrument: string
+          notes: string | null
+          user_id: string
+          weekly_goal_minutes: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          id?: string
+          instrument?: string
+          notes?: string | null
+          user_id: string
+          weekly_goal_minutes?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          id?: string
+          instrument?: string
+          notes?: string | null
+          user_id?: string
+          weekly_goal_minutes?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
