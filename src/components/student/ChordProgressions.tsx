@@ -3,12 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Music, Guitar, Piano } from 'lucide-react';
+import { GuitarFretboardDiagram } from './GuitarFretboardDiagram';
+import { ScalePianoKeyboard } from './ScalePianoKeyboard';
+import { GuitarAudioEngine } from './GuitarAudioEngine';
 
 interface ScaleInfo {
   name: string;
   notes: string[];
   description: string;
   mode: string;
+  root?: string;
 }
 
 interface ChordProg {
@@ -20,8 +24,6 @@ interface ChordProg {
   tips: string;
 }
 
-
-
 const PROGRESSIONS: ChordProg[] = [
   {
     name: 'I - IV - V - I (Clásica)',
@@ -29,11 +31,11 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['C', 'F', 'G', 'C'],
     key: 'C Mayor',
     scales: [
-      { name: 'Escala Mayor (Jónica)', notes: ['C','D','E','F','G','A','B'], description: 'La escala base. Sonido brillante y feliz.', mode: 'Jónico' },
-      { name: 'Pentatónica Mayor', notes: ['C','D','E','G','A'], description: 'Versión simplificada de la mayor. Ideal para improvisar sobre acordes mayores.', mode: 'Pentatónica' },
-      { name: 'Mixolidio (sobre G)', notes: ['G','A','B','C','D','E','F'], description: 'Modo dominante. Suena bluesy sobre el V grado.', mode: 'Mixolidio' },
+      { name: 'Escala Mayor (Jónica)', notes: ['C','D','E','F','G','A','B'], description: 'La escala base. Sonido brillante y feliz.', mode: 'Jónico', root: 'C' },
+      { name: 'Pentatónica Mayor', notes: ['C','D','E','G','A'], description: 'Versión simplificada. Ideal para improvisar.', mode: 'Pentatónica', root: 'C' },
+      { name: 'Mixolidio (sobre G)', notes: ['G','A','B','C','D','E','F'], description: 'Modo dominante. Suena bluesy sobre el V grado.', mode: 'Mixolidio', root: 'G' },
     ],
-    tips: 'Practica alternando entre la pentatónica mayor y la escala mayor completa. En el acorde G, prueba el modo Mixolidio para un color diferente.',
+    tips: 'Practica alternando entre la pentatónica mayor y la escala mayor completa. En el acorde G, prueba el modo Mixolidio.',
   },
   {
     name: 'I - V - vi - IV',
@@ -41,11 +43,11 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['C', 'G', 'Am', 'F'],
     key: 'C Mayor',
     scales: [
-      { name: 'Escala Mayor (Jónica)', notes: ['C','D','E','F','G','A','B'], description: 'Funciona sobre toda la progresión.', mode: 'Jónico' },
-      { name: 'Pentatónica Menor (sobre Am)', notes: ['A','C','D','E','G'], description: 'Añade emotividad sobre el vi grado (Am).', mode: 'Pentatónica Menor' },
-      { name: 'Eólico (Am)', notes: ['A','B','C','D','E','F','G'], description: 'Modo menor natural. Ideal para solos melancólicos.', mode: 'Eólico' },
+      { name: 'Escala Mayor (Jónica)', notes: ['C','D','E','F','G','A','B'], description: 'Funciona sobre toda la progresión.', mode: 'Jónico', root: 'C' },
+      { name: 'Pentatónica Menor (sobre Am)', notes: ['A','C','D','E','G'], description: 'Añade emotividad sobre el vi grado.', mode: 'Pentatónica Menor', root: 'A' },
+      { name: 'Eólico (Am)', notes: ['A','B','C','D','E','F','G'], description: 'Modo menor natural. Ideal para solos melancólicos.', mode: 'Eólico', root: 'A' },
     ],
-    tips: 'Esta es la progresión más popular del pop. Puedes usar la mayor sobre todo, o cambiar a pentatónica menor en el Am para más emoción.',
+    tips: 'La progresión más popular del pop. Usa la mayor sobre todo, o cambia a pentatónica menor en el Am.',
   },
   {
     name: 'ii - V - I (Jazz)',
@@ -53,12 +55,12 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['Dm7', 'G7', 'Cmaj7'],
     key: 'C Mayor',
     scales: [
-      { name: 'Dórico (sobre Dm7)', notes: ['D','E','F','G','A','B','C'], description: 'El modo favorito del jazz sobre acordes menores.', mode: 'Dórico' },
-      { name: 'Mixolidio (sobre G7)', notes: ['G','A','B','C','D','E','F'], description: 'Modo dominante. Esencial para el V7.', mode: 'Mixolidio' },
-      { name: 'Jónico (sobre Cmaj7)', notes: ['C','D','E','F','G','A','B'], description: 'Resolución al modo mayor.', mode: 'Jónico' },
-      { name: 'Escala Bebop Dominante', notes: ['G','A','B','C','D','E','F','F#'], description: 'Agrega la 7ma mayor como nota de paso para líneas cromáticas.', mode: 'Bebop' },
+      { name: 'Dórico (sobre Dm7)', notes: ['D','E','F','G','A','B','C'], description: 'El modo favorito del jazz sobre acordes menores.', mode: 'Dórico', root: 'D' },
+      { name: 'Mixolidio (sobre G7)', notes: ['G','A','B','C','D','E','F'], description: 'Modo dominante. Esencial para el V7.', mode: 'Mixolidio', root: 'G' },
+      { name: 'Jónico (sobre Cmaj7)', notes: ['C','D','E','F','G','A','B'], description: 'Resolución al modo mayor.', mode: 'Jónico', root: 'C' },
+      { name: 'Bebop Dominante', notes: ['G','A','B','C','D','E','F','F#'], description: 'Agrega la 7ma mayor como nota de paso cromática.', mode: 'Bebop', root: 'G' },
     ],
-    tips: 'Practica cambiando de escala con cada acorde. En jazz, cada acorde tiene su propia escala. El Dórico sobre ii, Mixolidio sobre V, Jónico sobre I.',
+    tips: 'Practica cambiando de escala con cada acorde. Dórico sobre ii, Mixolidio sobre V, Jónico sobre I.',
   },
   {
     name: 'i - iv - v (Menor)',
@@ -66,12 +68,12 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['Am', 'Dm', 'Em'],
     key: 'A Menor',
     scales: [
-      { name: 'Menor Natural (Eólica)', notes: ['A','B','C','D','E','F','G'], description: 'Base del modo menor. Sonido oscuro y dramático.', mode: 'Eólico' },
-      { name: 'Pentatónica Menor', notes: ['A','C','D','E','G'], description: 'La escala más usada en rock y blues.', mode: 'Pentatónica Menor' },
-      { name: 'Menor Armónica', notes: ['A','B','C','D','E','F','G#'], description: 'Añade tensión con el 7mo grado elevado. Sonido exótico/clásico.', mode: 'Menor Armónica' },
-      { name: 'Frigio', notes: ['E','F','G','A','B','C','D'], description: 'Modo español/flamenco. Sobre el Em suena muy étnico.', mode: 'Frigio' },
+      { name: 'Menor Natural (Eólica)', notes: ['A','B','C','D','E','F','G'], description: 'Sonido oscuro y dramático.', mode: 'Eólico', root: 'A' },
+      { name: 'Pentatónica Menor', notes: ['A','C','D','E','G'], description: 'La más usada en rock y blues.', mode: 'Pentatónica Menor', root: 'A' },
+      { name: 'Menor Armónica', notes: ['A','B','C','D','E','F','G#'], description: 'Añade tensión con el 7mo grado elevado.', mode: 'Menor Armónica', root: 'A' },
+      { name: 'Frigio (sobre Em)', notes: ['E','F','G','A','B','C','D'], description: 'Sonido español/flamenco.', mode: 'Frigio', root: 'E' },
     ],
-    tips: 'La pentatónica menor es tu base. Añade la nota blue (Eb/D#) para blues. Prueba la menor armónica para momentos de tensión y el Frigio sobre Em para un sonido flamenco.',
+    tips: 'La pentatónica menor es tu base. Añade la nota blue (Eb) para blues. Prueba el Frigio sobre Em.',
   },
   {
     name: 'I - vi - IV - V (50s)',
@@ -79,11 +81,11 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['C', 'Am', 'F', 'G'],
     key: 'C Mayor',
     scales: [
-      { name: 'Escala Mayor', notes: ['C','D','E','F','G','A','B'], description: 'Funciona perfecto sobre toda la progresión.', mode: 'Jónico' },
-      { name: 'Pentatónica Mayor', notes: ['C','D','E','G','A'], description: 'Simplifica la improvisación manteniendo el color mayor.', mode: 'Pentatónica' },
-      { name: 'Blues Mayor', notes: ['C','D','Eb','E','G','A'], description: 'Añade la blue note para un toque soul.', mode: 'Blues' },
+      { name: 'Escala Mayor', notes: ['C','D','E','F','G','A','B'], description: 'Funciona perfecto.', mode: 'Jónico', root: 'C' },
+      { name: 'Pentatónica Mayor', notes: ['C','D','E','G','A'], description: 'Simplifica la improvisación.', mode: 'Pentatónica', root: 'C' },
+      { name: 'Blues Mayor', notes: ['C','D','Eb','E','G','A'], description: 'Añade la blue note para toque soul.', mode: 'Blues', root: 'C' },
     ],
-    tips: 'Progresión clásica de los 50s. Ideal para practicar melodías vocales y solos melódicos con la escala mayor.',
+    tips: 'Progresión clásica de los 50s. Ideal para melodías vocales y solos melódicos.',
   },
   {
     name: 'i - bVII - bVI - V (Andaluza)',
@@ -91,11 +93,11 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['Am', 'G', 'F', 'E'],
     key: 'A Frigio',
     scales: [
-      { name: 'Frigio', notes: ['A','Bb','C','D','E','F','G'], description: 'El modo de esta progresión. Sonido español por excelencia.', mode: 'Frigio' },
-      { name: 'Frigio Dominante', notes: ['A','Bb','C#','D','E','F','G'], description: 'Variación con 3ra mayor. Sonido árabe/flamenco más intenso.', mode: 'Frigio Dominante' },
-      { name: 'Menor Armónica', notes: ['A','B','C','D','E','F','G#'], description: 'Añade tensión sobre el acorde E (dominante).', mode: 'Menor Armónica' },
+      { name: 'Frigio', notes: ['A','Bb','C','D','E','F','G'], description: 'Sonido español por excelencia.', mode: 'Frigio', root: 'A' },
+      { name: 'Frigio Dominante', notes: ['A','Bb','C#','D','E','F','G'], description: 'Sonido árabe/flamenco más intenso.', mode: 'Frigio Dominante', root: 'A' },
+      { name: 'Menor Armónica', notes: ['A','B','C','D','E','F','G#'], description: 'Tensión sobre el acorde E.', mode: 'Menor Armónica', root: 'A' },
     ],
-    tips: 'Esta es la cadencia andaluza. El modo Frigio es esencial aquí. Sobre el acorde E, prueba el Frigio Dominante para un sonido más auténtico.',
+    tips: 'Cadencia andaluza. El modo Frigio es esencial. Sobre E, prueba Frigio Dominante.',
   },
   {
     name: 'I - bVII - IV (Rock Modal)',
@@ -103,11 +105,11 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['A', 'G', 'D'],
     key: 'A Mixolidio',
     scales: [
-      { name: 'Mixolidio', notes: ['A','B','C#','D','E','F#','G'], description: 'Modo dominante. El sonido del rock clásico.', mode: 'Mixolidio' },
-      { name: 'Pentatónica Mayor', notes: ['A','B','C#','E','F#'], description: 'Para solos melódicos y riffs.', mode: 'Pentatónica' },
-      { name: 'Blues', notes: ['A','C','D','Eb','E','G'], description: 'Mezcla de pentatónica menor con blue note.', mode: 'Blues' },
+      { name: 'Mixolidio', notes: ['A','B','C#','D','E','F#','G'], description: 'El sonido del rock clásico.', mode: 'Mixolidio', root: 'A' },
+      { name: 'Pentatónica Mayor', notes: ['A','B','C#','E','F#'], description: 'Para solos melódicos y riffs.', mode: 'Pentatónica', root: 'A' },
+      { name: 'Blues', notes: ['A','C','D','Eb','E','G'], description: 'Mezcla pentatónica menor con blue note.', mode: 'Blues', root: 'A' },
     ],
-    tips: 'Progresión modal muy usada en rock. El Mixolidio da ese sonido "relajado" del rock. Mezcla pentatónica mayor y menor para solos interesantes.',
+    tips: 'Progresión modal. El Mixolidio da el sonido "relajado" del rock.',
   },
   {
     name: 'vi - IV - I - V',
@@ -115,12 +117,110 @@ const PROGRESSIONS: ChordProg[] = [
     chords: ['Am', 'F', 'C', 'G'],
     key: 'C Mayor / A Menor',
     scales: [
-      { name: 'Eólico (Am)', notes: ['A','B','C','D','E','F','G'], description: 'Perfecto para el inicio emotivo.', mode: 'Eólico' },
-      { name: 'Jónico (C)', notes: ['C','D','E','F','G','A','B'], description: 'Para la resolución esperanzadora.', mode: 'Jónico' },
-      { name: 'Pentatónica Menor', notes: ['A','C','D','E','G'], description: 'Base segura para improvisar.', mode: 'Pentatónica Menor' },
-      { name: 'Lidio (sobre F)', notes: ['F','G','A','B','C','D','E'], description: 'Modo con #4. Suena etéreo y soñador.', mode: 'Lidio' },
+      { name: 'Eólico (Am)', notes: ['A','B','C','D','E','F','G'], description: 'Para el inicio emotivo.', mode: 'Eólico', root: 'A' },
+      { name: 'Jónico (C)', notes: ['C','D','E','F','G','A','B'], description: 'Para la resolución esperanzadora.', mode: 'Jónico', root: 'C' },
+      { name: 'Pentatónica Menor', notes: ['A','C','D','E','G'], description: 'Base segura para improvisar.', mode: 'Pentatónica Menor', root: 'A' },
+      { name: 'Lidio (sobre F)', notes: ['F','G','A','B','C','D','E'], description: 'Suena etéreo y soñador.', mode: 'Lidio', root: 'F' },
     ],
-    tips: 'Mismas notas que I-V-vi-IV pero empezando por el relativo menor. Comienza con Eólico/pentatónica menor y resuelve a mayor. Prueba Lidio sobre F para momentos mágicos.',
+    tips: 'Comienza con Eólico/pentatónica menor y resuelve a mayor. Prueba Lidio sobre F.',
+  },
+  // ===== NEW PROGRESSIONS =====
+  {
+    name: 'I - IV - vi - V',
+    genre: 'Pop / Country',
+    chords: ['G', 'C', 'Em', 'D'],
+    key: 'G Mayor',
+    scales: [
+      { name: 'Escala Mayor (G)', notes: ['G','A','B','C','D','E','F#'], description: 'Base mayor sobre toda la progresión.', mode: 'Jónico', root: 'G' },
+      { name: 'Pentatónica Mayor (G)', notes: ['G','A','B','D','E'], description: 'Ideal para solos country y folk.', mode: 'Pentatónica', root: 'G' },
+      { name: 'Eólico (Em)', notes: ['E','F#','G','A','B','C','D'], description: 'Sobre el vi grado para color emotivo.', mode: 'Eólico', root: 'E' },
+    ],
+    tips: 'Progresión muy usada en country y pop. La pentatónica mayor de G funciona sobre todo.',
+  },
+  {
+    name: 'i - bIII - bVII - IV (Épica)',
+    genre: 'Cinematic / Epic Rock',
+    chords: ['Am', 'C', 'G', 'D'],
+    key: 'A Menor',
+    scales: [
+      { name: 'Menor Natural', notes: ['A','B','C','D','E','F','G'], description: 'Base menor dramática.', mode: 'Eólico', root: 'A' },
+      { name: 'Dórico', notes: ['A','B','C','D','E','F#','G'], description: 'El 6to grado mayor añade luminosidad.', mode: 'Dórico', root: 'A' },
+      { name: 'Pentatónica Menor', notes: ['A','C','D','E','G'], description: 'Perfecta para melodías épicas.', mode: 'Pentatónica Menor', root: 'A' },
+    ],
+    tips: 'Progresión épica. Mezcla Eólico y Dórico para variar entre oscuro y luminoso.',
+  },
+  {
+    name: 'I - iii - IV - V',
+    genre: 'Pop / Balada',
+    chords: ['D', 'F#m', 'G', 'A'],
+    key: 'D Mayor',
+    scales: [
+      { name: 'Escala Mayor (D)', notes: ['D','E','F#','G','A','B','C#'], description: 'Funciona sobre toda la progresión.', mode: 'Jónico', root: 'D' },
+      { name: 'Pentatónica Mayor (D)', notes: ['D','E','F#','A','B'], description: 'Para melodías sencillas y dulces.', mode: 'Pentatónica', root: 'D' },
+      { name: 'Frigio (F#m)', notes: ['F#','G','A','B','C#','D','E'], description: 'Color misterioso sobre el iii grado.', mode: 'Frigio', root: 'F#' },
+    ],
+    tips: 'Progresión suave para baladas. El iii grado (F#m) añade misterio. Usa Frigio sobre él.',
+  },
+  {
+    name: 'i - v - bVI - bVII (Rock Menor)',
+    genre: 'Hard Rock / Alt Rock',
+    chords: ['Em', 'Bm', 'C', 'D'],
+    key: 'E Menor',
+    scales: [
+      { name: 'Menor Natural (E)', notes: ['E','F#','G','A','B','C','D'], description: 'Base del rock menor.', mode: 'Eólico', root: 'E' },
+      { name: 'Pentatónica Menor (E)', notes: ['E','G','A','B','D'], description: 'Esencial para riffs y solos.', mode: 'Pentatónica Menor', root: 'E' },
+      { name: 'Blues (E)', notes: ['E','G','A','Bb','B','D'], description: 'Añade la blue note para más agresividad.', mode: 'Blues', root: 'E' },
+      { name: 'Dórico (E)', notes: ['E','F#','G','A','B','C#','D'], description: 'Con C# para un sonido más luminoso.', mode: 'Dórico', root: 'E' },
+    ],
+    tips: 'Pentatónica menor de E es la base. La blue note (Bb) añade carácter. Mezcla con Dórico.',
+  },
+  {
+    name: 'I - V - IV - V (Blues 12)',
+    genre: 'Blues / R&B',
+    chords: ['A', 'E', 'D', 'E'],
+    key: 'A Mayor/Blues',
+    scales: [
+      { name: 'Pentatónica Menor (A)', notes: ['A','C','D','E','G'], description: 'La escala clásica del blues.', mode: 'Pentatónica Menor', root: 'A' },
+      { name: 'Blues (A)', notes: ['A','C','D','Eb','E','G'], description: 'Pentatónica + blue note. El sonido del blues.', mode: 'Blues', root: 'A' },
+      { name: 'Mixolidio (A)', notes: ['A','B','C#','D','E','F#','G'], description: 'Mezcla mayor/menor sobre acordes dominantes.', mode: 'Mixolidio', root: 'A' },
+    ],
+    tips: 'Mezcla pentatónica menor y mayor (Mixolidio) para el clásico sonido blues. Los bends son clave.',
+  },
+  {
+    name: 'i - bVI - bIII - bVII (Reggae/Ska)',
+    genre: 'Reggae / Ska',
+    chords: ['Am', 'F', 'C', 'G'],
+    key: 'A Menor',
+    scales: [
+      { name: 'Menor Natural', notes: ['A','B','C','D','E','F','G'], description: 'Base para reggae melódico.', mode: 'Eólico', root: 'A' },
+      { name: 'Pentatónica Menor', notes: ['A','C','D','E','G'], description: 'Para melodías y solos sencillos.', mode: 'Pentatónica Menor', root: 'A' },
+      { name: 'Dórico', notes: ['A','B','C','D','E','F#','G'], description: 'El F# añade el color jamaicano.', mode: 'Dórico', root: 'A' },
+    ],
+    tips: 'El ritmo off-beat es clave en reggae. Usa Dórico para un color más auténtico.',
+  },
+  {
+    name: 'I - IV - I - V (Country)',
+    genre: 'Country / Bluegrass',
+    chords: ['G', 'C', 'G', 'D'],
+    key: 'G Mayor',
+    scales: [
+      { name: 'Escala Mayor (G)', notes: ['G','A','B','C','D','E','F#'], description: 'La base del country.', mode: 'Jónico', root: 'G' },
+      { name: 'Pentatónica Mayor (G)', notes: ['G','A','B','D','E'], description: 'Para chicken picking y solos country.', mode: 'Pentatónica', root: 'G' },
+      { name: 'Mixolidio (G)', notes: ['G','A','B','C','D','E','F'], description: 'Sonido "twangy" con b7.', mode: 'Mixolidio', root: 'G' },
+    ],
+    tips: 'Pentatónica mayor con bends y slides. Mixolidio para solos con sabor country.',
+  },
+  {
+    name: 'i - bVII - bVI - bVII (Power Ballad)',
+    genre: 'Rock / Power Ballad',
+    chords: ['Cm', 'Bb', 'Ab', 'Bb'],
+    key: 'C Menor',
+    scales: [
+      { name: 'Menor Natural (C)', notes: ['C','D','Eb','F','G','Ab','Bb'], description: 'Emotiva y dramática.', mode: 'Eólico', root: 'C' },
+      { name: 'Pentatónica Menor (C)', notes: ['C','Eb','F','G','Bb'], description: 'Para solos poderosos y emotivos.', mode: 'Pentatónica Menor', root: 'C' },
+      { name: 'Menor Armónica (C)', notes: ['C','D','Eb','F','G','Ab','B'], description: 'La 7ma mayor (B) crea tensión dramática.', mode: 'Menor Armónica', root: 'C' },
+    ],
+    tips: 'Progresión dramática de power ballads. Menor armónica para los clímax emocionales.',
   },
 ];
 
@@ -140,23 +240,24 @@ const GUITAR_POSITIONS: Record<string, string> = {
 };
 
 const PIANO_TIPS: Record<string, string> = {
-  'Jónico': 'Todas teclas blancas en C. Practica con ambas manos, digitación 1-2-3-1-2-3-4-5.',
-  'Dórico': 'En D: todas teclas blancas. Siente la diferencia con el Eólico (6ta mayor vs menor).',
-  'Frigio': 'En E: todas teclas blancas. El b2 le da un color único. Mano izquierda: acordes.',
+  'Jónico': 'Todas teclas blancas en C. Digitación 1-2-3-1-2-3-4-5.',
+  'Dórico': 'En D: todas teclas blancas. Siente la diferencia con Eólico (6ta mayor vs menor).',
+  'Frigio': 'En E: todas teclas blancas. El b2 le da un color único.',
   'Lidio': 'En F: todas teclas blancas. El #4 (B natural) es la nota mágica.',
-  'Mixolidio': 'En G: todas teclas blancas. Suena como una mayor "relajada" por el b7.',
-  'Eólico': 'En A: todas teclas blancas. La escala menor natural más fácil de visualizar.',
-  'Pentatónica': 'Las 5 teclas negras forman una pentatónica. Improvisa solo con teclas negras.',
-  'Pentatónica Menor': 'En Am: A, C, D, E, G. Practica patrones de 3 notas ascendentes.',
-  'Blues': 'Añade Eb entre D y E en Am. Mano izquierda: bajo con octavas.',
-  'Menor Armónica': 'Como menor natural pero con G# en Am. Sonido "clásico" y tenso.',
-  'Frigio Dominante': 'Escala exótica. Practica con mano derecha mientras la izquierda sostiene la tónica.',
-  'Bebop': 'Practica en corcheas constantes. La nota extra te permite aterrizar en tiempos fuertes.',
+  'Mixolidio': 'En G: todas teclas blancas. Suena como mayor "relajada" por el b7.',
+  'Eólico': 'En A: todas teclas blancas. La menor natural más fácil.',
+  'Pentatónica': 'Las 5 teclas negras forman una pentatónica. Improvisa con ellas.',
+  'Pentatónica Menor': 'En Am: A, C, D, E, G. Patrones de 3 notas ascendentes.',
+  'Blues': 'Añade Eb entre D y E en Am. Mano izquierda: octavas.',
+  'Menor Armónica': 'Como menor natural pero con G# en Am. Sonido "clásico".',
+  'Frigio Dominante': 'Escala exótica. Mano derecha melódica, izquierda sostiene tónica.',
+  'Bebop': 'Practica en corcheas. La nota extra aterriza en tiempos fuertes.',
 };
 
 export const ChordProgressions = () => {
   const [selectedProg, setSelectedProg] = useState(0);
   const [instrument, setInstrument] = useState<'guitar' | 'piano'>('guitar');
+  const [expandedScale, setExpandedScale] = useState<number | null>(0);
 
   const prog = PROGRESSIONS[selectedProg];
 
@@ -192,7 +293,7 @@ export const ChordProgressions = () => {
             variant={selectedProg === i ? 'default' : 'outline'}
             size="sm"
             className="h-auto py-2 text-left flex flex-col items-start"
-            onClick={() => setSelectedProg(i)}
+            onClick={() => { setSelectedProg(i); setExpandedScale(0); }}
           >
             <span className="font-semibold text-xs">{p.name}</span>
             <span className="text-[10px] opacity-70">{p.genre}</span>
@@ -200,7 +301,7 @@ export const ChordProgressions = () => {
         ))}
       </div>
 
-      {/* Selected progression details */}
+      {/* Selected progression */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -212,54 +313,70 @@ export const ChordProgressions = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Chord display */}
-          <div className="flex gap-3 flex-wrap">
-            {prog.chords.map((chord, i) => (
-              <div key={i} className="bg-primary/10 rounded-xl px-6 py-4 text-center min-w-[80px]">
-                <p className="text-2xl font-bold text-primary">{chord}</p>
-              </div>
-            ))}
-          </div>
+          {/* Audio engine with chord display */}
+          <GuitarAudioEngine chords={prog.chords} />
 
           {/* Scales & Modes */}
           <div>
             <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
               <Music className="w-4 h-4" />
-              Escalas y Modos Compatibles
+              Escalas y Modos Compatibles — toca una para ver el diagrama
             </h3>
             <div className="space-y-3">
-              {prog.scales.map((scale, i) => (
-                <Card key={i} className="border-border/30">
-                  <CardContent className="p-4 space-y-2">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <h4 className="font-semibold text-foreground">{scale.name}</h4>
-                      <Badge variant="outline" className="text-xs">{scale.mode}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{scale.description}</p>
-                    
-                    {/* Notes display */}
-                    <div className="flex gap-1.5 flex-wrap">
-                      {scale.notes.map((note, j) => (
-                        <span key={j} className="bg-muted px-2.5 py-1 rounded-md text-sm font-mono font-medium text-foreground">
-                          {note}
-                        </span>
-                      ))}
-                    </div>
+              {prog.scales.map((scale, i) => {
+                const isExpanded = expandedScale === i;
+                return (
+                  <Card
+                    key={i}
+                    className={`border-border/30 cursor-pointer transition-all ${isExpanded ? 'ring-1 ring-primary/50' : 'hover:border-primary/30'}`}
+                    onClick={() => setExpandedScale(isExpanded ? null : i)}
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <h4 className="font-semibold text-foreground">{scale.name}</h4>
+                        <Badge variant="outline" className="text-xs">{scale.mode}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{scale.description}</p>
 
-                    {/* Instrument-specific tips */}
-                    <div className="bg-muted/50 rounded-lg p-3 mt-2">
-                      <p className="text-xs text-muted-foreground">
-                        {instrument === 'guitar' ? '🎸 ' : '🎹 '}
-                        <span className="font-medium text-foreground">
-                          {instrument === 'guitar' 
-                            ? (GUITAR_POSITIONS[scale.mode] || 'Practica esta escala en diferentes posiciones del mástil.')
-                            : (PIANO_TIPS[scale.mode] || 'Practica con ambas manos por separado, luego juntas.')}
-                        </span>
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      {/* Notes display */}
+                      <div className="flex gap-1.5 flex-wrap">
+                        {scale.notes.map((note, j) => (
+                          <span key={j} className={`px-2.5 py-1 rounded-md text-sm font-mono font-medium ${
+                            note === (scale.root || scale.notes[0])
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-foreground'
+                          }`}>
+                            {note}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Visual diagram when expanded */}
+                      {isExpanded && (
+                        <div className="pt-2">
+                          {instrument === 'guitar' ? (
+                            <GuitarFretboardDiagram notes={scale.notes} rootNote={scale.root} />
+                          ) : (
+                            <ScalePianoKeyboard notes={scale.notes} rootNote={scale.root} />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Instrument tips */}
+                      <div className="bg-muted/50 rounded-lg p-3">
+                        <p className="text-xs text-muted-foreground">
+                          {instrument === 'guitar' ? '🎸 ' : '🎹 '}
+                          <span className="font-medium text-foreground">
+                            {instrument === 'guitar'
+                              ? (GUITAR_POSITIONS[scale.mode] || 'Practica en diferentes posiciones del mástil.')
+                              : (PIANO_TIPS[scale.mode] || 'Practica con ambas manos.')}
+                          </span>
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
 
