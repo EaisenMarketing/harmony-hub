@@ -19,25 +19,91 @@ const NOTE_FREQ: Record<string, number> = {
 
 // Chord voicings as arrays of note names
 const CHORD_VOICINGS: Record<string, string[]> = {
+  // Major
   'C':     ['C', 'E', 'G', 'C', 'E'],
-  'Cm':    ['C', 'Eb', 'G', 'C', 'Eb'],
-  'C7':    ['C', 'E', 'G', 'Bb'],
-  'Cmaj7': ['C', 'E', 'G', 'B'],
   'D':     ['D', 'F#', 'A', 'D'],
-  'Dm':    ['D', 'F', 'A', 'D'],
-  'Dm7':   ['D', 'F', 'A', 'C'],
   'E':     ['E', 'G#', 'B', 'E', 'G#'],
-  'Em':    ['E', 'G', 'B', 'E', 'G'],
   'F':     ['F', 'A', 'C', 'F', 'A'],
-  'Fm':    ['F', 'Ab', 'C', 'F'],
   'G':     ['G', 'B', 'D', 'G', 'B'],
-  'G7':    ['G', 'B', 'D', 'F'],
   'A':     ['A', 'C#', 'E', 'A', 'C#'],
-  'Am':    ['A', 'C', 'E', 'A', 'C'],
-  'Am7':   ['A', 'C', 'E', 'G'],
   'B':     ['B', 'D#', 'F#', 'B'],
-  'Bm':    ['B', 'D', 'F#', 'B'],
   'Bb':    ['Bb', 'D', 'F', 'Bb'],
+  'Eb':    ['Eb', 'G', 'Bb', 'Eb'],
+  'Ab':    ['Ab', 'C', 'Eb', 'Ab'],
+  // Minor
+  'Cm':    ['C', 'Eb', 'G', 'C', 'Eb'],
+  'Dm':    ['D', 'F', 'A', 'D'],
+  'Em':    ['E', 'G', 'B', 'E', 'G'],
+  'Fm':    ['F', 'Ab', 'C', 'F'],
+  'Gm':    ['G', 'Bb', 'D', 'G'],
+  'Am':    ['A', 'C', 'E', 'A', 'C'],
+  'Bm':    ['B', 'D', 'F#', 'B'],
+  'Bbm':   ['Bb', 'Db', 'F', 'Bb'],
+  // Dominant 7th
+  'C7':    ['C', 'E', 'G', 'Bb'],
+  'D7':    ['D', 'F#', 'A', 'C'],
+  'E7':    ['E', 'G#', 'B', 'D'],
+  'F7':    ['F', 'A', 'C', 'Eb'],
+  'G7':    ['G', 'B', 'D', 'F'],
+  'A7':    ['A', 'C#', 'E', 'G'],
+  'B7':    ['B', 'D#', 'F#', 'A'],
+  'Bb7':   ['Bb', 'D', 'F', 'Ab'],
+  // Major 7th
+  'Cmaj7': ['C', 'E', 'G', 'B'],
+  'Dmaj7': ['D', 'F#', 'A', 'C#'],
+  'Emaj7': ['E', 'G#', 'B', 'D#'],
+  'Fmaj7': ['F', 'A', 'C', 'E'],
+  'Gmaj7': ['G', 'B', 'D', 'F#'],
+  'Amaj7': ['A', 'C#', 'E', 'G#'],
+  'Bbmaj7':['Bb', 'D', 'F', 'A'],
+  // Minor 7th
+  'Cm7':   ['C', 'Eb', 'G', 'Bb'],
+  'Dm7':   ['D', 'F', 'A', 'C'],
+  'Em7':   ['E', 'G', 'B', 'D'],
+  'Fm7':   ['F', 'Ab', 'C', 'Eb'],
+  'Gm7':   ['G', 'Bb', 'D', 'F'],
+  'Am7':   ['A', 'C', 'E', 'G'],
+  'Bm7':   ['B', 'D', 'F#', 'A'],
+  // Sus2
+  'Csus2': ['C', 'D', 'G', 'C'],
+  'Dsus2': ['D', 'E', 'A', 'D'],
+  'Esus2': ['E', 'F#', 'B', 'E'],
+  'Gsus2': ['G', 'A', 'D', 'G'],
+  'Asus2': ['A', 'B', 'E', 'A'],
+  // Sus4
+  'Csus4': ['C', 'F', 'G', 'C'],
+  'Dsus4': ['D', 'G', 'A', 'D'],
+  'Esus4': ['E', 'A', 'B', 'E'],
+  'Gsus4': ['G', 'C', 'D', 'G'],
+  'Asus4': ['A', 'D', 'E', 'A'],
+  // Add9
+  'Cadd9': ['C', 'E', 'G', 'D'],
+  'Dadd9': ['D', 'F#', 'A', 'E'],
+  'Eadd9': ['E', 'G#', 'B', 'F#'],
+  'Gadd9': ['G', 'B', 'D', 'A'],
+  'Aadd9': ['A', 'C#', 'E', 'B'],
+  // 9th chords
+  'C9':    ['C', 'E', 'Bb', 'D'],
+  'D9':    ['D', 'F#', 'C', 'E'],
+  'G9':    ['G', 'B', 'F', 'A'],
+  'A9':    ['A', 'C#', 'G', 'B'],
+  // Minor 9th
+  'Am9':   ['A', 'C', 'G', 'B'],
+  'Dm9':   ['D', 'F', 'C', 'E'],
+  'Em9':   ['E', 'G', 'D', 'F#'],
+  // Diminished
+  'Bdim':  ['B', 'D', 'F'],
+  'Cdim':  ['C', 'Eb', 'Gb'],
+  'Ddim':  ['D', 'F', 'Ab'],
+  // Augmented
+  'Caug':  ['C', 'E', 'G#'],
+  'Eaug':  ['E', 'G#', 'C'],
+  // Power chords
+  'C5':    ['C', 'G', 'C'],
+  'D5':    ['D', 'A', 'D'],
+  'E5':    ['E', 'B', 'E'],
+  'G5':    ['G', 'D', 'G'],
+  'A5':    ['A', 'E', 'A'],
 };
 
 // Karplus-Strong plucked string synthesis
