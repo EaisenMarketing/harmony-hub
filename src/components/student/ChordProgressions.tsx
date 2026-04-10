@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Music, Guitar, Piano } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Music, Guitar, Piano, Plus, Save, Trash2, X, Bookmark } from 'lucide-react';
 import { GuitarFretboardDiagram } from './GuitarFretboardDiagram';
 import { ScalePianoKeyboard } from './ScalePianoKeyboard';
 import { GuitarAudioEngine } from './GuitarAudioEngine';
-
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 interface ScaleInfo {
   name: string;
   notes: string[];
