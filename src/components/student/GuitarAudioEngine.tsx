@@ -283,6 +283,7 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
       ctxRef.current.close();
       ctxRef.current = null;
     }
+    effectsChain = null;
   }, []);
 
   const play = useCallback(() => {
