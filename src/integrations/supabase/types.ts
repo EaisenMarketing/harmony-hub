@@ -231,6 +231,42 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_progressions: {
+        Row: {
+          chords: string[]
+          created_at: string
+          description: string | null
+          id: string
+          instrument: string
+          key: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chords?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string
+          key?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chords?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string
+          key?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       instructor_activity_logs: {
         Row: {
           action_type: string

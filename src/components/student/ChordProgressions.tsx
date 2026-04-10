@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Music, Guitar, Piano } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Music, Guitar, Piano, Plus, Save, Trash2, X, Bookmark } from 'lucide-react';
 import { GuitarFretboardDiagram } from './GuitarFretboardDiagram';
 import { ScalePianoKeyboard } from './ScalePianoKeyboard';
 import { GuitarAudioEngine } from './GuitarAudioEngine';
-
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 interface ScaleInfo {
   name: string;
   notes: string[];
@@ -254,10 +258,103 @@ const PIANO_TIPS: Record<string, string> = {
   'Bebop': 'Practica en corcheas. La nota extra aterriza en tiempos fuertes.',
 };
 
+const AVAILABLE_CHORDS = [
+  'C','Cm','C7','Cmaj7','Cm7','Csus2','Csus4','Cadd9',
+  'D','Dm','D7','Dmaj7','Dm7','Dsus2','Dsus4','Dadd9',
+  'E','Em','E7','Emaj7','Em7','Esus2','Esus4','Eadd9',
+  'F','Fm','F7','Fmaj7','Fm7',
+  'G','Gm','G7','Gmaj7','Gm7','Gsus2','Gsus4','Gadd9',
+  'A','Am','A7','Amaj7','Am7','Asus2','Asus4','Aadd9',
+  'B','Bm','B7','Bm7',
+  'Bb','Bbm','Bb7','Bbmaj7',
+  'Eb','Ab',
+];
+
+interface CustomProg {
+  id: string;
+  name: string;
+  chords: string[];
+  key: string | null;
+  description: string | null;
+  instrument: string;
+}
+
 export const ChordProgressions = () => {
+  const { user } = useAuth();
   const [selectedProg, setSelectedProg] = useState(0);
   const [instrument, setInstrument] = useState<'guitar' | 'piano'>('guitar');
   const [expandedScale, setExpandedScale] = useState<number | null>(0);
+  const [tab, setTab] = useState<'presets' | 'custom'>('presets');
+
+  // Custom progressions state
+  const [customProgs, setCustomProgs] = useState<CustomProg[]>([]);
+  const [selectedCustom, setSelectedCustom] = useState<number | null>(null);
+  const [showCreator, setShowCreator] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newChords, setNewChords] = useState<string[]>([]);
+  const [newKey, setNewKey] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Load custom progressions
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from('custom_progressions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (data) setCustomProgs(data as CustomProg[]);
+    };
+    load();
+  }, [user]);
+
+  const saveProgression = async () => {
+    if (!user || !newName.trim() || newChords.length < 2) {
+      toast.error('Agrega un nombre y al menos 2 acordes');
+      return;
+    }
+    setSaving(true);
+    const { data, error } = await supabase
+      .from('custom_progressions')
+      .insert({
+        user_id: user.id,
+        name: newName.trim(),
+        chords: newChords,
+        key: newKey || null,
+        description: newDesc || null,
+        instrument,
+      })
+      .select()
+      .single();
+    setSaving(false);
+    if (error) {
+      toast.error('Error al guardar');
+      return;
+    }
+    setCustomProgs(prev => [data as CustomProg, ...prev]);
+    setNewName(''); setNewChords([]); setNewKey(''); setNewDesc('');
+    setShowCreator(false);
+    toast.success('Progresión guardada');
+  };
+
+  const deleteProgression = async (id: string) => {
+    const { error } = await supabase.from('custom_progressions').delete().eq('id', id);
+    if (!error) {
+      setCustomProgs(prev => prev.filter(p => p.id !== id));
+      setSelectedCustom(null);
+      toast.success('Progresión eliminada');
+    }
+  };
+
+  const addChord = (chord: string) => {
+    if (newChords.length < 12) setNewChords(prev => [...prev, chord]);
+  };
+
+  const removeChord = (idx: number) => {
+    setNewChords(prev => prev.filter((_, i) => i !== idx));
+  };
 
   const prog = PROGRESSIONS[selectedProg];
 
@@ -266,127 +363,217 @@ export const ChordProgressions = () => {
       <h2 className="text-xl font-bold text-foreground">🎵 Progresiones de Acordes, Escalas y Modos</h2>
 
       {/* Instrument toggle */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant={instrument === 'guitar' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setInstrument('guitar')}
-          className="gap-2"
-        >
+      <div className="flex items-center gap-3 flex-wrap">
+        <Button variant={instrument === 'guitar' ? 'default' : 'outline'} size="sm" onClick={() => setInstrument('guitar')} className="gap-2">
           <Guitar className="w-4 h-4" /> Guitarra
         </Button>
-        <Button
-          variant={instrument === 'piano' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setInstrument('piano')}
-          className="gap-2"
-        >
+        <Button variant={instrument === 'piano' ? 'default' : 'outline'} size="sm" onClick={() => setInstrument('piano')} className="gap-2">
           <Piano className="w-4 h-4" /> Piano
         </Button>
-      </div>
-
-      {/* Progression selector */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-        {PROGRESSIONS.map((p, i) => (
-          <Button
-            key={i}
-            variant={selectedProg === i ? 'default' : 'outline'}
-            size="sm"
-            className="h-auto py-2 text-left flex flex-col items-start"
-            onClick={() => { setSelectedProg(i); setExpandedScale(0); }}
-          >
-            <span className="font-semibold text-xs">{p.name}</span>
-            <span className="text-[10px] opacity-70">{p.genre}</span>
+        <div className="ml-auto flex gap-2">
+          <Button variant={tab === 'presets' ? 'default' : 'outline'} size="sm" onClick={() => setTab('presets')}>
+            <Music className="w-4 h-4 mr-1" /> Presets
           </Button>
-        ))}
+          <Button variant={tab === 'custom' ? 'default' : 'outline'} size="sm" onClick={() => setTab('custom')}>
+            <Bookmark className="w-4 h-4 mr-1" /> Mis Progresiones
+          </Button>
+        </div>
       </div>
 
-      {/* Selected progression */}
-      <Card className="border-border/50">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <CardTitle className="text-lg">{prog.name}</CardTitle>
-            <div className="flex gap-2">
-              <Badge variant="secondary">{prog.genre}</Badge>
-              <Badge variant="outline">Tonalidad: {prog.key}</Badge>
-            </div>
+      {tab === 'custom' ? (
+        <div className="space-y-4">
+          {/* Create new */}
+          {!showCreator ? (
+            <Button onClick={() => setShowCreator(true)} className="gap-2">
+              <Plus className="w-4 h-4" /> Crear Progresión
+            </Button>
+          ) : (
+            <Card className="border-primary/30">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Nueva Progresión</CardTitle>
+                  <Button variant="ghost" size="icon" onClick={() => { setShowCreator(false); setNewChords([]); }}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <Input placeholder="Nombre (ej: Mi Blues Favorito)" value={newName} onChange={e => setNewName(e.target.value)} maxLength={60} />
+                  <Input placeholder="Tonalidad (ej: C Mayor)" value={newKey} onChange={e => setNewKey(e.target.value)} maxLength={20} />
+                </div>
+                <Textarea placeholder="Descripción o notas (opcional)" value={newDesc} onChange={e => setNewDesc(e.target.value)} maxLength={200} rows={2} />
+
+                {/* Selected chords */}
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-2">Acordes seleccionados ({newChords.length}/12):</p>
+                  <div className="flex gap-2 flex-wrap min-h-[44px] p-3 bg-muted/50 rounded-lg border border-border/50">
+                    {newChords.length === 0 && <span className="text-sm text-muted-foreground">Toca los acordes de abajo para agregarlos...</span>}
+                    {newChords.map((c, i) => (
+                      <button key={i} onClick={() => removeChord(i)} className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-destructive transition-colors">
+                        {c} ×
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Preview audio */}
+                {newChords.length >= 2 && (
+                  <div className="p-3 bg-muted/30 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-2">Vista previa:</p>
+                    <GuitarAudioEngine chords={newChords} />
+                  </div>
+                )}
+
+                {/* Chord picker */}
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-2">Elige acordes:</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {AVAILABLE_CHORDS.map(c => (
+                      <button key={c} onClick={() => addChord(c)} disabled={newChords.length >= 12}
+                        className="px-2 py-1 rounded text-xs font-mono font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-30">
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Button onClick={saveProgression} disabled={saving || !newName.trim() || newChords.length < 2} className="gap-2">
+                  <Save className="w-4 h-4" /> {saving ? 'Guardando...' : 'Guardar Progresión'}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Saved list */}
+          {customProgs.length === 0 && !showCreator && (
+            <p className="text-sm text-muted-foreground text-center py-8">Aún no tienes progresiones guardadas. ¡Crea tu primera!</p>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {customProgs.map((cp, i) => (
+              <Card key={cp.id} className={`cursor-pointer transition-all ${selectedCustom === i ? 'ring-2 ring-primary' : 'hover:border-primary/30'}`}
+                onClick={() => setSelectedCustom(selectedCustom === i ? null : i)}>
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold text-sm text-foreground truncate">{cp.name}</h4>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={e => { e.stopPropagation(); deleteProgression(cp.id); }}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                  {cp.key && <Badge variant="outline" className="text-[10px]">{cp.key}</Badge>}
+                  <div className="flex gap-1 flex-wrap">
+                    {cp.chords.map((c, j) => (
+                      <span key={j} className="px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-bold">{c}</span>
+                    ))}
+                  </div>
+                  {cp.description && <p className="text-xs text-muted-foreground line-clamp-2">{cp.description}</p>}
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Audio engine with chord display */}
-          <GuitarAudioEngine chords={prog.chords} />
 
-          {/* Scales & Modes */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Music className="w-4 h-4" />
-              Escalas y Modos Compatibles — toca una para ver el diagrama
-            </h3>
-            <div className="space-y-3">
-              {prog.scales.map((scale, i) => {
-                const isExpanded = expandedScale === i;
-                return (
-                  <Card
-                    key={i}
-                    className={`border-border/30 cursor-pointer transition-all ${isExpanded ? 'ring-1 ring-primary/50' : 'hover:border-primary/30'}`}
-                    onClick={() => setExpandedScale(isExpanded ? null : i)}
-                  >
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <h4 className="font-semibold text-foreground">{scale.name}</h4>
-                        <Badge variant="outline" className="text-xs">{scale.mode}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{scale.description}</p>
+          {/* Expanded custom progression with audio */}
+          {selectedCustom !== null && customProgs[selectedCustom] && (
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">{customProgs[selectedCustom].name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <GuitarAudioEngine chords={customProgs[selectedCustom].chords} />
+                {customProgs[selectedCustom].description && (
+                  <p className="text-sm text-muted-foreground">{customProgs[selectedCustom].description}</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Progression selector */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {PROGRESSIONS.map((p, i) => (
+              <Button key={i} variant={selectedProg === i ? 'default' : 'outline'} size="sm"
+                className="h-auto py-2 text-left flex flex-col items-start"
+                onClick={() => { setSelectedProg(i); setExpandedScale(0); }}>
+                <span className="font-semibold text-xs">{p.name}</span>
+                <span className="text-[10px] opacity-70">{p.genre}</span>
+              </Button>
+            ))}
+          </div>
 
-                      {/* Notes display */}
-                      <div className="flex gap-1.5 flex-wrap">
-                        {scale.notes.map((note, j) => (
-                          <span key={j} className={`px-2.5 py-1 rounded-md text-sm font-mono font-medium ${
-                            note === (scale.root || scale.notes[0])
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted text-foreground'
-                          }`}>
-                            {note}
-                          </span>
-                        ))}
-                      </div>
+          {/* Selected progression */}
+          <Card className="border-border/50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <CardTitle className="text-lg">{prog.name}</CardTitle>
+                <div className="flex gap-2">
+                  <Badge variant="secondary">{prog.genre}</Badge>
+                  <Badge variant="outline">Tonalidad: {prog.key}</Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <GuitarAudioEngine chords={prog.chords} />
 
-                      {/* Visual diagram when expanded */}
-                      {isExpanded && (
-                        <div className="pt-2">
-                          {instrument === 'guitar' ? (
-                            <GuitarFretboardDiagram notes={scale.notes} rootNote={scale.root} />
-                          ) : (
-                            <ScalePianoKeyboard notes={scale.notes} rootNote={scale.root} />
+              <div>
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Music className="w-4 h-4" />
+                  Escalas y Modos Compatibles — toca una para ver el diagrama
+                </h3>
+                <div className="space-y-3">
+                  {prog.scales.map((scale, i) => {
+                    const isExpanded = expandedScale === i;
+                    return (
+                      <Card key={i} className={`border-border/30 cursor-pointer transition-all ${isExpanded ? 'ring-1 ring-primary/50' : 'hover:border-primary/30'}`}
+                        onClick={() => setExpandedScale(isExpanded ? null : i)}>
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <h4 className="font-semibold text-foreground">{scale.name}</h4>
+                            <Badge variant="outline" className="text-xs">{scale.mode}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{scale.description}</p>
+                          <div className="flex gap-1.5 flex-wrap">
+                            {scale.notes.map((note, j) => (
+                              <span key={j} className={`px-2.5 py-1 rounded-md text-sm font-mono font-medium ${
+                                note === (scale.root || scale.notes[0]) ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
+                              }`}>{note}</span>
+                            ))}
+                          </div>
+                          {isExpanded && (
+                            <div className="pt-2">
+                              {instrument === 'guitar' ? (
+                                <GuitarFretboardDiagram notes={scale.notes} rootNote={scale.root} />
+                              ) : (
+                                <ScalePianoKeyboard notes={scale.notes} rootNote={scale.root} />
+                              )}
+                            </div>
                           )}
-                        </div>
-                      )}
+                          <div className="bg-muted/50 rounded-lg p-3">
+                            <p className="text-xs text-muted-foreground">
+                              {instrument === 'guitar' ? '🎸 ' : '🎹 '}
+                              <span className="font-medium text-foreground">
+                                {instrument === 'guitar'
+                                  ? (GUITAR_POSITIONS[scale.mode] || 'Practica en diferentes posiciones del mástil.')
+                                  : (PIANO_TIPS[scale.mode] || 'Practica con ambas manos.')}
+                              </span>
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
 
-                      {/* Instrument tips */}
-                      <div className="bg-muted/50 rounded-lg p-3">
-                        <p className="text-xs text-muted-foreground">
-                          {instrument === 'guitar' ? '🎸 ' : '🎹 '}
-                          <span className="font-medium text-foreground">
-                            {instrument === 'guitar'
-                              ? (GUITAR_POSITIONS[scale.mode] || 'Practica en diferentes posiciones del mástil.')
-                              : (PIANO_TIPS[scale.mode] || 'Practica con ambas manos.')}
-                          </span>
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Practice tips */}
-          <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
-            <h4 className="font-semibold text-foreground mb-1">💡 Consejos de Práctica</h4>
-            <p className="text-sm text-muted-foreground">{prog.tips}</p>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+                <h4 className="font-semibold text-foreground mb-1">💡 Consejos de Práctica</h4>
+                <p className="text-sm text-muted-foreground">{prog.tips}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };
