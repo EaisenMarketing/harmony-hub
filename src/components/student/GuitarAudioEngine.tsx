@@ -292,6 +292,7 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
       return;
     }
 
+    effectsChain = null;
     const ctx = new AudioContext();
     ctxRef.current = ctx;
     isPlayingRef.current = true;
