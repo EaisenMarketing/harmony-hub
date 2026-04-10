@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Play, Square, SkipForward } from 'lucide-react';
+import { Play, Square, SkipForward, SlidersHorizontal } from 'lucide-react';
 
 interface GuitarAudioEngineProps {
   chords: string[];
@@ -106,7 +106,19 @@ const CHORD_VOICINGS: Record<string, string[]> = {
   'A5':    ['A', 'E', 'A'],
 };
 
-// Create convolution reverb impulse response
+// Controllable effects chain
+interface EffectsNodes {
+  input: BiquadFilterNode;
+  master: GainNode;
+  dryGain: GainNode;
+  reverbGain: GainNode;
+  chorusGain: GainNode;
+  bodyEQ: BiquadFilterNode;
+  presenceEQ: BiquadFilterNode;
+  highCut: BiquadFilterNode;
+  lfo: OscillatorNode;
+}
+
 function createReverbIR(ctx: AudioContext, duration = 2.5, decay = 3.0): AudioBuffer {
   const length = ctx.sampleRate * duration;
   const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
@@ -119,33 +131,27 @@ function createReverbIR(ctx: AudioContext, duration = 2.5, decay = 3.0): AudioBu
   return impulse;
 }
 
-// Shared effects chain — created once per AudioContext
-function createEffectsChain(ctx: AudioContext) {
-  // Master gain
+function createEffectsChain(ctx: AudioContext): EffectsNodes {
   const master = ctx.createGain();
   master.gain.value = 1.0;
 
-  // Body resonance EQ
   const bodyEQ = ctx.createBiquadFilter();
   bodyEQ.type = 'peaking';
   bodyEQ.frequency.value = 250;
   bodyEQ.Q.value = 1.2;
   bodyEQ.gain.value = 4;
 
-  // Presence EQ
   const presenceEQ = ctx.createBiquadFilter();
   presenceEQ.type = 'peaking';
   presenceEQ.frequency.value = 3500;
   presenceEQ.Q.value = 1.0;
   presenceEQ.gain.value = 2;
 
-  // High-cut for warmth
   const highCut = ctx.createBiquadFilter();
   highCut.type = 'lowpass';
   highCut.frequency.value = 6000;
   highCut.Q.value = 0.7;
 
-  // Chorus via modulated delay
   const chorusDelay = ctx.createDelay(0.05);
   chorusDelay.delayTime.value = 0.012;
   const chorusGain = ctx.createGain();
@@ -158,7 +164,6 @@ function createEffectsChain(ctx: AudioContext) {
   lfoGain.connect(chorusDelay.delayTime);
   lfo.start();
 
-  // Convolution reverb
   const reverb = ctx.createConvolver();
   reverb.buffer = createReverbIR(ctx, 2.5, 3.0);
   const reverbGain = ctx.createGain();
@@ -166,10 +171,6 @@ function createEffectsChain(ctx: AudioContext) {
   const dryGain = ctx.createGain();
   dryGain.gain.value = 0.85;
 
-  // Chain: input → bodyEQ → presenceEQ → highCut → master
-  // master → dry → destination
-  // master → chorus → destination
-  // master → reverb → destination
   bodyEQ.connect(presenceEQ);
   presenceEQ.connect(highCut);
   highCut.connect(master);
@@ -185,10 +186,9 @@ function createEffectsChain(ctx: AudioContext) {
   reverb.connect(reverbGain);
   reverbGain.connect(ctx.destination);
 
-  return { input: bodyEQ, master };
+  return { input: bodyEQ, master, dryGain, reverbGain, chorusGain, bodyEQ, presenceEQ, highCut, lfo };
 }
 
-// Karplus-Strong plucked string synthesis with improved realism
 function pluckString(
   ctx: AudioContext,
   dest: AudioNode,
@@ -203,14 +203,12 @@ function pluckString(
   const buffer = ctx.createBuffer(1, totalSamples, sampleRate);
   const data = buffer.getChannelData(0);
 
-  // Shaped noise burst (low-pass filtered for warmer attack)
   const noise = new Float32Array(N);
   noise[0] = Math.random() * 2 - 1;
   for (let i = 1; i < N; i++) {
     noise[i] = 0.5 * (Math.random() * 2 - 1) + 0.5 * noise[i - 1];
   }
 
-  // Karplus-Strong with two-point average + tuning allpass
   const decay = 0.998;
   const damping = 0.48;
   for (let i = 0; i < totalSamples; i++) {
@@ -238,27 +236,26 @@ function pluckString(
   return source;
 }
 
-let effectsChain: { input: AudioNode; master: GainNode } | null = null;
+let fxNodes: EffectsNodes | null = null;
 
 function strumChord(ctx: AudioContext, chordName: string, startTime: number, duration: number, volume: number) {
   const voicing = CHORD_VOICINGS[chordName];
   if (!voicing) return [];
 
-  if (!effectsChain) {
-    effectsChain = createEffectsChain(ctx);
+  if (!fxNodes) {
+    fxNodes = createEffectsChain(ctx);
   }
 
   const sources: AudioBufferSourceNode[] = [];
-  const strumDelay = 0.018 + Math.random() * 0.008; // humanized strum
+  const strumDelay = 0.018 + Math.random() * 0.008;
 
   voicing.forEach((noteName, i) => {
     const baseFreq = NOTE_FREQ[noteName];
     if (!baseFreq) return;
     const freq = i < 2 ? baseFreq : baseFreq * 2;
     const t = startTime + i * strumDelay;
-    // Slight velocity variation per string
     const vel = volume * (0.3 + Math.random() * 0.1);
-    const src = pluckString(ctx, effectsChain!.input, freq, t, duration - i * strumDelay, vel);
+    const src = pluckString(ctx, fxNodes!.input, freq, t, duration - i * strumDelay, vel);
     sources.push(src);
   });
 
@@ -269,9 +266,38 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(80);
   const [currentChordIdx, setCurrentChordIdx] = useState(-1);
+  const [showFx, setShowFx] = useState(false);
+
+  // FX values (0-100)
+  const [reverbLevel, setReverbLevel] = useState(25);
+  const [chorusLevel, setChorusLevel] = useState(30);
+  const [bodyLevel, setBodyLevel] = useState(50);
+  const [presenceLevel, setPresenceLevel] = useState(50);
+  const [brightnessLevel, setBrightnessLevel] = useState(50);
+
   const ctxRef = useRef<AudioContext | null>(null);
   const timeoutRef = useRef<number[]>([]);
   const isPlayingRef = useRef(false);
+
+  // Apply FX values to live nodes
+  const applyFx = useCallback(() => {
+    if (!fxNodes) return;
+    fxNodes.reverbGain.gain.value = reverbLevel / 100 * 0.6;
+    fxNodes.dryGain.gain.value = 1 - reverbLevel / 100 * 0.4;
+    fxNodes.chorusGain.gain.value = chorusLevel / 100 * 0.5;
+    fxNodes.bodyEQ.gain.value = (bodyLevel / 50 - 1) * 8; // -8 to +8 dB
+    fxNodes.presenceEQ.gain.value = (presenceLevel / 50 - 1) * 6; // -6 to +6 dB
+    fxNodes.highCut.frequency.value = 2000 + (brightnessLevel / 100) * 10000; // 2k-12k Hz
+  }, [reverbLevel, chorusLevel, bodyLevel, presenceLevel, brightnessLevel]);
+
+  const updateFx = useCallback((setter: (v: number) => void, value: number) => {
+    setter(value);
+    // Will be applied on next render via effect below
+  }, []);
+
+  // Apply whenever values change and nodes exist
+  const applyRef = useRef(applyFx);
+  applyRef.current = applyFx;
 
   const stop = useCallback(() => {
     isPlayingRef.current = false;
@@ -283,33 +309,31 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
       ctxRef.current.close();
       ctxRef.current = null;
     }
-    effectsChain = null;
+    fxNodes = null;
   }, []);
 
   const play = useCallback(() => {
-    if (isPlayingRef.current) {
-      stop();
-      return;
-    }
+    if (isPlayingRef.current) { stop(); return; }
 
-    effectsChain = null;
+    fxNodes = null;
     const ctx = new AudioContext();
     ctxRef.current = ctx;
     isPlayingRef.current = true;
     setIsPlaying(true);
 
     const beatDuration = 60 / bpm;
-    const chordDuration = beatDuration * 2; // 2 beats per chord
+    const chordDuration = beatDuration * 2;
 
     const playLoop = (loopStart: number) => {
       if (!isPlayingRef.current) return;
 
+      // Apply current FX settings
+      applyRef.current();
+
       chords.forEach((chord, i) => {
         const time = loopStart + i * chordDuration;
         const delay = (time - ctx.currentTime) * 1000;
-
         if (delay < 0) return;
-
         const tid = window.setTimeout(() => {
           if (!isPlayingRef.current) return;
           setCurrentChordIdx(i);
@@ -318,13 +342,10 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
         timeoutRef.current.push(tid);
       });
 
-      // Schedule next loop
       const loopDuration = chords.length * chordDuration;
       const nextLoopDelay = (loopStart + loopDuration - ctx.currentTime) * 1000;
       const loopTid = window.setTimeout(() => {
-        if (isPlayingRef.current) {
-          playLoop(loopStart + loopDuration);
-        }
+        if (isPlayingRef.current) playLoop(loopStart + loopDuration);
       }, nextLoopDelay);
       timeoutRef.current.push(loopTid);
     };
@@ -333,7 +354,7 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
   }, [chords, bpm, stop]);
 
   const playOnce = useCallback(() => {
-    effectsChain = null;
+    fxNodes = null;
     const ctx = new AudioContext();
     const beatDuration = 60 / bpm;
     const chordDuration = beatDuration * 2;
@@ -342,6 +363,7 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
       const time = ctx.currentTime + 0.1 + i * chordDuration;
       const delay = (time - ctx.currentTime) * 1000;
       setTimeout(() => {
+        applyRef.current();
         setCurrentChordIdx(i);
         strumChord(ctx, chord, ctx.currentTime, chordDuration * 0.9, 0.8);
       }, delay);
@@ -350,35 +372,37 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
     setTimeout(() => {
       setCurrentChordIdx(-1);
       ctx.close();
+      fxNodes = null;
     }, (0.1 + chords.length * chordDuration) * 1000 + 500);
   }, [chords, bpm]);
 
+  // Real-time FX update when sliders move during playback
+  const handleFxChange = useCallback((setter: (v: number) => void) => {
+    return ([v]: number[]) => {
+      setter(v);
+      // Immediately apply if playing
+      setTimeout(() => applyRef.current(), 0);
+    };
+  }, []);
+
   return (
     <div className="space-y-3">
-      {/* Chord visualization with highlight */}
+      {/* Chord visualization */}
       <div className="flex gap-2 flex-wrap items-center">
         {chords.map((chord, i) => (
-          <div
-            key={i}
-            className={`rounded-xl px-5 py-3 text-center min-w-[70px] transition-all duration-200 ${
-              currentChordIdx === i
-                ? 'bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/30'
-                : 'bg-primary/10 text-primary'
-            }`}
-          >
+          <div key={i} className={`rounded-xl px-5 py-3 text-center min-w-[70px] transition-all duration-200 ${
+            currentChordIdx === i
+              ? 'bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/30'
+              : 'bg-primary/10 text-primary'
+          }`}>
             <p className="text-xl font-bold">{chord}</p>
           </div>
         ))}
       </div>
 
-      {/* Controls */}
+      {/* Transport controls */}
       <div className="flex items-center gap-3 flex-wrap">
-        <Button
-          size="sm"
-          variant={isPlaying ? 'destructive' : 'default'}
-          onClick={play}
-          className="gap-2"
-        >
+        <Button size="sm" variant={isPlaying ? 'destructive' : 'default'} onClick={play} className="gap-2">
           {isPlaying ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           {isPlaying ? 'Detener' : 'Loop'}
         </Button>
@@ -387,16 +411,36 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
         </Button>
         <div className="flex items-center gap-2 min-w-[160px]">
           <span className="text-xs text-muted-foreground font-mono w-12">{bpm} BPM</span>
-          <Slider
-            value={[bpm]}
-            onValueChange={([v]) => setBpm(v)}
-            min={40}
-            max={160}
-            step={5}
-            className="w-24"
-          />
+          <Slider value={[bpm]} onValueChange={([v]) => setBpm(v)} min={40} max={160} step={5} className="w-24" />
         </div>
+        <Button size="sm" variant={showFx ? 'secondary' : 'outline'} onClick={() => setShowFx(!showFx)} className="gap-1.5 ml-auto">
+          <SlidersHorizontal className="w-4 h-4" /> FX
+        </Button>
       </div>
+
+      {/* Effects panel */}
+      {showFx && (
+        <div className="bg-muted/40 rounded-xl p-4 border border-border/50 space-y-3">
+          <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Efectos en Tiempo Real</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+            <FxSlider label="🌊 Reverb" value={reverbLevel} onChange={handleFxChange(setReverbLevel)} />
+            <FxSlider label="✨ Chorus" value={chorusLevel} onChange={handleFxChange(setChorusLevel)} />
+            <FxSlider label="🔊 Cuerpo (Graves)" value={bodyLevel} onChange={handleFxChange(setBodyLevel)} />
+            <FxSlider label="🔔 Presencia (Medios)" value={presenceLevel} onChange={handleFxChange(setPresenceLevel)} />
+            <FxSlider label="☀️ Brillo (Agudos)" value={brightnessLevel} onChange={handleFxChange(setBrightnessLevel)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+function FxSlider({ label, value, onChange }: { label: string; value: number; onChange: (v: number[]) => void }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-muted-foreground w-[130px] shrink-0">{label}</span>
+      <Slider value={[value]} onValueChange={onChange} min={0} max={100} step={1} className="flex-1 min-w-[80px]" />
+      <span className="text-xs font-mono text-muted-foreground w-8 text-right">{value}</span>
+    </div>
+  );
+}
