@@ -333,6 +333,7 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
   }, [chords, bpm, stop]);
 
   const playOnce = useCallback(() => {
+    effectsChain = null;
     const ctx = new AudioContext();
     const beatDuration = 60 / bpm;
     const chordDuration = beatDuration * 2;
