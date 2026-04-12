@@ -143,40 +143,46 @@ function createTaylorBodyIR(ctx: AudioContext): AudioBuffer {
 
 function createEffectsChain(ctx: AudioContext): EffectsNodes {
   const master = ctx.createGain();
-  master.gain.value = 1.0;
+  master.gain.value = 0.45; // Reduced to prevent clipping with 6 summed strings
+
+  // Limiter — prevents harsh digital distortion
+  const limiter = ctx.createDynamicsCompressor();
+  limiter.threshold.setValueAtTime(-6, ctx.currentTime);
+  limiter.knee.setValueAtTime(6, ctx.currentTime);
+  limiter.ratio.setValueAtTime(12, ctx.currentTime);
+  limiter.attack.setValueAtTime(0.001, ctx.currentTime);
+  limiter.release.setValueAtTime(0.1, ctx.currentTime);
 
   // Taylor EQ curve: warm low-mids, sparkling highs
   const bodyEQ = ctx.createBiquadFilter();
   bodyEQ.type = 'peaking';
-  bodyEQ.frequency.value = 220; // Body resonance
+  bodyEQ.frequency.value = 220;
   bodyEQ.Q.value = 1.0;
-  bodyEQ.gain.value = 5;
+  bodyEQ.gain.value = 3; // Reduced from 5
 
   const presenceEQ = ctx.createBiquadFilter();
   presenceEQ.type = 'peaking';
-  presenceEQ.frequency.value = 3200; // String clarity / sparkle
+  presenceEQ.frequency.value = 3200;
   presenceEQ.Q.value = 0.8;
-  presenceEQ.gain.value = 3;
+  presenceEQ.gain.value = 2; // Reduced from 3
 
-  // Warmth — Taylor doesn't sound harsh
   const highCut = ctx.createBiquadFilter();
   highCut.type = 'lowpass';
   highCut.frequency.value = 8000;
   highCut.Q.value = 0.5;
 
-  // Low shelf for body warmth
   const warmth = ctx.createBiquadFilter();
   warmth.type = 'lowshelf';
   warmth.frequency.value = 180;
-  warmth.gain.value = 3;
+  warmth.gain.value = 2; // Reduced from 3
 
-  // Subtle chorus for stereo width (Taylor's natural shimmer)
+  // Subtle chorus for stereo width
   const chorusDelay = ctx.createDelay(0.05);
   chorusDelay.delayTime.value = 0.015;
   const chorusGain = ctx.createGain();
-  chorusGain.gain.value = 0.15;
+  chorusGain.gain.value = 0.1; // Reduced from 0.15
   const lfo = ctx.createOscillator();
-  lfo.frequency.value = 0.4; // Slower, more subtle
+  lfo.frequency.value = 0.4;
   const lfoGain = ctx.createGain();
   lfoGain.gain.value = 0.002;
   lfo.connect(lfoGain);
@@ -187,26 +193,28 @@ function createEffectsChain(ctx: AudioContext): EffectsNodes {
   const reverb = ctx.createConvolver();
   reverb.buffer = createTaylorBodyIR(ctx);
   const reverbGain = ctx.createGain();
-  reverbGain.gain.value = 0.3;
+  reverbGain.gain.value = 0.2; // Reduced from 0.3
   const dryGain = ctx.createGain();
-  dryGain.gain.value = 0.8;
+  dryGain.gain.value = 0.7; // Reduced from 0.8
 
-  // Signal chain
+  // Signal chain — everything goes through limiter before destination
   warmth.connect(bodyEQ);
   bodyEQ.connect(presenceEQ);
   presenceEQ.connect(highCut);
   highCut.connect(master);
 
   master.connect(dryGain);
-  dryGain.connect(ctx.destination);
+  dryGain.connect(limiter);
 
   master.connect(chorusDelay);
   chorusDelay.connect(chorusGain);
-  chorusGain.connect(ctx.destination);
+  chorusGain.connect(limiter);
 
   master.connect(reverb);
   reverb.connect(reverbGain);
-  reverbGain.connect(ctx.destination);
+  reverbGain.connect(limiter);
+
+  limiter.connect(ctx.destination);
 
   return { input: warmth, master, dryGain, reverbGain, chorusGain, bodyEQ, presenceEQ, highCut, lfo };
 }
@@ -271,9 +279,9 @@ function pluckString(
     }
   }
 
-  // Apply steel string brightness — slight high-frequency emphasis at attack
+  // Apply steel string brightness — gentle high-frequency emphasis at attack
   for (let i = 0; i < Math.min(N * 3, totalSamples); i++) {
-    const attackEnv = 1 + 0.3 * Math.exp(-i / (N * 0.5));
+    const attackEnv = 1 + 0.1 * Math.exp(-i / (N * 0.5)); // Reduced from 0.3
     data[i] *= attackEnv;
   }
 
@@ -325,7 +333,7 @@ function strumChord(ctx: AudioContext, chordName: string, startTime: number, dur
 
     // Velocity varies per string — middle strings slightly louder
     const velCurve = 1 - Math.abs(i - 2.5) / 5;
-    const vel = volume * (0.25 + velCurve * 0.15 + Math.random() * 0.05);
+    const vel = volume * (0.15 + velCurve * 0.08 + Math.random() * 0.03); // Reduced to prevent clipping
 
     const src = pluckString(ctx, fxNodes!.input, freq, t, duration - i * strumDelay, vel, i);
     sources.push(src);
