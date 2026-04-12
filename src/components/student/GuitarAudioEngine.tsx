@@ -17,96 +17,97 @@ const NOTE_FREQ: Record<string, number> = {
   'B': 246.94,
 };
 
-// Chord voicings as arrays of note names
+// Chord voicings — 6-string guitar voicings for Taylor-like open sound
 const CHORD_VOICINGS: Record<string, string[]> = {
-  // Major
-  'C':     ['C', 'E', 'G', 'C', 'E'],
-  'D':     ['D', 'F#', 'A', 'D'],
-  'E':     ['E', 'G#', 'B', 'E', 'G#'],
-  'F':     ['F', 'A', 'C', 'F', 'A'],
-  'G':     ['G', 'B', 'D', 'G', 'B'],
-  'A':     ['A', 'C#', 'E', 'A', 'C#'],
-  'B':     ['B', 'D#', 'F#', 'B'],
-  'Bb':    ['Bb', 'D', 'F', 'Bb'],
-  'Eb':    ['Eb', 'G', 'Bb', 'Eb'],
-  'Ab':    ['Ab', 'C', 'Eb', 'Ab'],
+  // Major (open voicings with doubled notes like real guitar)
+  'C':     ['C', 'E', 'G', 'C', 'E', 'G'],
+  'D':     ['D', 'A', 'D', 'F#', 'A', 'D'],
+  'E':     ['E', 'B', 'E', 'G#', 'B', 'E'],
+  'F':     ['F', 'C', 'F', 'A', 'C', 'F'],
+  'G':     ['G', 'B', 'D', 'G', 'B', 'G'],
+  'A':     ['A', 'E', 'A', 'C#', 'E', 'A'],
+  'B':     ['B', 'F#', 'B', 'D#', 'F#', 'B'],
+  'Bb':    ['Bb', 'F', 'Bb', 'D', 'F', 'Bb'],
+  'Eb':    ['Eb', 'Bb', 'Eb', 'G', 'Bb', 'Eb'],
+  'Ab':    ['Ab', 'Eb', 'Ab', 'C', 'Eb', 'Ab'],
   // Minor
-  'Cm':    ['C', 'Eb', 'G', 'C', 'Eb'],
-  'Dm':    ['D', 'F', 'A', 'D'],
-  'Em':    ['E', 'G', 'B', 'E', 'G'],
-  'Fm':    ['F', 'Ab', 'C', 'F'],
-  'Gm':    ['G', 'Bb', 'D', 'G'],
-  'Am':    ['A', 'C', 'E', 'A', 'C'],
-  'Bm':    ['B', 'D', 'F#', 'B'],
-  'Bbm':   ['Bb', 'Db', 'F', 'Bb'],
+  'Cm':    ['C', 'G', 'C', 'Eb', 'G', 'C'],
+  'Dm':    ['D', 'A', 'D', 'F', 'A', 'D'],
+  'Em':    ['E', 'B', 'E', 'G', 'B', 'E'],
+  'Fm':    ['F', 'C', 'F', 'Ab', 'C', 'F'],
+  'Gm':    ['G', 'D', 'G', 'Bb', 'D', 'G'],
+  'Am':    ['A', 'E', 'A', 'C', 'E', 'A'],
+  'Bm':    ['B', 'F#', 'B', 'D', 'F#', 'B'],
+  'Bbm':   ['Bb', 'F', 'Bb', 'Db', 'F', 'Bb'],
   // Dominant 7th
-  'C7':    ['C', 'E', 'G', 'Bb'],
-  'D7':    ['D', 'F#', 'A', 'C'],
-  'E7':    ['E', 'G#', 'B', 'D'],
-  'F7':    ['F', 'A', 'C', 'Eb'],
-  'G7':    ['G', 'B', 'D', 'F'],
-  'A7':    ['A', 'C#', 'E', 'G'],
-  'B7':    ['B', 'D#', 'F#', 'A'],
-  'Bb7':   ['Bb', 'D', 'F', 'Ab'],
+  'C7':    ['C', 'E', 'Bb', 'C', 'E', 'G'],
+  'D7':    ['D', 'A', 'C', 'F#', 'A', 'D'],
+  'E7':    ['E', 'B', 'D', 'G#', 'B', 'E'],
+  'F7':    ['F', 'A', 'Eb', 'F', 'A', 'C'],
+  'G7':    ['G', 'B', 'D', 'F', 'B', 'G'],
+  'A7':    ['A', 'E', 'G', 'C#', 'E', 'A'],
+  'B7':    ['B', 'F#', 'A', 'D#', 'F#', 'B'],
+  'Bb7':   ['Bb', 'D', 'Ab', 'Bb', 'D', 'F'],
   // Major 7th
-  'Cmaj7': ['C', 'E', 'G', 'B'],
-  'Dmaj7': ['D', 'F#', 'A', 'C#'],
-  'Emaj7': ['E', 'G#', 'B', 'D#'],
-  'Fmaj7': ['F', 'A', 'C', 'E'],
-  'Gmaj7': ['G', 'B', 'D', 'F#'],
-  'Amaj7': ['A', 'C#', 'E', 'G#'],
-  'Bbmaj7':['Bb', 'D', 'F', 'A'],
+  'Cmaj7': ['C', 'E', 'G', 'B', 'E', 'G'],
+  'Dmaj7': ['D', 'A', 'C#', 'F#', 'A', 'D'],
+  'Emaj7': ['E', 'B', 'D#', 'G#', 'B', 'E'],
+  'Fmaj7': ['F', 'A', 'C', 'E', 'A', 'C'],
+  'Gmaj7': ['G', 'B', 'D', 'F#', 'B', 'G'],
+  'Amaj7': ['A', 'E', 'G#', 'C#', 'E', 'A'],
+  'Bbmaj7':['Bb', 'D', 'F', 'A', 'D', 'F'],
   // Minor 7th
-  'Cm7':   ['C', 'Eb', 'G', 'Bb'],
-  'Dm7':   ['D', 'F', 'A', 'C'],
-  'Em7':   ['E', 'G', 'B', 'D'],
-  'Fm7':   ['F', 'Ab', 'C', 'Eb'],
-  'Gm7':   ['G', 'Bb', 'D', 'F'],
-  'Am7':   ['A', 'C', 'E', 'G'],
-  'Bm7':   ['B', 'D', 'F#', 'A'],
+  'Cm7':   ['C', 'G', 'Bb', 'Eb', 'G', 'C'],
+  'Dm7':   ['D', 'A', 'C', 'F', 'A', 'D'],
+  'Em7':   ['E', 'B', 'D', 'G', 'B', 'E'],
+  'Fm7':   ['F', 'Ab', 'Eb', 'F', 'Ab', 'C'],
+  'Gm7':   ['G', 'D', 'F', 'Bb', 'D', 'G'],
+  'Am7':   ['A', 'E', 'G', 'C', 'E', 'A'],
+  'Bm7':   ['B', 'F#', 'A', 'D', 'F#', 'B'],
   // Sus2
-  'Csus2': ['C', 'D', 'G', 'C'],
-  'Dsus2': ['D', 'E', 'A', 'D'],
-  'Esus2': ['E', 'F#', 'B', 'E'],
-  'Gsus2': ['G', 'A', 'D', 'G'],
-  'Asus2': ['A', 'B', 'E', 'A'],
+  'Csus2': ['C', 'G', 'C', 'D', 'G', 'C'],
+  'Dsus2': ['D', 'A', 'D', 'E', 'A', 'D'],
+  'Esus2': ['E', 'B', 'E', 'F#', 'B', 'E'],
+  'Gsus2': ['G', 'D', 'G', 'A', 'D', 'G'],
+  'Asus2': ['A', 'E', 'A', 'B', 'E', 'A'],
   // Sus4
-  'Csus4': ['C', 'F', 'G', 'C'],
-  'Dsus4': ['D', 'G', 'A', 'D'],
-  'Esus4': ['E', 'A', 'B', 'E'],
-  'Gsus4': ['G', 'C', 'D', 'G'],
-  'Asus4': ['A', 'D', 'E', 'A'],
+  'Csus4': ['C', 'G', 'C', 'F', 'G', 'C'],
+  'Dsus4': ['D', 'A', 'D', 'G', 'A', 'D'],
+  'Esus4': ['E', 'B', 'E', 'A', 'B', 'E'],
+  'Gsus4': ['G', 'D', 'G', 'C', 'D', 'G'],
+  'Asus4': ['A', 'E', 'A', 'D', 'E', 'A'],
   // Add9
-  'Cadd9': ['C', 'E', 'G', 'D'],
-  'Dadd9': ['D', 'F#', 'A', 'E'],
-  'Eadd9': ['E', 'G#', 'B', 'F#'],
-  'Gadd9': ['G', 'B', 'D', 'A'],
-  'Aadd9': ['A', 'C#', 'E', 'B'],
-  // 9th chords
-  'C9':    ['C', 'E', 'Bb', 'D'],
-  'D9':    ['D', 'F#', 'C', 'E'],
-  'G9':    ['G', 'B', 'F', 'A'],
-  'A9':    ['A', 'C#', 'G', 'B'],
+  'Cadd9': ['C', 'E', 'G', 'D', 'E', 'G'],
+  'Dadd9': ['D', 'A', 'D', 'F#', 'A', 'E'],
+  'Eadd9': ['E', 'B', 'E', 'G#', 'B', 'F#'],
+  'Gadd9': ['G', 'B', 'D', 'A', 'B', 'G'],
+  'Aadd9': ['A', 'E', 'A', 'C#', 'E', 'B'],
+  // 9th
+  'C9':    ['C', 'E', 'Bb', 'D', 'E', 'G'],
+  'D9':    ['D', 'F#', 'C', 'E', 'A', 'D'],
+  'G9':    ['G', 'B', 'F', 'A', 'B', 'G'],
+  'A9':    ['A', 'C#', 'G', 'B', 'E', 'A'],
   // Minor 9th
-  'Am9':   ['A', 'C', 'G', 'B'],
-  'Dm9':   ['D', 'F', 'C', 'E'],
-  'Em9':   ['E', 'G', 'D', 'F#'],
+  'Am9':   ['A', 'E', 'G', 'C', 'E', 'B'],
+  'Dm9':   ['D', 'F', 'C', 'E', 'A', 'D'],
+  'Em9':   ['E', 'G', 'D', 'F#', 'B', 'E'],
   // Diminished
-  'Bdim':  ['B', 'D', 'F'],
-  'Cdim':  ['C', 'Eb', 'Gb'],
-  'Ddim':  ['D', 'F', 'Ab'],
+  'Bdim':  ['B', 'F', 'B', 'D', 'F'],
+  'Cdim':  ['C', 'Gb', 'C', 'Eb', 'Gb'],
+  'Ddim':  ['D', 'Ab', 'D', 'F', 'Ab'],
   // Augmented
-  'Caug':  ['C', 'E', 'G#'],
-  'Eaug':  ['E', 'G#', 'C'],
+  'Caug':  ['C', 'E', 'G#', 'C', 'E'],
+  'Eaug':  ['E', 'G#', 'C', 'E', 'G#'],
   // Power chords
-  'C5':    ['C', 'G', 'C'],
-  'D5':    ['D', 'A', 'D'],
-  'E5':    ['E', 'B', 'E'],
-  'G5':    ['G', 'D', 'G'],
-  'A5':    ['A', 'E', 'A'],
+  'C5':    ['C', 'G', 'C', 'G', 'C'],
+  'D5':    ['D', 'A', 'D', 'A', 'D'],
+  'E5':    ['E', 'B', 'E', 'B', 'E'],
+  'G5':    ['G', 'D', 'G', 'D', 'G'],
+  'A5':    ['A', 'E', 'A', 'E', 'A'],
 };
 
-// Controllable effects chain
+// ─── Taylor-style acoustic guitar synthesis ───
+
 interface EffectsNodes {
   input: BiquadFilterNode;
   master: GainNode;
@@ -119,13 +120,22 @@ interface EffectsNodes {
   lfo: OscillatorNode;
 }
 
-function createReverbIR(ctx: AudioContext, duration = 2.5, decay = 3.0): AudioBuffer {
-  const length = ctx.sampleRate * duration;
+// Taylor-specific body impulse response — simulates spruce top / rosewood back
+function createTaylorBodyIR(ctx: AudioContext): AudioBuffer {
+  const duration = 3.0;
+  const length = Math.round(ctx.sampleRate * duration);
   const impulse = ctx.createBuffer(2, length, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++) {
-    const data = impulse.getChannelData(ch);
+    const d = impulse.getChannelData(ch);
     for (let i = 0; i < length; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+      const t = i / ctx.sampleRate;
+      // Early reflections inside the body
+      const early = t < 0.015 ? Math.exp(-t / 0.004) * 0.6 : 0;
+      // Main body resonance decay
+      const body = Math.exp(-t / 0.8) * 0.25;
+      // Late diffuse tail (room)
+      const room = Math.exp(-t / 1.5) * 0.08;
+      d[i] = (Math.random() * 2 - 1) * (early + body + room);
     }
   }
   return impulse;
@@ -135,42 +145,54 @@ function createEffectsChain(ctx: AudioContext): EffectsNodes {
   const master = ctx.createGain();
   master.gain.value = 1.0;
 
+  // Taylor EQ curve: warm low-mids, sparkling highs
   const bodyEQ = ctx.createBiquadFilter();
   bodyEQ.type = 'peaking';
-  bodyEQ.frequency.value = 250;
-  bodyEQ.Q.value = 1.2;
-  bodyEQ.gain.value = 4;
+  bodyEQ.frequency.value = 220; // Body resonance
+  bodyEQ.Q.value = 1.0;
+  bodyEQ.gain.value = 5;
 
   const presenceEQ = ctx.createBiquadFilter();
   presenceEQ.type = 'peaking';
-  presenceEQ.frequency.value = 3500;
-  presenceEQ.Q.value = 1.0;
-  presenceEQ.gain.value = 2;
+  presenceEQ.frequency.value = 3200; // String clarity / sparkle
+  presenceEQ.Q.value = 0.8;
+  presenceEQ.gain.value = 3;
 
+  // Warmth — Taylor doesn't sound harsh
   const highCut = ctx.createBiquadFilter();
   highCut.type = 'lowpass';
-  highCut.frequency.value = 6000;
-  highCut.Q.value = 0.7;
+  highCut.frequency.value = 8000;
+  highCut.Q.value = 0.5;
 
+  // Low shelf for body warmth
+  const warmth = ctx.createBiquadFilter();
+  warmth.type = 'lowshelf';
+  warmth.frequency.value = 180;
+  warmth.gain.value = 3;
+
+  // Subtle chorus for stereo width (Taylor's natural shimmer)
   const chorusDelay = ctx.createDelay(0.05);
-  chorusDelay.delayTime.value = 0.012;
+  chorusDelay.delayTime.value = 0.015;
   const chorusGain = ctx.createGain();
-  chorusGain.gain.value = 0.3;
+  chorusGain.gain.value = 0.15;
   const lfo = ctx.createOscillator();
-  lfo.frequency.value = 0.8;
+  lfo.frequency.value = 0.4; // Slower, more subtle
   const lfoGain = ctx.createGain();
-  lfoGain.gain.value = 0.003;
+  lfoGain.gain.value = 0.002;
   lfo.connect(lfoGain);
   lfoGain.connect(chorusDelay.delayTime);
   lfo.start();
 
+  // Taylor body reverb
   const reverb = ctx.createConvolver();
-  reverb.buffer = createReverbIR(ctx, 2.5, 3.0);
+  reverb.buffer = createTaylorBodyIR(ctx);
   const reverbGain = ctx.createGain();
-  reverbGain.gain.value = 0.25;
+  reverbGain.gain.value = 0.3;
   const dryGain = ctx.createGain();
-  dryGain.gain.value = 0.85;
+  dryGain.gain.value = 0.8;
 
+  // Signal chain
+  warmth.connect(bodyEQ);
   bodyEQ.connect(presenceEQ);
   presenceEQ.connect(highCut);
   highCut.connect(master);
@@ -186,16 +208,18 @@ function createEffectsChain(ctx: AudioContext): EffectsNodes {
   reverb.connect(reverbGain);
   reverbGain.connect(ctx.destination);
 
-  return { input: bodyEQ, master, dryGain, reverbGain, chorusGain, bodyEQ, presenceEQ, highCut, lfo };
+  return { input: warmth, master, dryGain, reverbGain, chorusGain, bodyEQ, presenceEQ, highCut, lfo };
 }
 
+// Enhanced Karplus-Strong with Taylor acoustic characteristics
 function pluckString(
   ctx: AudioContext,
   dest: AudioNode,
   freq: number,
   startTime: number,
   duration: number,
-  gain: number
+  gain: number,
+  stringIndex: number // 0=low E to 5=high E
 ) {
   const sampleRate = ctx.sampleRate;
   const N = Math.round(sampleRate / freq);
@@ -203,22 +227,54 @@ function pluckString(
   const buffer = ctx.createBuffer(1, totalSamples, sampleRate);
   const data = buffer.getChannelData(0);
 
-  const noise = new Float32Array(N);
-  noise[0] = Math.random() * 2 - 1;
-  for (let i = 1; i < N; i++) {
-    noise[i] = 0.5 * (Math.random() * 2 - 1) + 0.5 * noise[i - 1];
+  // Steel string excitation — shaped noise burst with pick character
+  const excitation = new Float32Array(N);
+  const pickPosition = 0.13 + stringIndex * 0.02; // Varies per string
+  const pickWidth = Math.round(N * pickPosition);
+  for (let i = 0; i < N; i++) {
+    // Combination of noise and harmonic content
+    const noise = Math.random() * 2 - 1;
+    const harmonic = Math.sin(2 * Math.PI * i / N);
+    // Pick shape: triangle-like with noise
+    const pickShape = i < pickWidth
+      ? (i / pickWidth)
+      : ((N - i) / (N - pickWidth));
+    excitation[i] = (noise * 0.6 + harmonic * 0.4) * pickShape;
   }
 
-  const decay = 0.998;
-  const damping = 0.48;
+  // String-specific decay and brightness
+  // Lower strings decay slower, higher strings are brighter
+  const stringDecay = 0.9985 + stringIndex * 0.0003; // 0.9985 to 1.0000
+  const stringDamping = 0.42 + stringIndex * 0.02; // Lower strings more damped
+
+  // Karplus-Strong with allpass tuning for precise pitch
+  const fracDelay = sampleRate / freq - Math.floor(sampleRate / freq);
+  const allpassCoeff = (1 - fracDelay) / (1 + fracDelay);
+
+  let prevAllpass = 0;
+
   for (let i = 0; i < totalSamples; i++) {
     if (i < N) {
-      data[i] = noise[i];
+      data[i] = excitation[i];
     } else {
+      // Average filter (lowpass)
       const s0 = data[i - N];
-      const s1 = i - N + 1 < totalSamples ? data[i - N + 1] : s0;
-      data[i] = decay * (damping * s0 + (1 - damping) * s1);
+      const s1 = data[i - N + 1] || s0;
+      const filtered = stringDamping * s0 + (1 - stringDamping) * s1;
+
+      // Allpass for fractional delay tuning
+      const allpassed = allpassCoeff * (filtered - prevAllpass) + data[i - N];
+      prevAllpass = allpassed;
+
+      // Decay
+      data[i] = stringDecay * allpassed;
     }
+  }
+
+  // Apply steel string brightness — slight high-frequency emphasis at attack
+  for (let i = 0; i < Math.min(N * 3, totalSamples); i++) {
+    const attackEnv = 1 + 0.3 * Math.exp(-i / (N * 0.5));
+    data[i] *= attackEnv;
   }
 
   const source = ctx.createBufferSource();
@@ -226,6 +282,8 @@ function pluckString(
 
   const gainNode = ctx.createGain();
   gainNode.gain.setValueAtTime(gain, startTime);
+  // Natural guitar note decay envelope
+  gainNode.gain.setTargetAtTime(gain * 0.7, startTime + 0.05, 0.15);
   gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
   source.connect(gainNode);
@@ -247,15 +305,29 @@ function strumChord(ctx: AudioContext, chordName: string, startTime: number, dur
   }
 
   const sources: AudioBufferSourceNode[] = [];
-  const strumDelay = 0.018 + Math.random() * 0.008;
+  // Natural strum timing — slight acceleration like real hand
+  const baseDelay = 0.012;
 
   voicing.forEach((noteName, i) => {
     const baseFreq = NOTE_FREQ[noteName];
     if (!baseFreq) return;
-    const freq = i < 2 ? baseFreq : baseFreq * 2;
+
+    // Realistic octave assignment for 6 strings
+    let freq: number;
+    if (i === 0) freq = baseFreq; // Low E range
+    else if (i === 1) freq = baseFreq; // A range
+    else if (i <= 3) freq = baseFreq * 2; // D, G range
+    else freq = baseFreq * 2; // B, high E range (will naturally be higher notes)
+
+    // Strum accelerates slightly as hand moves across strings
+    const strumDelay = baseDelay * (1 - i * 0.02) + (Math.random() * 0.004);
     const t = startTime + i * strumDelay;
-    const vel = volume * (0.3 + Math.random() * 0.1);
-    const src = pluckString(ctx, fxNodes!.input, freq, t, duration - i * strumDelay, vel);
+
+    // Velocity varies per string — middle strings slightly louder
+    const velCurve = 1 - Math.abs(i - 2.5) / 5;
+    const vel = volume * (0.25 + velCurve * 0.15 + Math.random() * 0.05);
+
+    const src = pluckString(ctx, fxNodes!.input, freq, t, duration - i * strumDelay, vel, i);
     sources.push(src);
   });
 
@@ -268,34 +340,26 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
   const [currentChordIdx, setCurrentChordIdx] = useState(-1);
   const [showFx, setShowFx] = useState(false);
 
-  // FX values (0-100)
-  const [reverbLevel, setReverbLevel] = useState(25);
-  const [chorusLevel, setChorusLevel] = useState(30);
-  const [bodyLevel, setBodyLevel] = useState(50);
+  const [reverbLevel, setReverbLevel] = useState(30);
+  const [chorusLevel, setChorusLevel] = useState(15);
+  const [bodyLevel, setBodyLevel] = useState(55);
   const [presenceLevel, setPresenceLevel] = useState(50);
-  const [brightnessLevel, setBrightnessLevel] = useState(50);
+  const [brightnessLevel, setBrightnessLevel] = useState(55);
 
   const ctxRef = useRef<AudioContext | null>(null);
   const timeoutRef = useRef<number[]>([]);
   const isPlayingRef = useRef(false);
 
-  // Apply FX values to live nodes
   const applyFx = useCallback(() => {
     if (!fxNodes) return;
     fxNodes.reverbGain.gain.value = reverbLevel / 100 * 0.6;
     fxNodes.dryGain.gain.value = 1 - reverbLevel / 100 * 0.4;
-    fxNodes.chorusGain.gain.value = chorusLevel / 100 * 0.5;
-    fxNodes.bodyEQ.gain.value = (bodyLevel / 50 - 1) * 8; // -8 to +8 dB
-    fxNodes.presenceEQ.gain.value = (presenceLevel / 50 - 1) * 6; // -6 to +6 dB
-    fxNodes.highCut.frequency.value = 2000 + (brightnessLevel / 100) * 10000; // 2k-12k Hz
+    fxNodes.chorusGain.gain.value = chorusLevel / 100 * 0.35;
+    fxNodes.bodyEQ.gain.value = (bodyLevel / 50 - 1) * 8;
+    fxNodes.presenceEQ.gain.value = (presenceLevel / 50 - 1) * 6;
+    fxNodes.highCut.frequency.value = 3000 + (brightnessLevel / 100) * 9000;
   }, [reverbLevel, chorusLevel, bodyLevel, presenceLevel, brightnessLevel]);
 
-  const updateFx = useCallback((setter: (v: number) => void, value: number) => {
-    setter(value);
-    // Will be applied on next render via effect below
-  }, []);
-
-  // Apply whenever values change and nodes exist
   const applyRef = useRef(applyFx);
   applyRef.current = applyFx;
 
@@ -326,8 +390,6 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
 
     const playLoop = (loopStart: number) => {
       if (!isPlayingRef.current) return;
-
-      // Apply current FX settings
       applyRef.current();
 
       chords.forEach((chord, i) => {
@@ -376,18 +438,15 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
     }, (0.1 + chords.length * chordDuration) * 1000 + 500);
   }, [chords, bpm]);
 
-  // Real-time FX update when sliders move during playback
   const handleFxChange = useCallback((setter: (v: number) => void) => {
     return ([v]: number[]) => {
       setter(v);
-      // Immediately apply if playing
       setTimeout(() => applyRef.current(), 0);
     };
   }, []);
 
   return (
     <div className="space-y-3">
-      {/* Chord visualization */}
       <div className="flex gap-2 flex-wrap items-center">
         {chords.map((chord, i) => (
           <div key={i} className={`rounded-xl px-5 py-3 text-center min-w-[70px] transition-all duration-200 ${
@@ -400,7 +459,6 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
         ))}
       </div>
 
-      {/* Transport controls */}
       <div className="flex items-center gap-3 flex-wrap">
         <Button size="sm" variant={isPlaying ? 'destructive' : 'default'} onClick={play} className="gap-2">
           {isPlaying ? <Square className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -418,16 +476,15 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
         </Button>
       </div>
 
-      {/* Effects panel */}
       {showFx && (
         <div className="bg-muted/40 rounded-xl p-4 border border-border/50 space-y-3">
-          <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Efectos en Tiempo Real</p>
+          <p className="text-xs font-semibold text-foreground uppercase tracking-wider">🎸 Sonido Taylor Acoustic</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
-            <FxSlider label="🌊 Reverb" value={reverbLevel} onChange={handleFxChange(setReverbLevel)} />
-            <FxSlider label="✨ Chorus" value={chorusLevel} onChange={handleFxChange(setChorusLevel)} />
-            <FxSlider label="🔊 Cuerpo (Graves)" value={bodyLevel} onChange={handleFxChange(setBodyLevel)} />
-            <FxSlider label="🔔 Presencia (Medios)" value={presenceLevel} onChange={handleFxChange(setPresenceLevel)} />
-            <FxSlider label="☀️ Brillo (Agudos)" value={brightnessLevel} onChange={handleFxChange(setBrightnessLevel)} />
+            <FxSlider label="🌊 Reverb (Room)" value={reverbLevel} onChange={handleFxChange(setReverbLevel)} />
+            <FxSlider label="✨ Chorus (Shimmer)" value={chorusLevel} onChange={handleFxChange(setChorusLevel)} />
+            <FxSlider label="🔊 Cuerpo (Body)" value={bodyLevel} onChange={handleFxChange(setBodyLevel)} />
+            <FxSlider label="🔔 Presencia (Sparkle)" value={presenceLevel} onChange={handleFxChange(setPresenceLevel)} />
+            <FxSlider label="☀️ Brillo (Warmth)" value={brightnessLevel} onChange={handleFxChange(setBrightnessLevel)} />
           </div>
         </div>
       )}
@@ -438,7 +495,7 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
 function FxSlider({ label, value, onChange }: { label: string; value: number; onChange: (v: number[]) => void }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-muted-foreground w-[130px] shrink-0">{label}</span>
+      <span className="text-xs text-muted-foreground w-[140px] shrink-0">{label}</span>
       <Slider value={[value]} onValueChange={onChange} min={0} max={100} step={1} className="flex-1 min-w-[80px]" />
       <span className="text-xs font-mono text-muted-foreground w-8 text-right">{value}</span>
     </div>
