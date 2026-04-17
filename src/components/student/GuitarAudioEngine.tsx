@@ -219,7 +219,7 @@ function createEffectsChain(ctx: AudioContext): EffectsNodes {
   return { input: warmth, master, dryGain, reverbGain, chorusGain, bodyEQ, presenceEQ, highCut, lfo };
 }
 
-// Enhanced Karplus-Strong with Taylor acoustic characteristics
+// Clean Karplus-Strong acoustic guitar synthesis
 function pluckString(
   ctx: AudioContext,
   dest: AudioNode,
@@ -230,75 +230,49 @@ function pluckString(
   stringIndex: number // 0=low E to 5=high E
 ) {
   const sampleRate = ctx.sampleRate;
-  const N = Math.round(sampleRate / freq);
+  const N = Math.max(2, Math.round(sampleRate / freq));
   const totalSamples = Math.round(sampleRate * duration);
   const buffer = ctx.createBuffer(1, totalSamples, sampleRate);
   const data = buffer.getChannelData(0);
 
-  // Steel string excitation — shaped noise burst with pick character
-  const excitation = new Float32Array(N);
-  const pickPosition = 0.13 + stringIndex * 0.02; // Varies per string
-  const pickWidth = Math.round(N * pickPosition);
+  // Soft noise excitation, lowpassed for warmth (no harsh harmonics)
+  let prev = 0;
   for (let i = 0; i < N; i++) {
-    // Combination of noise and harmonic content
     const noise = Math.random() * 2 - 1;
-    const harmonic = Math.sin(2 * Math.PI * i / N);
-    // Pick shape: triangle-like with noise
-    const pickShape = i < pickWidth
-      ? (i / pickWidth)
-      : ((N - i) / (N - pickWidth));
-    excitation[i] = (noise * 0.6 + harmonic * 0.4) * pickShape;
+    // One-pole lowpass on the noise burst — softer pluck
+    prev = prev * 0.5 + noise * 0.5;
+    // Smooth bell window so the burst has no clicks
+    const window = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (N - 1));
+    data[i] = prev * window;
   }
 
-  // String-specific decay and brightness
-  // Lower strings decay slower, higher strings are brighter
-  const stringDecay = 0.9985 + stringIndex * 0.0003; // 0.9985 to 1.0000
-  const stringDamping = 0.42 + stringIndex * 0.02; // Lower strings more damped
+  // String-specific damping. Higher strings decay faster; all strictly < 1.
+  // damping is the lowpass coefficient inside the loop (0..0.5 range of avg).
+  const decay = 0.994 - stringIndex * 0.0015; // 0.994 .. 0.9865 — always stable
+  const brightness = 0.5 + stringIndex * 0.02; // slight tilt per string
 
-  // Karplus-Strong with allpass tuning for precise pitch
-  const fracDelay = sampleRate / freq - Math.floor(sampleRate / freq);
-  const allpassCoeff = (1 - fracDelay) / (1 + fracDelay);
-
-  let prevAllpass = 0;
-
-  for (let i = 0; i < totalSamples; i++) {
-    if (i < N) {
-      data[i] = excitation[i];
-    } else {
-      // Average filter (lowpass)
-      const s0 = data[i - N];
-      const s1 = data[i - N + 1] || s0;
-      const filtered = stringDamping * s0 + (1 - stringDamping) * s1;
-
-      // Allpass for fractional delay tuning
-      const allpassed = allpassCoeff * (filtered - prevAllpass) + data[i - N];
-      prevAllpass = allpassed;
-
-      // Decay
-      data[i] = stringDecay * allpassed;
-    }
-  }
-
-  // Apply steel string brightness — gentle high-frequency emphasis at attack
-  for (let i = 0; i < Math.min(N * 3, totalSamples); i++) {
-    const attackEnv = 1 + 0.1 * Math.exp(-i / (N * 0.5)); // Reduced from 0.3
-    data[i] *= attackEnv;
+  // Standard Karplus-Strong: y[n] = decay * 0.5 * (y[n-N] + y[n-N-1])
+  for (let i = N; i < totalSamples; i++) {
+    const a = data[i - N];
+    const b = data[i - N - 1] !== undefined ? data[i - N - 1] : a;
+    const avg = brightness * a + (1 - brightness) * b;
+    data[i] = decay * avg;
   }
 
   const source = ctx.createBufferSource();
   source.buffer = buffer;
 
   const gainNode = ctx.createGain();
-  gainNode.gain.setValueAtTime(gain, startTime);
-  // Natural guitar note decay envelope
-  gainNode.gain.setTargetAtTime(gain * 0.7, startTime + 0.05, 0.15);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  // Smooth attack ramp avoids clicks
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(gain, startTime + 0.005);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
   source.connect(gainNode);
   gainNode.connect(dest);
 
   source.start(startTime);
-  source.stop(startTime + duration);
+  source.stop(startTime + duration + 0.05);
   return source;
 }
 
@@ -313,8 +287,7 @@ function strumChord(ctx: AudioContext, chordName: string, startTime: number, dur
   }
 
   const sources: AudioBufferSourceNode[] = [];
-  // Natural strum timing — slight acceleration like real hand
-  const baseDelay = 0.012;
+  const baseDelay = 0.018; // slower, more natural strum
 
   voicing.forEach((noteName, i) => {
     const baseFreq = NOTE_FREQ[noteName];
@@ -322,20 +295,19 @@ function strumChord(ctx: AudioContext, chordName: string, startTime: number, dur
 
     // Realistic octave assignment for 6 strings
     let freq: number;
-    if (i === 0) freq = baseFreq; // Low E range
-    else if (i === 1) freq = baseFreq; // A range
-    else if (i <= 3) freq = baseFreq * 2; // D, G range
-    else freq = baseFreq * 2; // B, high E range (will naturally be higher notes)
+    if (i === 0) freq = baseFreq;
+    else if (i === 1) freq = baseFreq;
+    else if (i <= 3) freq = baseFreq * 2;
+    else freq = baseFreq * 2;
 
-    // Strum accelerates slightly as hand moves across strings
-    const strumDelay = baseDelay * (1 - i * 0.02) + (Math.random() * 0.004);
-    const t = startTime + i * strumDelay;
+    const strumDelay = baseDelay + i * 0.008;
+    const t = startTime + strumDelay;
 
-    // Velocity varies per string — middle strings slightly louder
-    const velCurve = 1 - Math.abs(i - 2.5) / 5;
-    const vel = volume * (0.15 + velCurve * 0.08 + Math.random() * 0.03); // Reduced to prevent clipping
+    // Lower per-string velocity to prevent buildup across loops
+    const velCurve = 1 - Math.abs(i - 2.5) / 6;
+    const vel = volume * (0.10 + velCurve * 0.05);
 
-    const src = pluckString(ctx, fxNodes!.input, freq, t, duration - i * strumDelay, vel, i);
+    const src = pluckString(ctx, fxNodes!.input, freq, t, duration, vel, i);
     sources.push(src);
   });
 
