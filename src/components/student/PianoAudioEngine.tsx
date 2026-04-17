@@ -297,7 +297,11 @@ export const PianoAudioEngine = ({ chords }: PianoAudioEngineProps) => {
   const [toneLevel, setToneLevel] = useState(55);
   const [brillanceLevel, setBrillanceLevel] = useState(55);
 
+  const [drumPattern, setDrumPattern] = useState<DrumPatternId>('pop');
+  const [drumVolume, setDrumVolume] = useState(60);
+
   const ctxRef = useRef<AudioContext | null>(null);
+  const drumBusRef = useRef<DrumBus | null>(null);
   const timeoutRef = useRef<number[]>([]);
   const isPlayingRef = useRef(false);
 
