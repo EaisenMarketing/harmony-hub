@@ -452,6 +452,27 @@ export const PianoAudioEngine = ({ chords }: PianoAudioEngineProps) => {
         </Button>
       </div>
 
+      <div className="flex items-center gap-2 flex-wrap bg-muted/30 rounded-xl p-2.5 border border-border/40">
+        <Drum className="w-4 h-4 text-muted-foreground ml-1" />
+        <span className="text-xs font-semibold text-foreground">Ritmo:</span>
+        {(Object.keys(DRUM_PATTERN_LABELS) as DrumPatternId[]).map(p => (
+          <Button key={p} size="sm" variant={drumPattern === p ? 'default' : 'outline'}
+            onClick={() => setDrumPattern(p)} className="h-7 px-2.5 text-xs">
+            {DRUM_PATTERN_LABELS[p]}
+          </Button>
+        ))}
+        {drumPattern !== 'off' && (
+          <div className="flex items-center gap-2 ml-auto min-w-[140px]">
+            <span className="text-[10px] text-muted-foreground">Vol</span>
+            <Slider value={[drumVolume]} onValueChange={([v]) => {
+              setDrumVolume(v);
+              if (drumBusRef.current) drumBusRef.current.input.gain.value = v / 100;
+            }} min={0} max={100} step={5} className="w-24" />
+            <span className="text-[10px] font-mono text-muted-foreground w-6 text-right">{drumVolume}</span>
+          </div>
+        )}
+      </div>
+
       {showFx && (
         <div className="bg-muted/40 rounded-xl p-4 border border-border/50 space-y-3">
           <p className="text-xs font-semibold text-foreground uppercase tracking-wider">🎹 Sonido Grand Piano</p>
