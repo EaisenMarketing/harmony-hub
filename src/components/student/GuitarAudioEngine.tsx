@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Play, Square, SkipForward, SlidersHorizontal } from 'lucide-react';
+import { Play, Square, SkipForward, SlidersHorizontal, Drum } from 'lucide-react';
+import { createDrumBus, scheduleDrumBar, DrumPatternId, DRUM_PATTERN_LABELS, DrumBus } from './DrumPatterns';
 
 interface GuitarAudioEngineProps {
   chords: string[];
