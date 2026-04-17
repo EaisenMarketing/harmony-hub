@@ -8,6 +8,7 @@ import { Music, Guitar, Piano, Plus, Save, Trash2, X, Bookmark } from 'lucide-re
 import { GuitarFretboardDiagram } from './GuitarFretboardDiagram';
 import { ScalePianoKeyboard } from './ScalePianoKeyboard';
 import { GuitarAudioEngine } from './GuitarAudioEngine';
+import { PianoAudioEngine } from './PianoAudioEngine';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
