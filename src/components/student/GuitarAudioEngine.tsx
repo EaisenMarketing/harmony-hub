@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Play, Square, SkipForward, SlidersHorizontal } from 'lucide-react';
+import { Play, Square, SkipForward, SlidersHorizontal, Drum } from 'lucide-react';
+import { createDrumBus, scheduleDrumBar, DrumPatternId, DRUM_PATTERN_LABELS, DrumBus } from './DrumPatterns';
 
 interface GuitarAudioEngineProps {
   chords: string[];
@@ -326,7 +327,11 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
   const [presenceLevel, setPresenceLevel] = useState(50);
   const [brightnessLevel, setBrightnessLevel] = useState(55);
 
+  const [drumPattern, setDrumPattern] = useState<DrumPatternId>('pop');
+  const [drumVolume, setDrumVolume] = useState(60);
+
   const ctxRef = useRef<AudioContext | null>(null);
+  const drumBusRef = useRef<DrumBus | null>(null);
   const timeoutRef = useRef<number[]>([]);
   const isPlayingRef = useRef(false);
 
@@ -353,6 +358,7 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
       ctxRef.current.close();
       ctxRef.current = null;
     }
+    drumBusRef.current = null;
     fxNodes = null;
   }, []);
 
@@ -362,11 +368,14 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
     fxNodes = null;
     const ctx = new AudioContext();
     ctxRef.current = ctx;
+    drumBusRef.current = createDrumBus(ctx, ctx.destination);
+    drumBusRef.current.input.gain.value = drumVolume / 100;
     isPlayingRef.current = true;
     setIsPlaying(true);
 
     const beatDuration = 60 / bpm;
     const chordDuration = beatDuration * 2;
+    const barDuration = beatDuration * 4;
 
     const playLoop = (loopStart: number) => {
       if (!isPlayingRef.current) return;
@@ -385,6 +394,13 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
       });
 
       const loopDuration = chords.length * chordDuration;
+      const numBars = Math.max(1, Math.ceil(loopDuration / barDuration));
+      if (drumBusRef.current && drumPattern !== 'off') {
+        for (let b = 0; b < numBars; b++) {
+          scheduleDrumBar(ctx, drumBusRef.current, drumPattern, loopStart + b * barDuration, barDuration, 0.7);
+        }
+      }
+
       const nextLoopDelay = (loopStart + loopDuration - ctx.currentTime) * 1000;
       const loopTid = window.setTimeout(() => {
         if (isPlayingRef.current) playLoop(loopStart + loopDuration);
@@ -393,16 +409,20 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
     };
 
     playLoop(ctx.currentTime + 0.1);
-  }, [chords, bpm, stop]);
+  }, [chords, bpm, stop, drumPattern, drumVolume]);
 
   const playOnce = useCallback(() => {
     fxNodes = null;
     const ctx = new AudioContext();
+    const drumBus = createDrumBus(ctx, ctx.destination);
+    drumBus.input.gain.value = drumVolume / 100;
     const beatDuration = 60 / bpm;
     const chordDuration = beatDuration * 2;
+    const barDuration = beatDuration * 4;
+    const startAt = ctx.currentTime + 0.1;
 
     chords.forEach((chord, i) => {
-      const time = ctx.currentTime + 0.1 + i * chordDuration;
+      const time = startAt + i * chordDuration;
       const delay = (time - ctx.currentTime) * 1000;
       setTimeout(() => {
         applyRef.current();
@@ -411,12 +431,20 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
       }, delay);
     });
 
+    if (drumPattern !== 'off') {
+      const totalDur = chords.length * chordDuration;
+      const numBars = Math.max(1, Math.ceil(totalDur / barDuration));
+      for (let b = 0; b < numBars; b++) {
+        scheduleDrumBar(ctx, drumBus, drumPattern, startAt + b * barDuration, barDuration, 0.7);
+      }
+    }
+
     setTimeout(() => {
       setCurrentChordIdx(-1);
       ctx.close();
       fxNodes = null;
     }, (0.1 + chords.length * chordDuration) * 1000 + 500);
-  }, [chords, bpm]);
+  }, [chords, bpm, drumPattern, drumVolume]);
 
   const handleFxChange = useCallback((setter: (v: number) => void) => {
     return ([v]: number[]) => {
@@ -454,6 +482,27 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
         <Button size="sm" variant={showFx ? 'secondary' : 'outline'} onClick={() => setShowFx(!showFx)} className="gap-1.5 ml-auto">
           <SlidersHorizontal className="w-4 h-4" /> FX
         </Button>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap bg-muted/30 rounded-xl p-2.5 border border-border/40">
+        <Drum className="w-4 h-4 text-muted-foreground ml-1" />
+        <span className="text-xs font-semibold text-foreground">Ritmo:</span>
+        {(Object.keys(DRUM_PATTERN_LABELS) as DrumPatternId[]).map(p => (
+          <Button key={p} size="sm" variant={drumPattern === p ? 'default' : 'outline'}
+            onClick={() => setDrumPattern(p)} className="h-7 px-2.5 text-xs">
+            {DRUM_PATTERN_LABELS[p]}
+          </Button>
+        ))}
+        {drumPattern !== 'off' && (
+          <div className="flex items-center gap-2 ml-auto min-w-[140px]">
+            <span className="text-[10px] text-muted-foreground">Vol</span>
+            <Slider value={[drumVolume]} onValueChange={([v]) => {
+              setDrumVolume(v);
+              if (drumBusRef.current) drumBusRef.current.input.gain.value = v / 100;
+            }} min={0} max={100} step={5} className="w-24" />
+            <span className="text-[10px] font-mono text-muted-foreground w-6 text-right">{drumVolume}</span>
+          </div>
+        )}
       </div>
 
       {showFx && (
