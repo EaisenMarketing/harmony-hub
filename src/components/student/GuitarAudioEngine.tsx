@@ -327,7 +327,11 @@ export const GuitarAudioEngine = ({ chords }: GuitarAudioEngineProps) => {
   const [presenceLevel, setPresenceLevel] = useState(50);
   const [brightnessLevel, setBrightnessLevel] = useState(55);
 
+  const [drumPattern, setDrumPattern] = useState<DrumPatternId>('pop');
+  const [drumVolume, setDrumVolume] = useState(60);
+
   const ctxRef = useRef<AudioContext | null>(null);
+  const drumBusRef = useRef<DrumBus | null>(null);
   const timeoutRef = useRef<number[]>([]);
   const isPlayingRef = useRef(false);
 
