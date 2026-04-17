@@ -287,8 +287,7 @@ function strumChord(ctx: AudioContext, chordName: string, startTime: number, dur
   }
 
   const sources: AudioBufferSourceNode[] = [];
-  // Natural strum timing — slight acceleration like real hand
-  const baseDelay = 0.012;
+  const baseDelay = 0.018; // slower, more natural strum
 
   voicing.forEach((noteName, i) => {
     const baseFreq = NOTE_FREQ[noteName];
@@ -296,20 +295,19 @@ function strumChord(ctx: AudioContext, chordName: string, startTime: number, dur
 
     // Realistic octave assignment for 6 strings
     let freq: number;
-    if (i === 0) freq = baseFreq; // Low E range
-    else if (i === 1) freq = baseFreq; // A range
-    else if (i <= 3) freq = baseFreq * 2; // D, G range
-    else freq = baseFreq * 2; // B, high E range (will naturally be higher notes)
+    if (i === 0) freq = baseFreq;
+    else if (i === 1) freq = baseFreq;
+    else if (i <= 3) freq = baseFreq * 2;
+    else freq = baseFreq * 2;
 
-    // Strum accelerates slightly as hand moves across strings
-    const strumDelay = baseDelay * (1 - i * 0.02) + (Math.random() * 0.004);
-    const t = startTime + i * strumDelay;
+    const strumDelay = baseDelay + i * 0.008;
+    const t = startTime + strumDelay;
 
-    // Velocity varies per string — middle strings slightly louder
-    const velCurve = 1 - Math.abs(i - 2.5) / 5;
-    const vel = volume * (0.15 + velCurve * 0.08 + Math.random() * 0.03); // Reduced to prevent clipping
+    // Lower per-string velocity to prevent buildup across loops
+    const velCurve = 1 - Math.abs(i - 2.5) / 6;
+    const vel = volume * (0.10 + velCurve * 0.05);
 
-    const src = pluckString(ctx, fxNodes!.input, freq, t, duration - i * strumDelay, vel, i);
+    const src = pluckString(ctx, fxNodes!.input, freq, t, duration, vel, i);
     sources.push(src);
   });
 
