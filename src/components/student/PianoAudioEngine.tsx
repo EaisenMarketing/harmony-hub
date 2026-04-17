@@ -326,6 +326,7 @@ export const PianoAudioEngine = ({ chords }: PianoAudioEngineProps) => {
       ctxRef.current.close();
       ctxRef.current = null;
     }
+    drumBusRef.current = null;
     pianoFx = null;
   }, []);
 
@@ -334,11 +335,14 @@ export const PianoAudioEngine = ({ chords }: PianoAudioEngineProps) => {
     pianoFx = null;
     const ctx = new AudioContext();
     ctxRef.current = ctx;
+    drumBusRef.current = createDrumBus(ctx, ctx.destination);
+    drumBusRef.current.input.gain.value = drumVolume / 100;
     isPlayingRef.current = true;
     setIsPlaying(true);
 
     const beatDuration = 60 / bpm;
     const chordDuration = beatDuration * 2;
+    const barDuration = beatDuration * 4; // 4/4
 
     const playLoop = (loopStart: number) => {
       if (!isPlayingRef.current) return;
@@ -356,7 +360,15 @@ export const PianoAudioEngine = ({ chords }: PianoAudioEngineProps) => {
         timeoutRef.current.push(tid);
       });
 
+      // Schedule drum bars covering the full loop
       const loopDuration = chords.length * chordDuration;
+      const numBars = Math.max(1, Math.ceil(loopDuration / barDuration));
+      if (drumBusRef.current && drumPattern !== 'off') {
+        for (let b = 0; b < numBars; b++) {
+          scheduleDrumBar(ctx, drumBusRef.current, drumPattern, loopStart + b * barDuration, barDuration, 0.7);
+        }
+      }
+
       const nextLoopDelay = (loopStart + loopDuration - ctx.currentTime) * 1000;
       const loopTid = window.setTimeout(() => {
         if (isPlayingRef.current) playLoop(loopStart + loopDuration);
@@ -365,16 +377,20 @@ export const PianoAudioEngine = ({ chords }: PianoAudioEngineProps) => {
     };
 
     playLoop(ctx.currentTime + 0.1);
-  }, [chords, bpm, stop]);
+  }, [chords, bpm, stop, drumPattern, drumVolume]);
 
   const playOnce = useCallback(() => {
     pianoFx = null;
     const ctx = new AudioContext();
+    const drumBus = createDrumBus(ctx, ctx.destination);
+    drumBus.input.gain.value = drumVolume / 100;
     const beatDuration = 60 / bpm;
     const chordDuration = beatDuration * 2;
+    const barDuration = beatDuration * 4;
+    const startAt = ctx.currentTime + 0.1;
 
     chords.forEach((chord, i) => {
-      const time = ctx.currentTime + 0.1 + i * chordDuration;
+      const time = startAt + i * chordDuration;
       const delay = (time - ctx.currentTime) * 1000;
       setTimeout(() => {
         applyRef.current();
@@ -383,12 +399,20 @@ export const PianoAudioEngine = ({ chords }: PianoAudioEngineProps) => {
       }, delay);
     });
 
+    if (drumPattern !== 'off') {
+      const totalDur = chords.length * chordDuration;
+      const numBars = Math.max(1, Math.ceil(totalDur / barDuration));
+      for (let b = 0; b < numBars; b++) {
+        scheduleDrumBar(ctx, drumBus, drumPattern, startAt + b * barDuration, barDuration, 0.7);
+      }
+    }
+
     setTimeout(() => {
       setCurrentChordIdx(-1);
       ctx.close();
       pianoFx = null;
     }, (0.1 + chords.length * chordDuration) * 1000 + 800);
-  }, [chords, bpm]);
+  }, [chords, bpm, drumPattern, drumVolume]);
 
   const handleFxChange = useCallback((setter: (v: number) => void) => {
     return ([v]: number[]) => {
