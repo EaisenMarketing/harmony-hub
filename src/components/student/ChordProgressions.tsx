@@ -8,6 +8,7 @@ import { Music, Guitar, Piano, Plus, Save, Trash2, X, Bookmark } from 'lucide-re
 import { GuitarFretboardDiagram } from './GuitarFretboardDiagram';
 import { ScalePianoKeyboard } from './ScalePianoKeyboard';
 import { GuitarAudioEngine } from './GuitarAudioEngine';
+import { PianoAudioEngine } from './PianoAudioEngine';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -421,7 +422,7 @@ export const ChordProgressions = () => {
                 {newChords.length >= 2 && (
                   <div className="p-3 bg-muted/30 rounded-lg">
                     <p className="text-xs text-muted-foreground mb-2">Vista previa:</p>
-                    <GuitarAudioEngine chords={newChords} />
+                    {instrument === 'piano' ? <PianoAudioEngine chords={newChords} /> : <GuitarAudioEngine chords={newChords} />}
                   </div>
                 )}
 
@@ -480,7 +481,7 @@ export const ChordProgressions = () => {
                 <CardTitle className="text-lg">{customProgs[selectedCustom].name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <GuitarAudioEngine chords={customProgs[selectedCustom].chords} />
+                {instrument === 'piano' ? <PianoAudioEngine chords={customProgs[selectedCustom].chords} /> : <GuitarAudioEngine chords={customProgs[selectedCustom].chords} />}
                 {customProgs[selectedCustom].description && (
                   <p className="text-sm text-muted-foreground">{customProgs[selectedCustom].description}</p>
                 )}
@@ -514,7 +515,7 @@ export const ChordProgressions = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <GuitarAudioEngine chords={prog.chords} />
+              {instrument === 'piano' ? <PianoAudioEngine chords={prog.chords} /> : <GuitarAudioEngine chords={prog.chords} />}
 
               <div>
                 <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
