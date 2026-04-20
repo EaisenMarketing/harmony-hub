@@ -408,6 +408,11 @@ export const RhythmExercises = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [currentBeat, setCurrentBeat] = useState(0);
   const [selectedId, setSelectedId] = useState<string>(EXERCISES[0].id);
+  const [activeCategory, setActiveCategory] = useState<Category | 'Todos'>('Todos');
+
+  const filteredExercises = activeCategory === 'Todos'
+    ? EXERCISES
+    : EXERCISES.filter((e) => e.category === activeCategory);
 
   const ctxRef = useRef<AudioContext | null>(null);
   const masterRef = useRef<GainNode | null>(null);
