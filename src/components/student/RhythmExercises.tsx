@@ -534,14 +534,31 @@ export const RhythmExercises = () => {
 
         {/* ─── Ejercicios ─── */}
         <TabsContent value="exercises" className="space-y-4 mt-4">
-          {/* Selector de ejercicio */}
+          {/* Filtro de categorías */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Selecciona un ejercicio</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Categorías ({EXERCISES.length} ejercicios)</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {(['Todos', ...CATEGORIES] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs font-semibold transition-all border',
+                      activeCategory === cat
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-muted/40 text-muted-foreground border-border hover:border-primary/50'
+                    )}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {EXERCISES.map((ex) => (
+                {filteredExercises.map((ex) => (
                   <button
                     key={ex.id}
                     onClick={() => setSelectedId(ex.id)}
@@ -558,6 +575,11 @@ export const RhythmExercises = () => {
                         {ex.timeSignature}
                       </Badge>
                     </div>
+                    {ex.syllables && (
+                      <p className="text-[10px] text-muted-foreground italic mb-1.5 line-clamp-1">
+                        🗣 {ex.syllables}
+                      </p>
+                    )}
                     <Badge
                       variant="secondary"
                       className={cn(
