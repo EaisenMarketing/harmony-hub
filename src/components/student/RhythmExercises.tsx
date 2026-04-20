@@ -601,9 +601,15 @@ export const RhythmExercises = () => {
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="space-y-2">
                   <CardTitle className="text-xl">{exercise.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">{exercise.description}</p>
+                  <p className="text-sm text-muted-foreground">{exercise.description}</p>
+                  {exercise.syllables && (
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary/10 border border-primary/30">
+                      <span className="text-xs font-semibold text-primary">🗣 Sílabas:</span>
+                      <span className="text-sm font-mono text-foreground">{exercise.syllables}</span>
+                    </div>
+                  )}
                 </div>
                 <Badge variant="outline" className="shrink-0">{exercise.timeSignature}</Badge>
               </div>
