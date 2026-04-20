@@ -11,13 +11,16 @@ import { cn } from '@/lib/utils';
 // Tipos
 // ───────────────────────────────────────────────────────────
 type Cell = 1 | 0; // 1 = ataque, 0 = silencio
+type Category = 'Lectura' | 'Subdivisión' | 'Síncopa' | 'Tresillos' | 'Compuesto' | 'Estilos' | 'Polirritmia';
 type Exercise = {
   id: string;
   title: string;
   level: 'Principiante' | 'Intermedio' | 'Avanzado';
+  category: Category;
   timeSignature: '4/4' | '3/4' | '6/8';
   subdivision: number; // celdas por compás
   pattern: Cell[]; // longitud = subdivision
+  syllables?: string; // ta, ti-ti, tiritiri, tri-o-la
   description: string;
   tip: string;
 };
