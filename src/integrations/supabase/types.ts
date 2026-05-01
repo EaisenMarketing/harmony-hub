@@ -180,6 +180,13 @@ export type Database = {
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses_admin_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       courses: {
@@ -818,7 +825,55 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      courses_admin_view: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          duration_hours: number | null
+          id: string | null
+          instrument: Database["public"]["Enums"]["instrument_type"] | null
+          is_published: boolean | null
+          level: Database["public"]["Enums"]["course_level"] | null
+          required_plan: Database["public"]["Enums"]["subscription_plan"] | null
+          thumbnail_url: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: string | null
+          instrument?: Database["public"]["Enums"]["instrument_type"] | null
+          is_published?: boolean | null
+          level?: Database["public"]["Enums"]["course_level"] | null
+          required_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: string | null
+          instrument?: Database["public"]["Enums"]["instrument_type"] | null
+          is_published?: boolean | null
+          level?: Database["public"]["Enums"]["course_level"] | null
+          required_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          thumbnail_url?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_user_plan: {
