@@ -560,6 +560,13 @@ export type Database = {
             referencedRelation: "live_classes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "live_class_registrations_live_class_id_fkey"
+            columns: ["live_class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes_with_zoom"
+            referencedColumns: ["id"]
+          },
         ]
       }
       live_classes: {
@@ -871,6 +878,61 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      live_classes_with_zoom: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string | null
+          instructor_id: string | null
+          instrument: Database["public"]["Enums"]["instrument_type"] | null
+          is_recorded: boolean | null
+          max_attendees: number | null
+          recording_url: string | null
+          required_plan: Database["public"]["Enums"]["subscription_plan"] | null
+          scheduled_at: string | null
+          title: string | null
+          zoom_join_url: string | null
+          zoom_meeting_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          instructor_id?: string | null
+          instrument?: Database["public"]["Enums"]["instrument_type"] | null
+          is_recorded?: boolean | null
+          max_attendees?: number | null
+          recording_url?: string | null
+          required_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          scheduled_at?: string | null
+          title?: string | null
+          zoom_join_url?: string | null
+          zoom_meeting_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string | null
+          instructor_id?: string | null
+          instrument?: Database["public"]["Enums"]["instrument_type"] | null
+          is_recorded?: boolean | null
+          max_attendees?: number | null
+          recording_url?: string | null
+          required_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          scheduled_at?: string | null
+          title?: string | null
+          zoom_join_url?: string | null
+          zoom_meeting_id?: string | null
         }
         Relationships: []
       }
