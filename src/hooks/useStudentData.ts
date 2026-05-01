@@ -134,9 +134,10 @@ export const useUpcomingClasses = () => {
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // Public class metadata (no Zoom credentials exposed)
       const { data: classes, error: classesError } = await supabase
         .from('live_classes')
-        .select('*')
+        .select('id, title, description, instructor_id, instrument, scheduled_at, duration_minutes, required_plan, max_attendees, is_recorded, recording_url, created_at')
         .gte('scheduled_at', new Date().toISOString())
         .order('scheduled_at', { ascending: true })
         .limit(10);
@@ -167,8 +168,21 @@ export const useUpcomingClasses = () => {
         registrationCounts[reg.live_class_id] = (registrationCounts[reg.live_class_id] || 0) + 1;
       });
 
+      // Fetch Zoom credentials only for accessible classes via secure view
+      // (RLS on the view restricts to admins, the instructor, or registered users with active subscription)
+      const { data: zoomData } = await (supabase as any)
+        .from('live_classes_with_zoom')
+        .select('id, zoom_join_url, zoom_meeting_id')
+        .in('id', classIds);
+
+      const zoomMap = new Map<string, { zoom_join_url: string | null }>();
+      (zoomData || []).forEach((z: { id: string; zoom_join_url: string | null }) => {
+        zoomMap.set(z.id, { zoom_join_url: z.zoom_join_url });
+      });
+
       const upcomingClasses: UpcomingClass[] = classes?.map(cls => ({
         ...cls,
+        zoom_join_url: zoomMap.get(cls.id)?.zoom_join_url ?? null,
         isRegistered: registeredClassIds.has(cls.id),
         registeredCount: registrationCounts[cls.id] || 0,
       })) || [];
