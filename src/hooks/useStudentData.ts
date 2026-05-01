@@ -134,8 +134,10 @@ export const useUpcomingClasses = () => {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      const { data: classes, error: classesError } = await supabase
-        .from('live_classes')
+      // Use the secure view so registered users with active subscription
+      // get zoom_join_url; everyone else still sees public class metadata.
+      const { data: classes, error: classesError } = await (supabase as any)
+        .from('live_classes_with_zoom')
         .select('*')
         .gte('scheduled_at', new Date().toISOString())
         .order('scheduled_at', { ascending: true })
