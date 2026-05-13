@@ -10,6 +10,7 @@ import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import { lovable } from '@/integrations/lovable';
 
 const emailSchema = z.string().email('Email inválido').max(255, 'Email muy largo');
 const passwordSchema = z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(72, 'Contraseña muy larga');
