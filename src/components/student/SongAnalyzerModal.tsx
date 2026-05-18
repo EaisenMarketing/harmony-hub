@@ -460,6 +460,22 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
           )}
         </div>
       </DialogContent>
+
+      {/* Hoja imprimible fuera de pantalla para exportar PDF/PNG */}
+      {analysis && (
+        <div
+          aria-hidden
+          style={{
+            position: 'fixed',
+            left: '-10000px',
+            top: 0,
+            pointerEvents: 'none',
+            opacity: 0,
+          }}
+        >
+          <ChordSheet ref={sheetRef} analysis={analysis} />
+        </div>
+      )}
     </Dialog>
   );
 };
