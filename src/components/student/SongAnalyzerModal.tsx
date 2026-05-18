@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp, FileDown, Save, Crown } from 'lucide-react';
+import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp, FileDown, Save, Crown, ImageDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { ChordSheet } from './ChordSheet';
 
 interface SongAnalysis {
   songTitle: string;
@@ -110,123 +112,87 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
     }
   };
 
-  const handleExportPDF = () => {
-    if (!analysis) return;
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState<'pdf' | 'png' | null>(null);
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    let yPos = 20;
-
-    // Title
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text(analysis.songTitle, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 8;
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'normal');
-    doc.text(analysis.artist, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 15;
-
-    // Info line
-    doc.setFontSize(10);
-    const infoText = `Tonalidad: ${analysis.key} | Tempo: ${analysis.tempo} | Compas: ${analysis.timeSignature} | Dificultad: ${analysis.difficulty}`;
-    doc.text(infoText, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 15;
-
-    // Chords
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Acordes Utilizados:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.text(analysis.chords.join('  -  '), 20, yPos);
-    yPos += 12;
-
-    // Progression
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Progresion Armonica:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.text(`${analysis.progression.name}: ${analysis.progression.numerals}`, 20, yPos);
-    yPos += 6;
-    
-    const descLines = doc.splitTextToSize(analysis.progression.description, pageWidth - 40);
-    doc.setFontSize(10);
-    doc.text(descLines, 20, yPos);
-    yPos += descLines.length * 5 + 10;
-
-    // Structure
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Estructura de la Cancion:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-
-    analysis.structure.forEach((section) => {
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.text(`${section.section}: ${section.chords.join(' -> ')} (${section.bars} compases)`, 25, yPos);
-      yPos += 6;
-    });
-    yPos += 8;
-
-    // Tips
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
-    }
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Consejos para Tocarla:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-
-    analysis.tips.forEach((tip) => {
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
-      }
-      const tipLines = doc.splitTextToSize(`• ${tip}`, pageWidth - 45);
-      doc.text(tipLines, 25, yPos);
-      yPos += tipLines.length * 5 + 2;
-    });
-    yPos += 8;
-
-    // Similar Songs
-    if (analysis.similarSongs && analysis.similarSongs.length > 0) {
-      if (yPos > 260) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Canciones con Progresion Similar:', 20, yPos);
-      yPos += 7;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text(analysis.similarSongs.join(', '), 25, yPos);
-    }
-
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(128);
-    doc.text('Generado con Escuela de Musica - Analizador de Canciones IA', pageWidth / 2, 285, { align: 'center' });
-
-    doc.save(`${analysis.songTitle} - ${analysis.artist} - Analisis.pdf`);
-
-    toast({
-      title: 'PDF Exportado',
-      description: 'El análisis ha sido descargado como PDF.',
+  const captureSheet = async () => {
+    if (!sheetRef.current) throw new Error('Sheet not rendered');
+    return await html2canvas(sheetRef.current, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false,
     });
   };
+
+  const handleExportPDF = async () => {
+    if (!analysis) return;
+    setExporting('pdf');
+    try {
+      const canvas = await captureSheet();
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`${analysis.songTitle} - ${analysis.artist} - Acordes.pdf`);
+      toast({
+        title: 'PDF Exportado',
+        description: 'La hoja de acordes se descargó como PDF.',
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: 'Error',
+        description: 'No se pudo exportar el PDF.',
+        variant: 'destructive',
+      });
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportPNG = async () => {
+    if (!analysis) return;
+    setExporting('png');
+    try {
+      const canvas = await captureSheet();
+      const link = document.createElement('a');
+      link.download = `${analysis.songTitle} - ${analysis.artist} - Acordes.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      toast({
+        title: 'Imagen exportada',
+        description: 'La hoja de acordes se descargó como PNG.',
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: 'Error',
+        description: 'No se pudo exportar la imagen.',
+        variant: 'destructive',
+      });
+    } finally {
+      setExporting(null);
+    }
+  };
+
+
 
   const handleSaveToLibrary = async () => {
     if (!analysis || !user) return;
@@ -344,9 +310,13 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
               <div className="flex flex-wrap gap-2 justify-end">
                 {isPro ? (
                   <>
-                    <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPDF}>
-                      <FileDown className="w-4 h-4" />
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPDF} disabled={exporting !== null}>
+                      {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
                       Exportar PDF
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPNG} disabled={exporting !== null}>
+                      {exporting === 'png' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageDown className="w-4 h-4" />}
+                      Exportar imagen
                     </Button>
                     <Button variant="outline" size="sm" className="gap-2" onClick={handleSaveToLibrary} disabled={saving}>
                       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -356,7 +326,7 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
                 ) : (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
                     <Crown className="w-3 h-3" />
-                    Exportar PDF y guardar en biblioteca disponible en Pro
+                    Exportar PDF/imagen y guardar en biblioteca disponible en Pro
                   </div>
                 )}
               </div>
@@ -490,6 +460,22 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
           )}
         </div>
       </DialogContent>
+
+      {/* Hoja imprimible fuera de pantalla para exportar PDF/PNG */}
+      {analysis && (
+        <div
+          aria-hidden
+          style={{
+            position: 'fixed',
+            left: '-10000px',
+            top: 0,
+            pointerEvents: 'none',
+            opacity: 0,
+          }}
+        >
+          <ChordSheet ref={sheetRef} analysis={analysis} />
+        </div>
+      )}
     </Dialog>
   );
 };
