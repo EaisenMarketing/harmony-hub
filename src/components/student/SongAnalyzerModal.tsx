@@ -192,7 +192,7 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
     }
   };
 
-  };
+
 
   const handleSaveToLibrary = async () => {
     if (!analysis || !user) return;
