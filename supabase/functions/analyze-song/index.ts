@@ -5,6 +5,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+interface VideoMetadata {
+  title: string;
+  author: string;
+}
+
+async function fetchYouTubeMetadata(youtubeUrl: string): Promise<VideoMetadata | null> {
+  try {
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(youtubeUrl)}&format=json`;
+    const res = await fetch(oembedUrl);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return {
+      title: data.title ?? '',
+      author: data.author_name ?? '',
+    };
+  } catch (e) {
+    console.warn('oEmbed fetch failed', e);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -24,44 +45,61 @@ serve(async (req) => {
 
     console.log(`Analyzing song from YouTube: ${youtubeUrl}`);
 
-    const systemPrompt = `Eres un músico profesional con oído absoluto y décadas de experiencia en análisis musical. Tu habilidad para identificar acordes, progresiones y estructuras es legendaria. Cuando te dan un enlace de YouTube de una canción, debes analizarla completamente.
+    // Step 1: Get reliable song identification via YouTube oEmbed
+    const metadata = await fetchYouTubeMetadata(youtubeUrl);
+    console.log('YouTube metadata:', metadata);
 
-IMPORTANTE: Responde ÚNICAMENTE en formato JSON válido con esta estructura exacta:
+    const songContext = metadata
+      ? `Título oficial del video de YouTube: "${metadata.title}"\nCanal/Artista: "${metadata.author}"\nURL: ${youtubeUrl}\nVideo ID: ${videoId}`
+      : `URL: ${youtubeUrl}\nVideo ID: ${videoId}\n(No se pudo obtener metadata del video)`;
+
+    const systemPrompt = `Eres un transcriptor musical profesional de élite con oído absoluto, equivalente a los mejores arreglistas de Berklee y Hal Leonard. Tu trabajo es entregar la transcripción armónica EXACTA y verificada de canciones populares.
+
+PROCESO OBLIGATORIO (sigue cada paso internamente):
+1. IDENTIFICA con certeza la canción a partir del título y el artista del video. Si el título incluye "cover", "tutorial", "karaoke", "live", "acoustic" o similar, identifica la canción ORIGINAL.
+2. RECUERDA la grabación oficial de estudio (o la versión más reconocida) de esa canción.
+3. DETERMINA la tonalidad real verificando: nota tónica del bajo en la cadencia final, calidad mayor/menor del primer y último acorde, y armadura.
+4. TRANSCRIBE los acordes EXACTOS sección por sección, en el orden real, respetando inversiones y séptimas cuando son parte definitoria (Cmaj7, G/B, Am7, D7sus4, etc.).
+5. VERIFICA tu transcripción mentalmente cantando la melodía sobre los acordes y confirmando que encajan.
+6. Si tienes CUALQUIER duda sobre la tonalidad o un acorde, prefiere la versión más documentada (Ultimate Guitar verificado, Hooktheory, transcripciones oficiales) en vez de inventar.
+
+REGLAS CRÍTICAS DE PRECISIÓN:
+- NUNCA inventes acordes. Si no recuerdas con certeza una sección, omite esa sección antes que mentir.
+- NO uses progresiones "genéricas" tipo I-V-vi-IV por defecto. Usa la progresión real de la canción.
+- Notación estándar internacional: C, C#, Db, D, Eb, E, F, F#, Gb, G, Ab, A, Bb, B. Menores con "m" minúscula (Am, Dm). Séptimas: maj7, m7, 7. Inversiones con slash: G/B, C/E.
+- La tonalidad debe estar en español: "Do Mayor", "La menor", "Sol Mayor", etc.
+- Los números romanos en "progression.numerals" deben ser RELATIVOS a la tonalidad declarada en "key" (mayúsculas = mayor, minúsculas = menor, ej: I - V - vi - IV en Do Mayor = C - G - Am - F).
+- La suma de "bars" debería ser coherente con una canción real (no inventes 50 compases).
+- "structure" debe reflejar la forma real: Intro, Verso, Pre-Coro, Coro, Puente, Solo, Outro según corresponda.
+- "tempo" debe ser un BPM realista verificado (ej: "120 BPM"), no aproximaciones absurdas.
+
+RESPONDE ÚNICAMENTE en JSON VÁLIDO con esta estructura EXACTA (sin texto antes ni después, sin markdown, sin \`\`\`):
 
 {
-  "songTitle": "Título de la canción",
-  "artist": "Nombre del artista",
-  "key": "Tonalidad (ej: Do Mayor, La menor)",
-  "tempo": "BPM aproximado (ej: 120 BPM)",
-  "timeSignature": "Compás (ej: 4/4)",
-  "chords": ["lista", "de", "todos", "los", "acordes", "usados"],
+  "songTitle": "Título oficial de la canción (no el del video de YouTube)",
+  "artist": "Artista original",
+  "key": "Tonalidad en español",
+  "tempo": "BPM",
+  "timeSignature": "4/4",
+  "chords": ["acordes únicos usados"],
   "structure": [
-    {"section": "Intro", "chords": ["Am", "F", "C", "G"], "bars": 4},
-    {"section": "Verso 1", "chords": ["Am", "F", "C", "G"], "bars": 8},
-    {"section": "Coro", "chords": ["F", "G", "Am", "C"], "bars": 8}
+    {"section": "Intro", "chords": ["C", "G", "Am", "F"], "bars": 4}
   ],
   "progression": {
-    "name": "Nombre de la progresión (ej: I-V-vi-IV, Progresión del Pop, etc.)",
+    "name": "Nombre conocido de la progresión si aplica",
     "numerals": "I - V - vi - IV",
-    "description": "Descripción de por qué esta progresión es efectiva y cómo se usa en la música"
+    "description": "Por qué funciona y dónde se usa en la canción"
   },
-  "difficulty": "Fácil/Intermedio/Avanzado",
-  "tips": [
-    "Consejo específico 1 para tocar esta canción",
-    "Consejo específico 2",
-    "Consejo sobre la técnica requerida"
-  ],
-  "similarSongs": ["Canción 1 con progresión similar", "Canción 2", "Canción 3"]
-}
+  "difficulty": "Fácil|Intermedio|Avanzado",
+  "tips": ["3-5 consejos específicos para tocar ESTA canción"],
+  "similarSongs": ["3 canciones reales con la misma progresión"]
+}`;
 
-REGLAS:
-1. Identifica la canción por el enlace de YouTube proporcionado
-2. Si no puedes identificar la canción exacta, haz tu mejor aproximación basada en el ID del video
-3. Sé preciso con los acordes - usa notación estándar (Am, Dm7, G7, Cmaj7, etc.)
-4. La estructura debe reflejar la canción real con sus secciones
-5. Identifica la progresión armónica principal y nómbrala si es una progresión conocida
-6. Los consejos deben ser específicos y útiles para un músico que quiere aprender la canción
-7. No incluyas texto fuera del JSON`;
+    const userPrompt = `Analiza esta canción y devuelve los acordes EXACTOS de la grabación original.
+
+${songContext}
+
+Identifica la canción original, recuerda la transcripción verificada y entrega el JSON con la armonía exacta. Verifica internamente antes de responder.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -70,12 +108,13 @@ REGLAS:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
+        model: 'google/gemini-2.5-pro',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Analiza esta canción de YouTube: ${youtubeUrl}\n\nVideo ID: ${videoId}\n\nProporciona un análisis completo de los acordes, estructura y progresión armónica.` }
+          { role: 'user', content: userPrompt }
         ],
-        temperature: 0.4,
+        temperature: 0.1,
+        response_format: { type: 'json_object' },
       }),
     });
 
@@ -123,6 +162,12 @@ REGLAS:
     } catch (parseError) {
       console.error('Parse error:', parseError);
       throw new Error('Error parsing AI response');
+    }
+
+    // If oEmbed gave us reliable title/artist and the model returned something empty, fall back
+    if (metadata) {
+      if (!analysisData.songTitle) analysisData.songTitle = metadata.title;
+      if (!analysisData.artist) analysisData.artist = metadata.author;
     }
 
     return new Response(JSON.stringify({ 
