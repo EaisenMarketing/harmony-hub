@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp, FileDown, Save, Crown } from 'lucide-react';
+import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp, FileDown, Save, Crown, ImageDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { ChordSheet } from './ChordSheet';
 
 interface SongAnalysis {
   songTitle: string;
