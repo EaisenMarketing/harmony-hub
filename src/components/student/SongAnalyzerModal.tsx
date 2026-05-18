@@ -310,9 +310,13 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
               <div className="flex flex-wrap gap-2 justify-end">
                 {isPro ? (
                   <>
-                    <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPDF}>
-                      <FileDown className="w-4 h-4" />
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPDF} disabled={exporting !== null}>
+                      {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
                       Exportar PDF
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPNG} disabled={exporting !== null}>
+                      {exporting === 'png' ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageDown className="w-4 h-4" />}
+                      Exportar imagen
                     </Button>
                     <Button variant="outline" size="sm" className="gap-2" onClick={handleSaveToLibrary} disabled={saving}>
                       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -322,7 +326,7 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
                 ) : (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
                     <Crown className="w-3 h-3" />
-                    Exportar PDF y guardar en biblioteca disponible en Pro
+                    Exportar PDF/imagen y guardar en biblioteca disponible en Pro
                   </div>
                 )}
               </div>
