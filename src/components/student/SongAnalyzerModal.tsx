@@ -112,122 +112,86 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
     }
   };
 
-  const handleExportPDF = () => {
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState<'pdf' | 'png' | null>(null);
+
+  const captureSheet = async () => {
+    if (!sheetRef.current) throw new Error('Sheet not rendered');
+    return await html2canvas(sheetRef.current, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false,
+    });
+  };
+
+  const handleExportPDF = async () => {
     if (!analysis) return;
+    setExporting('pdf');
+    try {
+      const canvas = await captureSheet();
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    let yPos = 20;
+      let heightLeft = imgHeight;
+      let position = 0;
 
-    // Title
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text(analysis.songTitle, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 8;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
 
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'normal');
-    doc.text(analysis.artist, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 15;
-
-    // Info line
-    doc.setFontSize(10);
-    const infoText = `Tonalidad: ${analysis.key} | Tempo: ${analysis.tempo} | Compas: ${analysis.timeSignature} | Dificultad: ${analysis.difficulty}`;
-    doc.text(infoText, pageWidth / 2, yPos, { align: 'center' });
-    yPos += 15;
-
-    // Chords
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Acordes Utilizados:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.text(analysis.chords.join('  -  '), 20, yPos);
-    yPos += 12;
-
-    // Progression
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Progresion Armonica:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    doc.text(`${analysis.progression.name}: ${analysis.progression.numerals}`, 20, yPos);
-    yPos += 6;
-    
-    const descLines = doc.splitTextToSize(analysis.progression.description, pageWidth - 40);
-    doc.setFontSize(10);
-    doc.text(descLines, 20, yPos);
-    yPos += descLines.length * 5 + 10;
-
-    // Structure
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Estructura de la Cancion:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-
-    analysis.structure.forEach((section) => {
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
       }
-      doc.text(`${section.section}: ${section.chords.join(' -> ')} (${section.bars} compases)`, 25, yPos);
-      yPos += 6;
-    });
-    yPos += 8;
 
-    // Tips
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
+      pdf.save(`${analysis.songTitle} - ${analysis.artist} - Acordes.pdf`);
+      toast({
+        title: 'PDF Exportado',
+        description: 'La hoja de acordes se descargó como PDF.',
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: 'Error',
+        description: 'No se pudo exportar el PDF.',
+        variant: 'destructive',
+      });
+    } finally {
+      setExporting(null);
     }
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Consejos para Tocarla:', 20, yPos);
-    yPos += 7;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
+  };
 
-    analysis.tips.forEach((tip) => {
-      if (yPos > 270) {
-        doc.addPage();
-        yPos = 20;
-      }
-      const tipLines = doc.splitTextToSize(`• ${tip}`, pageWidth - 45);
-      doc.text(tipLines, 25, yPos);
-      yPos += tipLines.length * 5 + 2;
-    });
-    yPos += 8;
-
-    // Similar Songs
-    if (analysis.similarSongs && analysis.similarSongs.length > 0) {
-      if (yPos > 260) {
-        doc.addPage();
-        yPos = 20;
-      }
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Canciones con Progresion Similar:', 20, yPos);
-      yPos += 7;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text(analysis.similarSongs.join(', '), 25, yPos);
+  const handleExportPNG = async () => {
+    if (!analysis) return;
+    setExporting('png');
+    try {
+      const canvas = await captureSheet();
+      const link = document.createElement('a');
+      link.download = `${analysis.songTitle} - ${analysis.artist} - Acordes.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      toast({
+        title: 'Imagen exportada',
+        description: 'La hoja de acordes se descargó como PNG.',
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: 'Error',
+        description: 'No se pudo exportar la imagen.',
+        variant: 'destructive',
+      });
+    } finally {
+      setExporting(null);
     }
+  };
 
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(128);
-    doc.text('Generado con Escuela de Musica - Analizador de Canciones IA', pageWidth / 2, 285, { align: 'center' });
-
-    doc.save(`${analysis.songTitle} - ${analysis.artist} - Analisis.pdf`);
-
-    toast({
-      title: 'PDF Exportado',
-      description: 'El análisis ha sido descargado como PDF.',
-    });
   };
 
   const handleSaveToLibrary = async () => {
