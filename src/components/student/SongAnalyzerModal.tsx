@@ -46,6 +46,11 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [analysis, setAnalysis] = useState<SongAnalysis | null>(null);
+  const [originalAnalysis, setOriginalAnalysis] = useState<SongAnalysis | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [savingCorrection, setSavingCorrection] = useState(false);
+  const [fromCorrection, setFromCorrection] = useState(false);
+  const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
