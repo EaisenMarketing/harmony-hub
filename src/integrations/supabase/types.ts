@@ -771,6 +771,36 @@ export type Database = {
         }
         Relationships: []
       }
+      song_corrections: {
+        Row: {
+          corrected_analysis: Json
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          video_id: string
+          youtube_url: string | null
+        }
+        Insert: {
+          corrected_analysis: Json
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          video_id: string
+          youtube_url?: string | null
+        }
+        Update: {
+          corrected_analysis?: Json
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+          youtube_url?: string | null
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed: boolean | null
