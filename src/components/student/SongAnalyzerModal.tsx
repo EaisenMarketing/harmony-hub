@@ -93,6 +93,10 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
 
     setLoading(true);
     setAnalysis(null);
+    setOriginalAnalysis(null);
+    setEditMode(false);
+    setFromCorrection(false);
+    setCurrentVideoId(videoId);
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-song', {
@@ -103,6 +107,14 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
 
       if (data.success && data.analysis) {
         setAnalysis(data.analysis);
+        setOriginalAnalysis(data.analysis);
+        setFromCorrection(!!data.fromCorrection);
+        if (data.fromCorrection) {
+          toast({
+            title: 'Versión corregida',
+            description: 'Cargamos tu corrección previa para esta canción.',
+          });
+        }
       } else {
         throw new Error(data.error || 'Error analizando la canción');
       }
@@ -115,6 +127,82 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ---- Edit / correction helpers ----
+  const updateField = <K extends keyof SongAnalysis>(key: K, value: SongAnalysis[K]) => {
+    setAnalysis((prev) => (prev ? { ...prev, [key]: value } : prev));
+  };
+
+  const updateProgression = (field: 'name' | 'numerals' | 'description', value: string) => {
+    setAnalysis((prev) => (prev ? { ...prev, progression: { ...prev.progression, [field]: value } } : prev));
+  };
+
+  const updateSection = (index: number, field: 'section' | 'chords' | 'bars', value: string | number | string[]) => {
+    setAnalysis((prev) => {
+      if (!prev) return prev;
+      const structure = [...prev.structure];
+      structure[index] = { ...structure[index], [field]: value } as SongAnalysis['structure'][number];
+      return { ...prev, structure };
+    });
+  };
+
+  const addSection = () => {
+    setAnalysis((prev) => prev ? { ...prev, structure: [...prev.structure, { section: 'Nueva sección', chords: [], bars: 4 }] } : prev);
+  };
+
+  const removeSection = (index: number) => {
+    setAnalysis((prev) => prev ? { ...prev, structure: prev.structure.filter((_, i) => i !== index) } : prev);
+  };
+
+  const handleSaveCorrection = async () => {
+    if (!analysis || !user || !currentVideoId) return;
+    setSavingCorrection(true);
+    try {
+      const { error } = await supabase
+        .from('song_corrections')
+        .upsert({
+          user_id: user.id,
+          video_id: currentVideoId,
+          youtube_url: youtubeUrl,
+          corrected_analysis: analysis as unknown as Record<string, unknown>,
+        }, { onConflict: 'user_id,video_id' });
+      if (error) throw error;
+      setOriginalAnalysis(analysis);
+      setFromCorrection(true);
+      setEditMode(false);
+      toast({
+        title: 'Corrección guardada',
+        description: 'Se aplicará automáticamente la próxima vez que analices esta canción.',
+      });
+    } catch (e) {
+      console.error('save correction error', e);
+      toast({ title: 'Error', description: 'No se pudo guardar la corrección.', variant: 'destructive' });
+    } finally {
+      setSavingCorrection(false);
+    }
+  };
+
+  const handleResetCorrection = async () => {
+    if (!user || !currentVideoId) return;
+    setSavingCorrection(true);
+    try {
+      const { error } = await supabase
+        .from('song_corrections')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('video_id', currentVideoId);
+      if (error) throw error;
+      setFromCorrection(false);
+      setEditMode(false);
+      toast({ title: 'Corrección eliminada', description: 'Volveré a analizar desde cero la próxima vez.' });
+      await handleAnalyzeSong();
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Error', description: 'No se pudo eliminar la corrección.', variant: 'destructive' });
+    } finally {
+      setSavingCorrection(false);
     }
   };
 
