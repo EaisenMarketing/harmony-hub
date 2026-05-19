@@ -166,7 +166,7 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
           user_id: user.id,
           video_id: currentVideoId,
           youtube_url: youtubeUrl,
-          corrected_analysis: analysis as unknown as Record<string, unknown>,
+          corrected_analysis: JSON.parse(JSON.stringify(analysis)),
         }], { onConflict: 'user_id,video_id' });
       if (error) throw error;
       setOriginalAnalysis(analysis);
