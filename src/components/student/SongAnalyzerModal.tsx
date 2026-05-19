@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp, FileDown, Save, Crown, ImageDown } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Music2, Loader2, Lock, Youtube, ListMusic, Layers, TrendingUp, FileDown, Save, Crown, ImageDown, Pencil, Check, X, Plus, Trash2, RotateCcw, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
