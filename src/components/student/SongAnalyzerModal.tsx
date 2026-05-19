@@ -162,12 +162,12 @@ export const SongAnalyzerModal = ({ userPlan }: SongAnalyzerModalProps) => {
     try {
       const { error } = await supabase
         .from('song_corrections')
-        .upsert({
+        .upsert([{
           user_id: user.id,
           video_id: currentVideoId,
           youtube_url: youtubeUrl,
           corrected_analysis: analysis as unknown as Record<string, unknown>,
-        }, { onConflict: 'user_id,video_id' });
+        }], { onConflict: 'user_id,video_id' });
       if (error) throw error;
       setOriginalAnalysis(analysis);
       setFromCorrection(true);
