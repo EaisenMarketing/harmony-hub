@@ -8,6 +8,7 @@ import { InstructorStudents } from '@/components/instructor/InstructorStudents';
 import { InstructorCourses } from '@/components/instructor/InstructorCourses';
 import { InstructorClasses } from '@/components/instructor/InstructorClasses';
 import { InstructorPendingApproval } from '@/components/instructor/InstructorPendingApproval';
+import { InstructorQuestionsInbox } from '@/components/instructor/InstructorQuestionsInbox';
 import { Music } from 'lucide-react';
 
 const InstructorPanel = () => {
@@ -52,6 +53,9 @@ const InstructorPanel = () => {
     if (currentPath === '/instructor/clases') {
       return <InstructorClasses />;
     }
+    if (currentPath === '/instructor/consultas') {
+      return <InstructorQuestionsInbox />;
+    }
     // Dashboard home
     return <InstructorDashboard />;
   };
@@ -60,6 +64,7 @@ const InstructorPanel = () => {
     if (currentPath === '/instructor/alumnos') return 'Mis Alumnos';
     if (currentPath === '/instructor/cursos') return 'Mis Cursos';
     if (currentPath === '/instructor/clases') return 'Mis Clases';
+    if (currentPath === '/instructor/consultas') return 'Consultas de Alumnos';
     return 'Panel de Instructor';
   };
 
