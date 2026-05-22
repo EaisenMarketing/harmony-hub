@@ -16,6 +16,8 @@ import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
 import { ProductionClassesSection } from '@/components/student/ProductionClassesSection';
 import { PracticeSection } from '@/components/student/PracticeSection';
+import { TeacherConsultSection } from '@/components/student/TeacherConsultSection';
+import { CommunitySection } from '@/components/student/CommunitySection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
@@ -74,6 +76,10 @@ const StudentPortal = () => {
         return <CoursesSection />;
       case '/portal/practica':
         return <PracticeSection />;
+      case '/portal/consultas':
+        return <TeacherConsultSection />;
+      case '/portal/comunidad':
+        return <CommunitySection />;
       case '/portal/calendario':
         return <CalendarSection />;
       case '/portal/certificados':

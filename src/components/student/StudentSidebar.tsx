@@ -10,7 +10,9 @@ import {
   Shield,
   GraduationCap,
   Headphones,
-  Music
+  Music,
+  MessageCircleQuestion,
+  Users
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
@@ -26,6 +28,8 @@ const navigation = [
   { name: 'Mis Cursos', href: '/portal/cursos', icon: BookOpen },
   { name: 'Sala de Práctica', href: '/portal/practica', icon: Music },
   { name: 'Producción', href: '/portal/produccion', icon: Headphones },
+  { name: 'Pregunta al Maestro', href: '/portal/consultas', icon: MessageCircleQuestion },
+  { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
   { name: 'Calendario', href: '/portal/calendario', icon: Calendar },
   { name: 'Certificados', href: '/portal/certificados', icon: Award },
   { name: 'Pagos', href: '/portal/pagos', icon: CreditCard },

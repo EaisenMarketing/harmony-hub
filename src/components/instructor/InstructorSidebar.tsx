@@ -5,7 +5,8 @@ import {
   BookOpen, 
   Video, 
   LogOut,
-  Home
+  Home,
+  MessageCircleQuestion,
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Mis Alumnos', href: '/instructor/alumnos', icon: Users },
   { name: 'Mis Cursos', href: '/instructor/cursos', icon: BookOpen },
   { name: 'Mis Clases', href: '/instructor/clases', icon: Video },
+  { name: 'Consultas', href: '/instructor/consultas', icon: MessageCircleQuestion },
 ];
 
 const instrumentLabels: Record<string, string> = {

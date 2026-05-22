@@ -3,8 +3,8 @@ import {
   LayoutDashboard, 
   BookOpen, 
   Music,
-  Calendar, 
-  Settings
+  Users,
+  MessageCircleQuestion,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,8 +12,8 @@ const tabs = [
   { name: 'Inicio', href: '/portal', icon: LayoutDashboard },
   { name: 'Cursos', href: '/portal/cursos', icon: BookOpen },
   { name: 'Práctica', href: '/portal/practica', icon: Music },
-  { name: 'Calendario', href: '/portal/calendario', icon: Calendar },
-  { name: 'Ajustes', href: '/portal/configuracion', icon: Settings },
+  { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
+  { name: 'Maestros', href: '/portal/consultas', icon: MessageCircleQuestion },
 ];
 
 export const MobileBottomNav = () => {
