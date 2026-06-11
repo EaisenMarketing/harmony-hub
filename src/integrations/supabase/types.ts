@@ -451,6 +451,66 @@ export type Database = {
           },
         ]
       }
+      instructor_applications: {
+        Row: {
+          admin_notes: string | null
+          availability: string | null
+          bio: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          instrument: string
+          phone: string | null
+          presentation_video_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sample_class_url: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          timezone: string | null
+          updated_at: string
+          years_experience: number
+        }
+        Insert: {
+          admin_notes?: string | null
+          availability?: string | null
+          bio: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          instrument: string
+          phone?: string | null
+          presentation_video_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_class_url?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          timezone?: string | null
+          updated_at?: string
+          years_experience?: number
+        }
+        Update: {
+          admin_notes?: string | null
+          availability?: string | null
+          bio?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          instrument?: string
+          phone?: string | null
+          presentation_video_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_class_url?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          timezone?: string | null
+          updated_at?: string
+          years_experience?: number
+        }
+        Relationships: []
+      }
       instructor_profiles: {
         Row: {
           approved_at: string | null
@@ -1171,6 +1231,7 @@ export type Database = {
     Enums: {
       ad_platform: "facebook" | "instagram" | "tiktok" | "google"
       app_role: "admin" | "instructor" | "student"
+      application_status: "pending" | "approved" | "rejected"
       campaign_health: "healthy" | "needs_optimization" | "underperforming"
       campaign_status: "active" | "paused" | "completed" | "draft"
       course_level: "beginner" | "intermediate" | "advanced"
@@ -1306,6 +1367,7 @@ export const Constants = {
     Enums: {
       ad_platform: ["facebook", "instagram", "tiktok", "google"],
       app_role: ["admin", "instructor", "student"],
+      application_status: ["pending", "approved", "rejected"],
       campaign_health: ["healthy", "needs_optimization", "underperforming"],
       campaign_status: ["active", "paused", "completed", "draft"],
       course_level: ["beginner", "intermediate", "advanced"],
