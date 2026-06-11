@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { GuitarChordDiagram } from './GuitarChordDiagram';
 import { PianoChordDiagram } from './PianoChordDiagram';
+import { useEnabledInstruments } from '@/hooks/useEnabledInstruments';
 
 interface ChordData {
   chordName: string;
@@ -26,12 +27,22 @@ interface ChordGeneratorModalProps {
 }
 
 export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
+  const { data: enabled } = useEnabledInstruments();
+  const hasPiano = enabled?.hasPiano ?? true;
+  const hasGuitar = enabled?.hasGuitar ?? true;
+
   const [open, setOpen] = useState(false);
   const [chordName, setChordName] = useState('');
-  const [instrument, setInstrument] = useState<'piano' | 'guitar'>('piano');
+  const [instrument, setInstrument] = useState<'piano' | 'guitar'>(hasPiano ? 'piano' : 'guitar');
   const [loading, setLoading] = useState(false);
   const [chordData, setChordData] = useState<ChordData | null>(null);
   const { toast } = useToast();
+
+  // Keep selected instrument valid when enabled list changes
+  useEffect(() => {
+    if (instrument === 'piano' && !hasPiano && hasGuitar) setInstrument('guitar');
+    if (instrument === 'guitar' && !hasGuitar && hasPiano) setInstrument('piano');
+  }, [hasPiano, hasGuitar, instrument]);
 
   const hasAccess = ['standard', 'pro', 'production'].includes(userPlan);
 
