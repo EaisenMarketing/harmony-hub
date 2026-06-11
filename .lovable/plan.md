@@ -1,64 +1,101 @@
-# Plan: Consultas a Maestros + Comunidad Pro
 
-Voy a añadir dos nuevas secciones al portal del estudiante.
+# Plan — Acorde Live: Terminar la web app
 
-## 1. Consultas a Maestros (todos los alumnos)
+Trabajo dividido en **4 fases**. Tú apruebas cada una antes de la siguiente. Nada se rompe en producción mientras avanzamos.
 
-Nueva sección **"Pregunta al Maestro"** en el sidebar (`/portal/consultas`).
+---
 
-- Formulario: instrumento (Piano / Guitarra / Producción), maestro destinatario (lista de instructores aprobados de ese instrumento, o "Cualquier maestro"), título de la pregunta, descripción, opcional adjuntar imagen.
-- Al enviar:
-  - Se guarda en tabla `teacher_questions` (status: open / answered).
-  - Se envía un email al/los maestros con la pregunta y un enlace al panel del instructor.
-  - El maestro puede responder desde el panel; la respuesta queda visible para el alumno y se le envía un email de aviso.
-- Vista "Mis consultas": historial con estado y respuesta.
-- Nueva pestaña en el **Panel de Instructor** → "Consultas" con bandeja entrante, responder, marcar resuelta.
+## FASE 1 — Separación de herramientas por instrumento
 
-### Emails
-Para que los emails salgan desde tu dominio (`@tudominio.com`) necesito configurar el dominio de correo de Lovable. Te pediré el dominio al final del plan; mientras tanto, las consultas igual se guardan y se ven en el panel del instructor.
+Cada alumno tiene en su perfil los instrumentos habilitados. Solo ve y puede usar las herramientas de IA de su(s) instrumento(s).
 
-## 2. Comunidad Pro (solo plan Pro y superior)
+**Qué cambia para el alumno:**
+- Nuevo selector "Mis instrumentos" en su perfil (guitarra, piano, ambos).
+- En el primer login se le pregunta una vez con un modal de bienvenida.
+- El menú de "Herramientas IA" filtra automáticamente:
+  - Solo guitarra → Generador de acordes de guitarra, Sheet de guitarra, Afinador estándar guitarra.
+  - Solo piano → Generador de acordes de piano, Sheet de piano.
+  - Ambos → Todo.
+- Tools compartidos (metrónomo, analizador de canciones, sala de práctica) siguen disponibles para todos.
 
-Nueva sección **"Comunidad"** en el sidebar (`/portal/comunidad`), bloqueada con upgrade card para planes inferiores a **Pro**.
+**Qué cambia para el admin:**
+- Desde el panel admin puedes editar los instrumentos habilitados de cualquier alumno.
 
-Feed estilo red social:
-- **Publicar**: texto (hasta 2000 chars) + imagen opcional (subida a bucket `community-media`).
-- **Categorías/Tags**: Avance, Pregunta, Cover, Tip, General.
-- **Like** y **Comentarios** (texto, hasta 500 chars).
-- Avatar y nombre del autor, fecha relativa ("hace 2h").
-- Filtro por tag y orden por recientes / más populares.
-- Botón eliminar en tus propios posts/comentarios.
-- Admins pueden moderar (eliminar cualquier post/comentario).
+**Técnico:**
+- Columna `enabled_instruments text[]` en `profiles` con default `{}`.
+- Hook `useEnabledInstruments()` que también respeta plan (production sigue siendo el tope).
+- Componente `<InstrumentGate instrument="guitar">` que envuelve cada tool y muestra mensaje "Esta herramienta es parte del curso de guitarra" si no aplica.
 
-## Cambios técnicos
+---
 
-**DB (migración)**
-- `teacher_questions` (student_id, instructor_id nullable, instrument, title, body, image_url, status, answer, answered_at)
-- `community_posts` (user_id, content, image_url, tag)
-- `community_comments` (post_id, user_id, content)
-- `community_likes` (post_id, user_id) unique
-- Bucket público `community-media`
-- RLS:
-  - `teacher_questions`: alumno ve las suyas; instructor aprobado ve las dirigidas a él o sin destinatario de su instrumento; admin ve todo.
-  - `community_*`: SELECT solo si `get_user_plan(auth.uid())` ∈ {pro, production}; INSERT solo el propio user_id con mismo gate de plan; DELETE propio o admin.
+## FASE 2 — Reconocedor de acordes con foto + IA
 
-**Edge functions**
-- `notify-teacher-question`: envía email al/los maestros cuando se crea una consulta (vía cola de Lovable Emails).
-- `notify-question-answered`: avisa al alumno cuando hay respuesta.
+Nueva sección "Detectar acorde por foto" con dos modos: subir desde galería o tomar foto con la cámara (funciona en móvil y desktop).
 
-**Frontend nuevo**
-- `src/components/student/TeacherConsultSection.tsx` + formulario + lista "Mis consultas".
-- `src/components/student/CommunitySection.tsx` + `PostCard`, `PostComposer`, `CommentList`.
-- `src/components/instructor/InstructorQuestionsInbox.tsx`.
-- Rutas en `StudentPortal.tsx` (`/portal/consultas`, `/portal/comunidad`) y enlaces en `StudentSidebar.tsx` + `MobileBottomNav.tsx`.
-- Pestaña en `InstructorPanel.tsx`.
+**Flujo:**
+1. Alumno abre la sección (filtrada por instrumento igual que Fase 1).
+2. Toma foto de su mano en el instrumento, o sube una imagen.
+3. La imagen se envía a Gemini Vision (`google/gemini-2.5-pro`) vía edge function.
+4. La IA devuelve: nombre del acorde, nivel de confianza, posición/dedos detectados, y sugerencias si la mano está mal posicionada.
+5. Se guarda en historial (`chord_detections`) para que pueda revisarlas después.
 
-**Hooks**
-- `useTeacherQuestions`, `useCommunityFeed`, `usePostInteractions` con React Query + Realtime para feed.
+**Técnico:**
+- Edge function `detect-chord-from-image` (multimodal input a Lovable AI Gateway).
+- Tabla `chord_detections` con RLS.
+- Bucket `chord-photos` (privado, por usuario).
+- Componentes: `ChordPhotoDetector.tsx`, `ChordPhotoHistory.tsx`.
+- Compatible con cámara nativa de Capacitor (cuando empaqueten a iOS/Android funciona sin cambios).
 
-## Después de tu aprobación
-1. Corro la migración (te pediré confirmación).
-2. Te muestro el botón para configurar el dominio de correo (necesario para que los emails salgan).
-3. Implemento UI + edge functions y despliego.
+---
 
-¿Procedo con este plan?
+## FASE 3 — Página pública "Aplicar como maestro"
+
+Página `/aplicar-maestro` con formulario público (sin login) donde cualquiera puede aplicar.
+
+**Formulario:**
+- Datos personales, instrumento(s), años de experiencia, biografía.
+- Video de presentación (URL de YouTube/Vimeo).
+- Sample de clase grabada (URL).
+- Disponibilidad horaria y zona horaria.
+- Acepta términos.
+
+**Flujo de aprobación:**
+1. Aplica → se guarda en `instructor_applications` con estado `pending`.
+2. Admin recibe la aplicación en su panel (nuevo tab "Aplicaciones").
+3. Admin aprueba → se crea automáticamente la cuenta del maestro (email con contraseña temporal vía Resend), se le da rol `instructor`, se crea `instructor_profile`.
+4. Maestro entra al panel de instructor existente y ya puede programar sus clases de Zoom (la infra ya existe).
+
+**Técnico:**
+- Tabla `instructor_applications` con RLS (cualquiera puede insertar, solo admin lee).
+- Edge function `approve-instructor-application` (crea user vía service role, envía email).
+- Página `/aplicar-maestro` con SEO (título, meta, JSON-LD).
+- Nueva sección "Aplicaciones" en `AdminPanel`.
+
+---
+
+## FASE 4 — Pulido final (mobile-ready)
+
+Asegura que todo funciona perfecto antes de empaquetar a iOS/Android y conectar Stripe.
+
+- Auditoría de safe-areas en todas las páginas (notch + bottom nav).
+- Auditoría de permisos: cámara, micrófono (afinador, foto IA), storage.
+- Estados vacíos y de error consistentes en todas las secciones nuevas.
+- Loading skeletons en tools que llaman IA.
+- Test de flujo completo: registro → elegir instrumento → usar tool → guardar.
+- Verificación de RLS en todas las tablas nuevas (corro el linter de Supabase).
+- README breve con los pasos para empaquetar con Capacitor (ya está la guía en memoria).
+- Checklist de Stripe: confirmo que `enable_stripe_payments` puede conectarse limpiamente cuando lo decidas (solo dejo todo listo, no lo activo).
+
+---
+
+## Lo que NO incluye este plan (a propósito)
+
+- No toco el modelo de negocio "Maestro SaaS" que discutimos antes — sigues como escuela.
+- No activo Stripe todavía (tú lo harás cuando estés listo).
+- No empaqueto la app móvil (eso es paso final con Capacitor).
+
+---
+
+## Siguiente paso
+
+Si apruebas, empiezo con **Fase 1** (separación por instrumento). Es la base sobre la que se monta la Fase 2 (foto IA).

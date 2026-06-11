@@ -23,6 +23,7 @@ import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant'
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
 import { SongLibraryModal } from '@/components/student/SongLibraryModal';
 import { MetronomeTunerModal } from '@/components/student/MetronomeTunerModal';
+import { ChordPhotoDetector } from '@/components/student/ChordPhotoDetector';
 import { 
   useStudentProfile, 
   useStudentCourses, 
@@ -107,6 +108,7 @@ const StudentPortal = () => {
               <div className="flex gap-2 flex-wrap">
                 <MetronomeTunerModal />
                 <ChordGeneratorModal userPlan={userPlan} />
+                <ChordPhotoDetector userPlan={userPlan} />
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <SongAnalyzerModal userPlan={userPlan} />
                 <SongLibraryModal userPlan={userPlan} />

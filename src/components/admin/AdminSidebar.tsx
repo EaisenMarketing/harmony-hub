@@ -8,7 +8,8 @@ import {
   LogOut,
   BarChart3,
   Film,
-  Headphones
+  Headphones,
+  ClipboardList
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/button';
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Instructores', href: '/admin/instructores', icon: Users },
+  { name: 'Aplicaciones', href: '/admin/aplicaciones', icon: ClipboardList },
   { name: 'Cursos', href: '/admin/cursos', icon: BookOpen },
   { name: 'Biblioteca Videos', href: '/admin/videos', icon: Film },
   { name: 'Producción Musical', href: '/admin/produccion', icon: Headphones },

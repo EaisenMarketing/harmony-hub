@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { GuitarChordDiagram } from './GuitarChordDiagram';
 import { PianoChordDiagram } from './PianoChordDiagram';
+import { useEnabledInstruments } from '@/hooks/useEnabledInstruments';
 
 interface ChordData {
   chordName: string;
@@ -26,12 +27,22 @@ interface ChordGeneratorModalProps {
 }
 
 export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
+  const { data: enabled } = useEnabledInstruments();
+  const hasPiano = enabled?.hasPiano ?? true;
+  const hasGuitar = enabled?.hasGuitar ?? true;
+
   const [open, setOpen] = useState(false);
   const [chordName, setChordName] = useState('');
-  const [instrument, setInstrument] = useState<'piano' | 'guitar'>('piano');
+  const [instrument, setInstrument] = useState<'piano' | 'guitar'>(hasPiano ? 'piano' : 'guitar');
   const [loading, setLoading] = useState(false);
   const [chordData, setChordData] = useState<ChordData | null>(null);
   const { toast } = useToast();
+
+  // Keep selected instrument valid when enabled list changes
+  useEffect(() => {
+    if (instrument === 'piano' && !hasPiano && hasGuitar) setInstrument('guitar');
+    if (instrument === 'guitar' && !hasGuitar && hasPiano) setInstrument('piano');
+  }, [hasPiano, hasGuitar, instrument]);
 
   const hasAccess = ['standard', 'pro', 'production'].includes(userPlan);
 
@@ -117,16 +128,26 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
         </DialogHeader>
 
         <Tabs value={instrument} onValueChange={(v) => setInstrument(v as 'piano' | 'guitar')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="piano" className="gap-2">
-              <Piano className="w-4 h-4" />
-              Piano
-            </TabsTrigger>
-            <TabsTrigger value="guitar" className="gap-2">
-              <Guitar className="w-4 h-4" />
-              Guitarra
-            </TabsTrigger>
+          <TabsList className={`grid w-full ${hasPiano && hasGuitar ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {hasPiano && (
+              <TabsTrigger value="piano" className="gap-2">
+                <Piano className="w-4 h-4" />
+                Piano
+              </TabsTrigger>
+            )}
+            {hasGuitar && (
+              <TabsTrigger value="guitar" className="gap-2">
+                <Guitar className="w-4 h-4" />
+                Guitarra
+              </TabsTrigger>
+            )}
           </TabsList>
+
+          {!hasPiano && !hasGuitar && (
+            <div className="mt-4 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm">
+              Selecciona al menos un instrumento en Configuración → Mis instrumentos para usar esta herramienta.
+            </div>
+          )}
 
           <div className="mt-4 space-y-4">
             <div className="flex gap-2">

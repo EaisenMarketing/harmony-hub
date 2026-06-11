@@ -11,6 +11,7 @@ import CourseViewer from "./pages/CourseViewer";
 import AdminPanel from "./pages/AdminPanel";
 import InstructorPanel from "./pages/InstructorPanel";
 import AdFlowDashboard from "./pages/AdFlowDashboard";
+import TeacherApplicationPage from "./pages/TeacherApplicationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/instructor" element={<InstructorPanel />} />
             <Route path="/instructor/*" element={<InstructorPanel />} />
             <Route path="/adflow" element={<AdFlowDashboard />} />
+            <Route path="/aplicar-maestro" element={<TeacherApplicationPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

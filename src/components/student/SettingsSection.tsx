@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStudentProfile } from '@/hooks/useStudentData';
+import { InstrumentSettings } from './InstrumentSettings';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -271,6 +272,10 @@ export const SettingsSection = () => {
               </Button>
             </CardContent>
           </Card>
+
+          <div className="mt-6">
+            <InstrumentSettings />
+          </div>
         </TabsContent>
 
         <TabsContent value="notifications">

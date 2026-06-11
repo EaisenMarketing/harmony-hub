@@ -6,6 +6,7 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminStats } from '@/components/admin/AdminStats';
 import { AdminDashboardCharts } from '@/components/admin/AdminDashboardCharts';
 import { InstructorsManagement } from '@/components/admin/InstructorsManagement';
+import { InstructorApplicationsManagement } from '@/components/admin/InstructorApplicationsManagement';
 import { CoursesTable } from '@/components/admin/CoursesTable';
 import { LiveClassesTable } from '@/components/admin/LiveClassesTable';
 import { StudentsTable } from '@/components/admin/StudentsTable';
@@ -49,6 +50,9 @@ const AdminPanel = () => {
   const renderContent = () => {
     if (currentPath === '/admin/instructores') {
       return <InstructorsManagement />;
+    }
+    if (currentPath === '/admin/aplicaciones') {
+      return <InstructorApplicationsManagement />;
     }
     if (currentPath === '/admin/cursos') {
       return <CoursesTable />;
@@ -97,6 +101,8 @@ const AdminPanel = () => {
         return { title: 'Panel de Administración', subtitle: 'Visualiza la actividad de instructores y gestiona la plataforma' };
       case '/admin/instructores':
         return { title: 'Gestión de Instructores', subtitle: 'Autoriza y gestiona los maestros por instrumento' };
+      case '/admin/aplicaciones':
+        return { title: 'Aplicaciones de Maestros', subtitle: 'Revisa y aprueba a los maestros que postulan' };
       case '/admin/cursos':
         return { title: 'Gestión de Cursos', subtitle: 'Administra todos los cursos de la plataforma' };
       case '/admin/videos':

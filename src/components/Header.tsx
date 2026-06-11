@@ -110,6 +110,11 @@ export function Header() {
                 </Button>
               </Link>
             )}
+            <Link to="/aplicar-maestro">
+              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white">
+                Ser Maestro
+              </Button>
+            </Link>
             <a href="#precios">
               <Button variant="gradient" size="sm">
                 Obtén Suscripción Pro
