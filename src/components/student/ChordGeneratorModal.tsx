@@ -128,16 +128,26 @@ export const ChordGeneratorModal = ({ userPlan }: ChordGeneratorModalProps) => {
         </DialogHeader>
 
         <Tabs value={instrument} onValueChange={(v) => setInstrument(v as 'piano' | 'guitar')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="piano" className="gap-2">
-              <Piano className="w-4 h-4" />
-              Piano
-            </TabsTrigger>
-            <TabsTrigger value="guitar" className="gap-2">
-              <Guitar className="w-4 h-4" />
-              Guitarra
-            </TabsTrigger>
+          <TabsList className={`grid w-full ${hasPiano && hasGuitar ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {hasPiano && (
+              <TabsTrigger value="piano" className="gap-2">
+                <Piano className="w-4 h-4" />
+                Piano
+              </TabsTrigger>
+            )}
+            {hasGuitar && (
+              <TabsTrigger value="guitar" className="gap-2">
+                <Guitar className="w-4 h-4" />
+                Guitarra
+              </TabsTrigger>
+            )}
           </TabsList>
+
+          {!hasPiano && !hasGuitar && (
+            <div className="mt-4 rounded-lg border border-primary/30 bg-primary/10 p-4 text-sm">
+              Selecciona al menos un instrumento en Configuración → Mis instrumentos para usar esta herramienta.
+            </div>
+          )}
 
           <div className="mt-4 space-y-4">
             <div className="flex gap-2">
