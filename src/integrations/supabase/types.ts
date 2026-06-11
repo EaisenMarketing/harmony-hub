@@ -147,6 +147,51 @@ export type Database = {
         }
         Relationships: []
       }
+      chord_detections: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          detected_chord: string | null
+          fingers: string | null
+          id: string
+          image_path: string
+          instrument: string
+          notes: string[] | null
+          raw_response: Json | null
+          suggestions: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          detected_chord?: string | null
+          fingers?: string | null
+          id?: string
+          image_path: string
+          instrument: string
+          notes?: string[] | null
+          raw_response?: Json | null
+          suggestions?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          detected_chord?: string | null
+          fingers?: string | null
+          id?: string
+          image_path?: string
+          instrument?: string
+          notes?: string[] | null
+          raw_response?: Json | null
+          suggestions?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_comments: {
         Row: {
           content: string
