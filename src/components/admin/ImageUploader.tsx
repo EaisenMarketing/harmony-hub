@@ -128,7 +128,7 @@ export const ImageUploader = ({ value, onChange, folder = 'thumbnails' }: ImageU
 
       {value && (
         <div className="relative group">
-          <img
+          <img loading="lazy" decoding="async"
             src={value}
             alt="Preview"
             className="w-full h-32 object-cover rounded-lg"

@@ -109,7 +109,7 @@ export const InstructorCourses = () => {
                   {/* Thumbnail */}
                   <div className="w-24 h-16 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
                     {course.thumbnail_url ? (
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={course.thumbnail_url} 
                         alt={course.title}
                         className="w-full h-full object-cover"

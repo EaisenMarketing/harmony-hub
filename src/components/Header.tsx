@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, LogOut, User } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.webp';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -56,7 +56,7 @@ export function Header() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
+            <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
             <span className="text-xl font-bold text-white hidden sm:block">
               Acorde Live
             </span>

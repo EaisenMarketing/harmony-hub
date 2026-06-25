@@ -184,7 +184,7 @@ const PostItem = ({ post }: { post: CommunityPost }) => {
         </div>
         <p className="text-sm whitespace-pre-wrap">{post.content}</p>
         {post.image_url && (
-          <img src={post.image_url} alt="" className="rounded-lg max-h-[500px] w-full object-cover" />
+          <img loading="lazy" decoding="async" src={post.image_url} alt="" className="rounded-lg max-h-[500px] w-full object-cover" />
         )}
         <div className="flex items-center gap-4 pt-2">
           <Button

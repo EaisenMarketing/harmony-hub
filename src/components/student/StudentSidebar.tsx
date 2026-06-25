@@ -14,7 +14,7 @@ import {
   MessageCircleQuestion,
   Users
 } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.webp';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,7 @@ export const StudentSidebar = () => {
       {/* Logo */}
       <div className="p-4 border-b border-border">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
+          <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
           <span className="font-bold text-lg text-foreground">Acorde Live</span>
         </Link>
       </div>

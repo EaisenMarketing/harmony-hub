@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Headphones, Mic, Music, Sliders, Waves, Sparkles } from 'lucide-react';
-import productionImage from '@/assets/production-card.jpg';
+import productionImage from '@/assets/production-card.webp';
 import { ScrollReveal } from '@/components/landing/ScrollReveal';
 import { motion } from 'framer-motion';
 
@@ -49,6 +49,8 @@ export function MusicProductionSection() {
               <img
                 src={productionImage}
                 alt="Estudio de producción musical"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-[450px] object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[hsl(222,47%,5%)] via-transparent to-transparent" />

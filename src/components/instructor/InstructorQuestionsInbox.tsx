@@ -62,7 +62,7 @@ export const InstructorQuestionsInbox = () => {
                 <Badge variant="secondary" className="gap-1"><Clock className="w-3 h-3" /> Pendiente</Badge>
               </div>
               <p className="text-sm whitespace-pre-wrap">{q.body}</p>
-              {q.image_url && <img src={q.image_url} alt="" className="rounded-md max-h-60 object-cover" />}
+              {q.image_url && <img loading="lazy" decoding="async" src={q.image_url} alt="" className="rounded-md max-h-60 object-cover" />}
               <Textarea
                 placeholder="Escribe tu respuesta..."
                 value={replies[q.id] || ''}

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import guitarImage from '@/assets/guitar-card.jpg';
-import pianoImage from '@/assets/piano-card.jpg';
+import guitarImage from '@/assets/guitar-card.webp';
+import pianoImage from '@/assets/piano-card.webp';
 import { ScrollReveal, Parallax } from '@/components/landing/ScrollReveal';
 import { motion } from 'framer-motion';
 
@@ -69,6 +69,8 @@ export function InstrumentsSection() {
                     <motion.img
                       src={instrument.image}
                       alt={instrument.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                       whileHover={{ scale: 1.15 }}
                       transition={{ duration: 0.7 }}
