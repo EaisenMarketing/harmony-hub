@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Video, Clock, Award, CheckCircle2, Play } from 'lucide-react';
 
 import { motion } from 'framer-motion';
-import producerImage from '@/assets/producer-studio.jpg';
+import producerImage from '@/assets/producer-studio.webp';
 
 const badges = [
   { icon: Video, text: 'Clases en vivo por Zoom' },

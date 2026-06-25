@@ -11,7 +11,7 @@ import {
 import { GraduationCap, Send, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.webp';
 
 const TeacherApplicationPage = () => {
   const { toast } = useToast();

@@ -8,7 +8,7 @@ import {
   Home,
   MessageCircleQuestion,
 } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.webp';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInstructorProfile } from '@/hooks/useInstructorData';

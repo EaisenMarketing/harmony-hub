@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Headphones, Mic, Music, Sliders, Waves, Sparkles } from 'lucide-react';
-import productionImage from '@/assets/production-card.jpg';
+import productionImage from '@/assets/production-card.webp';
 import { ScrollReveal } from '@/components/landing/ScrollReveal';
 import { motion } from 'framer-motion';
 
