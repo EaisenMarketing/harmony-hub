@@ -144,7 +144,7 @@ const StudentPortal = () => {
         {/* Mobile top header with logout */}
         <div className="sticky top-0 z-40 flex items-center justify-between px-4 pt-12 pb-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Acorde Live" className="w-8 h-8 rounded-lg object-cover" />
+            <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-8 h-8 rounded-lg object-cover" />
             <span className="font-bold text-foreground">Acorde Live</span>
           </Link>
           <Button

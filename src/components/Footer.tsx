@@ -53,7 +53,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center gap-3 mb-6">
-              <img src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
+              <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
               <span className="text-xl font-bold">Acorde Live</span>
             </a>
             <p className="text-white/60 mb-6 max-w-sm">

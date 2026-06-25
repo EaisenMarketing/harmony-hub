@@ -370,7 +370,7 @@ const VideoCard = ({ lesson, onPlay }: VideoCardProps) => {
       {/* Thumbnail */}
       <div className="aspect-video relative bg-gradient-to-br from-primary/20 to-secondary/20">
         {lesson.module.course.thumbnail_url ? (
-          <img
+          <img loading="lazy" decoding="async"
             src={lesson.module.course.thumbnail_url}
             alt={lesson.title}
             className="w-full h-full object-cover"

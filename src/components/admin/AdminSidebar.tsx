@@ -38,7 +38,7 @@ export const AdminSidebar = () => {
       {/* Logo */}
       <div className="p-4 border-b border-white/10">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
+          <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
           <div>
             <span className="font-bold text-lg text-white">Admin</span>
             <p className="text-xs text-white/60">Panel de Control</p>

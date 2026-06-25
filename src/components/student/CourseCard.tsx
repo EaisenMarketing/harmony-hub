@@ -36,7 +36,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
     <Card className="group overflow-hidden border-border/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
       <div className="relative h-40 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
         {course.thumbnail_url ? (
-          <img
+          <img loading="lazy" decoding="async"
             src={course.thumbnail_url}
             alt={course.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

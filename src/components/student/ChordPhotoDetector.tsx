@@ -207,7 +207,7 @@ export const ChordPhotoDetector = ({ userPlan }: Props) => {
 
             {preview && (
               <div className="rounded-lg overflow-hidden border bg-muted/30">
-                <img src={preview} alt="Acorde" className="w-full max-h-64 object-contain" />
+                <img loading="lazy" decoding="async" src={preview} alt="Acorde" className="w-full max-h-64 object-contain" />
               </div>
             )}
 

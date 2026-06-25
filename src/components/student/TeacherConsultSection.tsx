@@ -192,7 +192,7 @@ export const TeacherConsultSection = () => {
                 )}
               </div>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">{q.body}</p>
-              {q.image_url && <img src={q.image_url} alt="" className="rounded-md max-h-60 object-cover" />}
+              {q.image_url && <img loading="lazy" decoding="async" src={q.image_url} alt="" className="rounded-md max-h-60 object-cover" />}
               {q.answer && (
                 <div className="mt-3 p-3 rounded-md bg-primary/5 border border-primary/20">
                   <p className="text-xs font-semibold text-primary mb-1">Respuesta del maestro</p>

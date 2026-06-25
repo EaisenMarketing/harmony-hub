@@ -79,7 +79,7 @@ const TeacherApplicationPage = () => {
       <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Acorde Live" className="w-9 h-9 rounded-lg" />
+            <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-9 h-9 rounded-lg" />
             <span className="font-bold">Acorde Live</span>
           </Link>
           <Button variant="ghost" size="sm" asChild>

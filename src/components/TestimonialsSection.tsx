@@ -76,7 +76,7 @@ export function TestimonialsSection() {
                 </p>
 
                 <div className="flex items-center gap-4">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={testimonial.avatar}
                     alt={testimonial.name}
                     className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"

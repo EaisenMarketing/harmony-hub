@@ -141,7 +141,7 @@ export const CoursesSection = () => {
                 >
                   <div className="relative h-40 bg-muted">
                     {course.thumbnail_url ? (
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={course.thumbnail_url}
                         alt={course.title}
                         className="w-full h-full object-cover"
@@ -215,7 +215,7 @@ export const CoursesSection = () => {
                 >
                   <div className="relative h-40 bg-muted">
                     {course.thumbnail_url ? (
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={course.thumbnail_url}
                         alt={course.title}
                         className="w-full h-full object-cover"
