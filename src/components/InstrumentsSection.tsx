@@ -69,6 +69,8 @@ export function InstrumentsSection() {
                     <motion.img
                       src={instrument.image}
                       alt={instrument.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                       whileHover={{ scale: 1.15 }}
                       transition={{ duration: 0.7 }}

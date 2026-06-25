@@ -27,6 +27,8 @@ export function HeroSection() {
           src={producerImage}
           alt="Productor musical en estudio"
           className="w-full h-full object-cover"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-[hsl(222,47%,5%)]/75" />
         <div className="absolute inset-0 bg-gradient-to-r from-[hsl(222,47%,5%)] via-[hsl(222,47%,5%)]/60 to-transparent" />
