@@ -57,9 +57,6 @@ export function Header() {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            {user ? (
-              null
-            ) : null}
             <Link to="/auth" className="inline-flex h-9 items-center justify-center rounded-md border border-white/20 bg-white/10 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/20">
               Acceso
             </Link>
