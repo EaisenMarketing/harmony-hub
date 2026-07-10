@@ -78,6 +78,7 @@ const DeferredLandingSections = () => {
       <TestimonialsSection />
       <Divider />
       <FAQSection />
+      <Footer />
     </Suspense>
   );
 };
@@ -91,9 +92,6 @@ const Index = () => {
         <HeroSection />
         <DeferredLandingSections />
       </main>
-      <Suspense fallback={null}>
-        <Footer />
-      </Suspense>
     </div>
   );
 };
