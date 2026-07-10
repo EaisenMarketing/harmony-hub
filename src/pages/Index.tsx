@@ -26,10 +26,10 @@ const DeferredLandingEffects = () => {
   useEffect(() => {
     if (window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)').matches) return;
     const start = () => {
-      const requestIdle = window.requestIdleCallback ?? ((callback: IdleRequestCallback) => window.setTimeout(callback, 600));
-      const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout;
+      const requestIdle = window.requestIdleCallback ?? ((callback: () => void) => window.setTimeout(callback, 600));
+      const cancelIdle = window.cancelIdleCallback ?? ((id: number) => window.clearTimeout(id));
       const id = requestIdle(() => setEnabled(true), { timeout: 2500 });
-      return () => cancelIdle(id as number);
+      return () => cancelIdle(id);
     };
 
     if (document.readyState === 'complete') return start();
@@ -56,10 +56,10 @@ const DeferredLandingSections = () => {
   const [showSections, setShowSections] = useState(false);
 
   useEffect(() => {
-    const requestIdle = window.requestIdleCallback ?? ((callback: IdleRequestCallback) => window.setTimeout(callback, 800));
-    const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout;
+    const requestIdle = window.requestIdleCallback ?? ((callback: () => void) => window.setTimeout(callback, 800));
+    const cancelIdle = window.cancelIdleCallback ?? ((id: number) => window.clearTimeout(id));
     const id = requestIdle(() => setShowSections(true), { timeout: 1800 });
-    return () => cancelIdle(id as number);
+    return () => cancelIdle(id);
   }, []);
 
   if (!showSections) return <SectionFallback />;
