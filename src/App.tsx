@@ -1,7 +1,6 @@
 import { Suspense, lazy } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -16,11 +15,16 @@ const InstructorPanel = lazy(() => import("./pages/InstructorPanel"));
 const AdFlowDashboard = lazy(() => import("./pages/AdFlowDashboard"));
 const TeacherApplicationPage = lazy(() => import("./pages/TeacherApplicationPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const AuthProvider = lazy(() => import("@/contexts/AuthContext").then(m => ({ default: m.AuthProvider })));
 
 const queryClient = new QueryClient();
 
 const PageFallback = () => (
   <div className="min-h-screen bg-[hsl(222,47%,5%)]" />
+);
+
+const WithAuth = ({ children }: { children: React.ReactNode }) => (
+  <AuthProvider>{children}</AuthProvider>
 );
 
 const App = () => (
@@ -32,26 +36,24 @@ const App = () => (
       </TooltipProvider>
     </Suspense>
     <BrowserRouter>
-      <AuthProvider>
-        <Suspense fallback={<PageFallback />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/portal" element={<StudentPortal />} />
-            <Route path="/portal/curso/:courseId" element={<CourseViewer />} />
-            <Route path="/portal/curso/:courseId/leccion/:lessonId" element={<CourseViewer />} />
-            <Route path="/portal/*" element={<StudentPortal />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/admin/*" element={<AdminPanel />} />
-            <Route path="/instructor" element={<InstructorPanel />} />
-            <Route path="/instructor/*" element={<InstructorPanel />} />
-            <Route path="/adflow" element={<AdFlowDashboard />} />
-            <Route path="/aplicar-maestro" element={<TeacherApplicationPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </AuthProvider>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<WithAuth><Auth /></WithAuth>} />
+          <Route path="/portal" element={<WithAuth><StudentPortal /></WithAuth>} />
+          <Route path="/portal/curso/:courseId" element={<WithAuth><CourseViewer /></WithAuth>} />
+          <Route path="/portal/curso/:courseId/leccion/:lessonId" element={<WithAuth><CourseViewer /></WithAuth>} />
+          <Route path="/portal/*" element={<WithAuth><StudentPortal /></WithAuth>} />
+          <Route path="/admin" element={<WithAuth><AdminPanel /></WithAuth>} />
+          <Route path="/admin/*" element={<WithAuth><AdminPanel /></WithAuth>} />
+          <Route path="/instructor" element={<WithAuth><InstructorPanel /></WithAuth>} />
+          <Route path="/instructor/*" element={<WithAuth><InstructorPanel /></WithAuth>} />
+          <Route path="/adflow" element={<WithAuth><AdFlowDashboard /></WithAuth>} />
+          <Route path="/aplicar-maestro" element={<TeacherApplicationPage />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   </QueryClientProvider>
 );
