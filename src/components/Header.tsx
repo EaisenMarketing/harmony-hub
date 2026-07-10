@@ -1,17 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, LogOut, User } from 'lucide-react';
 import logo from '@/assets/logo.webp';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const navItems = [
   { label: 'Inicio', href: '#hero' },
@@ -25,24 +14,15 @@ const navItems = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
-  const getUserInitials = () => {
-    if (!user?.email) return 'U';
-    return user.email.charAt(0).toUpperCase();
-  };
 
   return (
     <header
@@ -56,7 +36,7 @@ export function Header() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
+            <img decoding="async" src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" width="40" height="40" />
             <span className="text-xl font-bold text-white hidden sm:block">
               Acorde Live
             </span>
@@ -78,47 +58,20 @@ export function Header() {
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="glass" size="sm" className="gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="hidden xl:inline">Mi Cuenta</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <Link to="/portal">
-                    <DropdownMenuItem className="gap-2 cursor-pointer">
-                      <User className="h-4 w-4" />
-                      Mi Portal
-                    </DropdownMenuItem>
-                  </Link>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 text-destructive cursor-pointer">
-                    <LogOut className="h-4 w-4" />
-                    Cerrar Sesión
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link to="/auth">
-                <Button variant="glass" size="sm">
-                  Acceso
-                </Button>
-              </Link>
-            )}
+              null
+            ) : null}
+            <Link to="/auth" className="inline-flex h-9 items-center justify-center rounded-md border border-white/20 bg-white/10 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/20">
+              Acceso
+            </Link>
             <Link to="/aplicar-maestro">
-              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white">
+              <span className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white">
                 Ser Maestro
-              </Button>
+              </span>
             </Link>
             <a href="#precios">
-              <Button variant="gradient" size="sm">
+              <span className="inline-flex h-9 items-center justify-center rounded-md bg-gradient-to-r from-indigo-600 to-emerald-500 px-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105">
                 Obtén Suscripción Pro
-              </Button>
+              </span>
             </a>
           </div>
 
@@ -126,8 +79,9 @@ export function Header() {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+            aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <span className="block h-6 w-6 text-2xl leading-6">{isMobileMenuOpen ? '×' : '☰'}</span>
           </button>
         </div>
       </div>
@@ -148,30 +102,16 @@ export function Header() {
                 </a>
               ))}
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
-                {user ? (
-                  <>
-                    <Link to="/portal" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="glass" className="w-full">
-                        <User className="mr-2 h-4 w-4" />
-                        Mi Portal
-                      </Button>
-                    </Link>
-                    <Button variant="glass" className="w-full" onClick={handleSignOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Cerrar Sesión
-                    </Button>
-                  </>
-                ) : (
-                  <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="glass" className="w-full">
-                      Acceso
-                    </Button>
-                  </Link>
-                )}
-                <a href="#precios">
-                  <Button variant="gradient" className="w-full">
+                <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white">
+                  Acceso
+                </Link>
+                <Link to="/aplicar-maestro" onClick={() => setIsMobileMenuOpen(false)} className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-white/10 px-4 text-sm font-semibold text-white/80">
+                  Ser Maestro
+                </Link>
+                <a href="#precios" onClick={() => setIsMobileMenuOpen(false)}>
+                  <span className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-emerald-500 px-4 text-sm font-semibold text-white">
                     Obtén Suscripción Pro
-                  </Button>
+                  </span>
                 </a>
               </div>
             </nav>

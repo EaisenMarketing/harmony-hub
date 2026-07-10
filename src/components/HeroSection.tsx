@@ -1,14 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Video, Clock, Award, CheckCircle2, Play } from 'lucide-react';
-
-import { motion } from 'framer-motion';
 import producerImage from '@/assets/producer-studio.webp';
 
 const badges = [
-  { icon: Video, text: 'Clases en vivo por Zoom' },
-  { icon: Clock, text: 'Acceso 24/7' },
-  { icon: Award, text: 'Certificados oficiales' },
+  'Clases en vivo por Zoom',
+  'Acceso 24/7',
+  'Certificados oficiales',
 ];
 
 const stats = [
@@ -27,8 +23,9 @@ export function HeroSection() {
           src={producerImage}
           alt="Productor musical en estudio"
           className="w-full h-full object-cover"
-          fetchPriority="high"
           decoding="async"
+            width="1920"
+            height="1080"
         />
         <div className="absolute inset-0 bg-[hsl(222,47%,5%)]/75" />
         <div className="absolute inset-0 bg-gradient-to-r from-[hsl(222,47%,5%)] via-[hsl(222,47%,5%)]/60 to-transparent" />
@@ -36,104 +33,74 @@ export function HeroSection() {
       </div>
 
       {/* Subtle glow accents */}
-      <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-primary/10 blur-[150px] z-[1]" />
-      <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] rounded-full bg-secondary/8 blur-[120px] z-[1]" />
+      <div className="absolute top-1/4 right-1/4 hidden h-[360px] w-[360px] rounded-full bg-primary/10 blur-[96px] z-[1] lg:block" />
 
       {/* Content */}
       <div className="container relative mx-auto px-4 pt-32 pb-20 z-[2]">
         <div className="max-w-3xl">
           {/* Tag */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 mb-8"
+          <div 
+            className="hero-fade hero-delay-1 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8"
           >
             <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
             <span className="text-sm font-medium text-white/90">
               Más de 10,000 estudiantes activos
             </span>
-          </motion.div>
+          </div>
 
           {/* Heading */}
-          <motion.h1 
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-[1.05] mb-6 tracking-tight"
+          <h1 
+            className="hero-fade hero-delay-2 text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white leading-[1.05] mb-6 tracking-tight"
           >
             Aprende música online con{' '}
             <span className="relative">
               <span className="gradient-text">clases reales en vivo</span>
-              <motion.span
-                className="absolute -bottom-2 left-0 right-0 h-1 rounded-full gradient-bg"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 1, delay: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-                style={{ transformOrigin: 'left' }}
-              />
+              <span className="hero-line absolute -bottom-2 left-0 right-0 h-1 rounded-full gradient-bg" />
             </span>
-          </motion.h1>
+          </h1>
 
           {/* Subtitle */}
-          <motion.p 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.6 }}
-            className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl leading-relaxed"
+          <p 
+            className="hero-fade hero-delay-3 text-lg md:text-xl text-white/60 mb-10 max-w-2xl leading-relaxed"
           >
             Clases de guitarra, piano y producción musical con profesores profesionales. 
             Desde principiante hasta avanzado, a tu ritmo.
-          </motion.p>
+          </p>
 
           {/* CTAs */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.8 }}
-            className="flex flex-col sm:flex-row gap-4 mb-14"
+          <div 
+            className="hero-fade hero-delay-4 flex flex-col sm:flex-row gap-4 mb-14"
           >
-            <a href="#precios">
-              <Button variant="hero" size="xl" className="group">
-                <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+            <a href="#precios" className="inline-flex h-14 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 px-10 text-lg font-semibold text-white shadow-lg transition-transform hover:scale-[1.02]">
+                <span className="mr-2">▶</span>
                 Comenzar Ahora
-              </Button>
             </a>
             <Link to="/auth">
-              <Button variant="heroOutline" size="xl">
+              <span className="inline-flex h-14 items-center justify-center rounded-xl border-2 border-white/30 bg-white/10 px-10 text-lg font-semibold text-white transition-colors hover:bg-white/20">
                 Acceder a Clases
-              </Button>
+              </span>
             </Link>
-          </motion.div>
+          </div>
 
           {/* Badges */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            className="flex flex-wrap gap-3"
+          <div 
+            className="hero-fade hero-delay-5 flex flex-wrap gap-3"
           >
-            {badges.map((badge, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 1.1 + index * 0.1 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm"
+            {badges.map((badge) => (
+              <div
+                key={badge}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10"
               >
-                <CheckCircle2 className="w-4 h-4 text-secondary" />
-                <span className="text-sm font-medium text-white/70">{badge.text}</span>
-              </motion.div>
+                <span className="text-secondary">✓</span>
+                <span className="text-sm font-medium text-white/70">{badge}</span>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         {/* Stats bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.4 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl"
+        <div
+          className="hero-fade hero-delay-6 mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl"
         >
           {stats.map((stat, i) => (
             <div key={i} className="text-center md:text-left">
@@ -141,25 +108,20 @@ export function HeroSection() {
               <div className="text-sm text-white/40 uppercase tracking-wider">{stat.label}</div>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-[2]"
+      <div 
+        className="hero-fade hero-delay-6 absolute bottom-8 left-1/2 -translate-x-1/2 hidden flex-col items-center gap-2 z-[2] sm:flex"
       >
         <span className="text-xs text-white/30 uppercase tracking-[0.3em]">Descubrir</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center pt-1.5"
+        <div
+          className="scroll-dot w-5 h-8 rounded-full border border-white/20 flex items-start justify-center pt-1.5"
         >
           <div className="w-1 h-1 rounded-full bg-white/50" />
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }
