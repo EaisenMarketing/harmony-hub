@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
@@ -23,7 +23,7 @@ const PageFallback = () => (
   <div className="min-h-screen bg-[hsl(222,47%,5%)]" />
 );
 
-const WithAuth = ({ children }: { children: React.ReactNode }) => (
+const WithAuth = ({ children }: { children: ReactNode }) => (
   <AuthProvider>{children}</AuthProvider>
 );
 
