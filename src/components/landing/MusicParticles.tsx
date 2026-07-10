@@ -35,32 +35,50 @@ export function MusicParticles() {
   }), []);
 
   useEffect(() => {
+    if (window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = document.documentElement.scrollHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
 
     // Initialize particles
-    for (let i = 0; i < 30; i++) {
-      const p = createParticle(canvas.width, canvas.height);
-      p.y = Math.random() * canvas.height;
+    const particleCount = 12;
+    for (let i = 0; i < particleCount; i++) {
+      const p = createParticle(window.innerWidth, window.innerHeight);
+      p.y = Math.random() * window.innerHeight;
       particlesRef.current.push(p);
     }
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY + window.scrollY };
     };
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let lastFrame = 0;
+
+    const animate = (time = 0) => {
+      if (time - lastFrame < 50) {
+        animationRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrame = time;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       const particles = particlesRef.current;
 
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -83,7 +101,7 @@ export function MusicParticles() {
         // Remove out of bounds
         if (p.y < -50 || p.x < -50 || p.x > canvas.width + 50) {
           particles.splice(i, 1);
-          particles.push(createParticle(canvas.width, canvas.height));
+          particles.push(createParticle(window.innerWidth, window.innerHeight));
           continue;
         }
 
@@ -113,7 +131,7 @@ export function MusicParticles() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[1]"
+      className="fixed inset-0 pointer-events-none z-[1] hidden md:block"
       style={{ mixBlendMode: 'screen' }}
     />
   );
