@@ -1,73 +1,84 @@
-# Welcome to your Lovable project
+# Acorde Live
 
-## Project info
+SaaS de escuela de música en vivo: piano, guitarra y producción musical, con clases en Zoom, herramientas de IA (generador y detector de acordes por foto, analizador de canciones, teoría musical) y panel de instructores/admin.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Stack: React 18 + Vite + Tailwind + shadcn/ui + Lovable Cloud (Supabase Auth, DB con RLS, Storage, Edge Functions) + Resend para emails.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Desarrollo
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+bun install
+bun run dev      # http://localhost:8080
+bun run build
 ```
 
-**Edit a file directly in GitHub**
+Rutas principales: `/` landing, `/auth` login, `/portal` alumno, `/instructor` maestro, `/admin` admin, `/aplicar-maestro` aplicación pública de maestros.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Empaquetar como app móvil (Capacitor)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+La app ya está mobile-ready (safe-areas, bottom nav, cámara nativa vía `<input capture>`, sin dependencias de `window` bloqueantes).
 
-## What technologies are used for this project?
+```bash
+# 1. Instalar Capacitor
+bun add @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android
 
-This project is built with:
+# 2. Inicializar (una sola vez)
+bunx cap init "Acorde Live" com.acordelive.app --web-dir=dist
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# 3. Añadir plataformas
+bunx cap add ios
+bunx cap add android
 
-## How can I deploy this project?
+# 4. Cada vez que despliegues cambios:
+bun run build
+bunx cap sync
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+# 5. Abrir en Xcode / Android Studio
+bunx cap open ios
+bunx cap open android
+```
 
-## Can I connect a custom domain to my Lovable project?
+En `capacitor.config.ts` apunta `server.url` a la URL publicada (`https://chord-crafters-academy.lovable.app`) durante desarrollo si prefieres hot-reload en el dispositivo. Para producción quítalo y usa el bundle local.
 
-Yes, you can!
+Permisos que la app pide:
+- **Cámara**: detector de acordes por foto.
+- **Micrófono**: afinador y metrónomo.
+- **Almacenamiento**: subida de foto desde galería.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Añade las claves correspondientes en `ios/App/App/Info.plist` (`NSCameraUsageDescription`, `NSMicrophoneUsageDescription`, `NSPhotoLibraryUsageDescription`) y en `android/app/src/main/AndroidManifest.xml`.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+## Pagos (Stripe)
+
+Cuando quieras cobrar suscripciones, activa Stripe desde el chat de Lovable con "activar Stripe". El flujo es:
+
+1. Se abre el formulario integrado (email + datos de negocio).
+2. Se crea la conexión gestionada — no se necesita cuenta previa de Stripe.
+3. Los planes ya están definidos en `src/lib/plans.ts` (basic / standard / pro / production).
+4. Se conectan los precios y se habilita el checkout en `PaymentsSection`.
+
+No se activa automáticamente — se hace solo cuando lo indiques.
+
+---
+
+## Estructura
+
+```
+src/
+  components/
+    student/     # portal del alumno
+    instructor/  # panel del maestro
+    admin/       # panel de admin
+    landing/     # efectos de la home
+  hooks/         # data hooks (React Query + Supabase)
+  pages/         # rutas top-level
+  integrations/  # cliente Supabase autogenerado (no editar)
+supabase/
+  functions/     # edge functions (IA, aprobación de maestros)
+  migrations/    # esquema versionado
+```
