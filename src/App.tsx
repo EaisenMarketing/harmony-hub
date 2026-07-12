@@ -20,7 +20,7 @@ const LiveClassesPublicPage = lazy(() => import("./pages/public/LiveClassesPubli
 const PricingPage = lazy(() => import("./pages/public/PricingPage"));
 const TeachersPage = lazy(() => import("./pages/public/TeachersPage"));
 const ContactPage = lazy(() => import("./pages/public/ContactPage"));
-const Static = lazy(() => import("./pages/public/StaticPages"));
+// (StaticPages se carga vía helper S abajo)
 
 const PageFallback = () => (
   <div className="min-h-screen bg-[hsl(222,47%,5%)]" />
@@ -38,7 +38,10 @@ const WithData = ({ children }: { children: ReactNode }) => (
 
 // Wrapper para exportaciones nombradas del módulo StaticPages
 const S = (name: 'AboutPage'|'FaqPage'|'TermsPage'|'PrivacyPage'|'CancelPolicyPage'|'LoginAlias'|'RegisterAlias'|'RecoverAlias'|'TeacherAlias') => {
-  const Cmp = lazy(() => import("./pages/public/StaticPages").then(m => ({ default: (m as any)[name] })));
+  const Cmp = lazy(async () => {
+    const mod = await import("./pages/public/StaticPages");
+    return { default: (mod as Record<string, React.ComponentType>)[name] };
+  });
   return <Cmp />;
 };
 
