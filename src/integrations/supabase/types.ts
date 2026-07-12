@@ -327,52 +327,87 @@ export type Database = {
       }
       courses: {
         Row: {
+          access_type: string
+          cover_image_url: string | null
           created_at: string
           created_by: string | null
           description: string | null
           duration_hours: number | null
+          featured: boolean
           id: string
+          individual_price_cents: number | null
+          instructor_id: string | null
           instrument: Database["public"]["Enums"]["instrument_type"]
           is_published: boolean | null
           level: Database["public"]["Enums"]["course_level"]
+          preview_video_url: string | null
           required_plan: Database["public"]["Enums"]["subscription_plan"] | null
+          short_description: string | null
+          slug: string | null
+          stripe_price_id: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          access_type?: string
+          cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           duration_hours?: number | null
+          featured?: boolean
           id?: string
+          individual_price_cents?: number | null
+          instructor_id?: string | null
           instrument: Database["public"]["Enums"]["instrument_type"]
           is_published?: boolean | null
           level?: Database["public"]["Enums"]["course_level"]
+          preview_video_url?: string | null
           required_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
             | null
+          short_description?: string | null
+          slug?: string | null
+          stripe_price_id?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          access_type?: string
+          cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           duration_hours?: number | null
+          featured?: boolean
           id?: string
+          individual_price_cents?: number | null
+          instructor_id?: string | null
           instrument?: Database["public"]["Enums"]["instrument_type"]
           is_published?: boolean | null
           level?: Database["public"]["Enums"]["course_level"]
+          preview_video_url?: string | null
           required_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
             | null
+          short_description?: string | null
+          slug?: string | null
+          stripe_price_id?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "instructor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       custom_progressions: {
         Row: {
@@ -1048,6 +1083,45 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          author_name: string
+          avatar_url: string | null
+          created_at: string
+          id: string
+          is_approved: boolean
+          quote: string
+          role_or_instrument: string | null
+          sort_order: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          author_name: string
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          quote: string
+          role_or_instrument?: string | null
+          sort_order?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          quote?: string
+          role_or_instrument?: string | null
+          sort_order?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed: boolean | null
@@ -1227,6 +1301,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      slugify: { Args: { input: string }; Returns: string }
     }
     Enums: {
       ad_platform: "facebook" | "instagram" | "tiktok" | "google"
