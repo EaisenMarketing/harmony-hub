@@ -24,7 +24,7 @@ import type { Database } from '@/integrations/supabase/types';
 
 type InstrumentType = Database['public']['Enums']['instrument_type'];
 
-const instrumentLabels: Record<InstrumentType, string> = {
+const instrumentLabels: Record<string, string> = {
   guitar: '🎸 Guitarra',
   piano: '🎹 Piano',
   drums: '🥁 Batería',
@@ -117,7 +117,7 @@ export const VideoLibrary = () => {
   }, [lessons, selectedInstrument, searchQuery]);
 
   const videosByInstrument = useMemo(() => {
-    const grouped: Record<InstrumentType, LessonWithCourse[]> = {
+    const grouped: Record<string, LessonWithCourse[]> = {
       guitar: [],
       piano: [],
       drums: [],
