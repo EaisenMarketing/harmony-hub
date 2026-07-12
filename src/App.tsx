@@ -1,4 +1,4 @@
-import { Suspense, lazy, type ReactNode } from "react";
+import React, { Suspense, lazy, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 
