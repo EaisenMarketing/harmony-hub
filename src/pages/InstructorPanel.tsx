@@ -86,7 +86,7 @@ const InstructorPanel = () => {
               <p className="text-muted-foreground text-sm">
                 Instructor de {profile.instrument === 'guitar' ? 'Guitarra' : 
                   profile.instrument === 'piano' ? 'Piano' : 
-                  profile.instrument === 'drums' ? 'Batería' : 'Banjo'}
+                  profile.instrument === 'drums' ? 'Batería'}
               </p>
             </div>
           </header>

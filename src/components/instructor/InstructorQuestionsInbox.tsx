@@ -10,7 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const instrumentLabels: Record<string, string> = {
-  guitar: 'Guitarra', piano: 'Piano', drums: 'Producción', banjo: 'Banjo',
+  guitar: 'Guitarra', piano: 'Piano', drums: 'Producción',
 };
 
 export const InstructorQuestionsInbox = () => {

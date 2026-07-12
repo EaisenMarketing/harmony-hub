@@ -1446,7 +1446,7 @@ export const Constants = {
       campaign_health: ["healthy", "needs_optimization", "underperforming"],
       campaign_status: ["active", "paused", "completed", "draft"],
       course_level: ["beginner", "intermediate", "advanced"],
-      instrument_type: ["guitar", "piano", "drums", "banjo"],
+      instrument_type: ["guitar", "piano", "drums", "bass", "electric_guitar", "trumpet", "production"],
       lead_status: ["new", "contacted", "qualified", "closed", "lost"],
       subscription_plan: ["basic", "standard", "pro", "production"],
     },
