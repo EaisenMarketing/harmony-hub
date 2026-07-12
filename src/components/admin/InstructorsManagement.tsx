@@ -30,14 +30,12 @@ const instrumentIcons: Record<string, React.ReactNode> = {
   guitar: <Guitar className="w-4 h-4" />,
   piano: <Piano className="w-4 h-4" />,
   drums: <Drum className="w-4 h-4" />,
-  banjo: <Music className="w-4 h-4" />,
 };
 
 const instrumentLabels: Record<string, string> = {
   guitar: 'Guitarra',
   piano: 'Piano',
   drums: 'Batería',
-  banjo: 'Banjo',
 };
 
 const statusColors: Record<string, string> = {

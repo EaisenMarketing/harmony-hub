@@ -31,7 +31,6 @@ const instrumentEmojis: Record<string, string> = {
   guitar: '🎸',
   piano: '🎹',
   drums: '🥁',
-  banjo: '🪕',
 };
 
 const levelLabels: Record<string, string> = {

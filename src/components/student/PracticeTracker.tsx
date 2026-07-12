@@ -118,7 +118,6 @@ export const PracticeTracker = () => {
     guitar: '🎸 Guitarra',
     piano: '🎹 Piano',
     drums: '🥁 Batería',
-    banjo: '🪕 Banjo',
   };
 
   return (

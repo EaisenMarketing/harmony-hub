@@ -35,7 +35,6 @@ const instrumentLabels: Record<InstrumentType, string> = {
   guitar: '🎸 Guitarra',
   piano: '🎹 Piano',
   drums: '🥁 Batería',
-  banjo: '🪕 Banjo',
 };
 
 export const VideoUploadForm = ({ open, onClose }: VideoUploadFormProps) => {
