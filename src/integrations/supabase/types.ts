@@ -283,6 +283,42 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_leads: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string
+          phone: string | null
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message: string
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       course_modules: {
         Row: {
           course_id: string
@@ -1310,7 +1346,7 @@ export type Database = {
       campaign_health: "healthy" | "needs_optimization" | "underperforming"
       campaign_status: "active" | "paused" | "completed" | "draft"
       course_level: "beginner" | "intermediate" | "advanced"
-      instrument_type: "guitar" | "piano" | "drums"
+      instrument_type: "guitar" | "piano" | "drums" | "banjo"
       lead_status: "new" | "contacted" | "qualified" | "closed" | "lost"
       subscription_plan: "basic" | "standard" | "pro" | "production"
     }
@@ -1446,7 +1482,7 @@ export const Constants = {
       campaign_health: ["healthy", "needs_optimization", "underperforming"],
       campaign_status: ["active", "paused", "completed", "draft"],
       course_level: ["beginner", "intermediate", "advanced"],
-      instrument_type: ["guitar", "piano", "drums", "bass", "electric_guitar", "trumpet", "production"],
+      instrument_type: ["guitar", "piano", "drums", "banjo"],
       lead_status: ["new", "contacted", "qualified", "closed", "lost"],
       subscription_plan: ["basic", "standard", "pro", "production"],
     },
