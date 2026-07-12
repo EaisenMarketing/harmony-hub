@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom';
 import logo from '@/assets/logo.webp';
 
 const navItems = [
-  { label: 'Inicio', href: '#hero' },
-  { label: 'Cursos', href: '#instrumentos' },
-  { label: 'Clases en Vivo', href: '#calendario' },
-  { label: 'Precios', href: '#precios' },
-  { label: 'Testimonios', href: '#testimonios' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'Cursos', to: '/cursos' },
+  { label: 'Clases en Vivo', to: '/clases-en-vivo' },
+  { label: 'Precios', to: '/precios' },
+  { label: 'Maestros', to: '/maestros' },
+  { label: 'FAQ', to: '/preguntas-frecuentes' },
 ];
 
 export function Header() {
@@ -45,13 +44,13 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
-              <a
+              <Link
                 key={item.label}
-                href={item.href}
+                to={item.to}
                 className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/10"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -60,16 +59,16 @@ export function Header() {
             <Link to="/auth" className="inline-flex h-9 items-center justify-center rounded-md border border-white/20 bg-white/10 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/20">
               Acceso
             </Link>
-            <Link to="/aplicar-maestro">
+            <Link to="/ser-maestro">
               <span className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white">
                 Ser Maestro
               </span>
             </Link>
-            <a href="#precios">
+            <Link to="/precios">
               <span className="inline-flex h-9 items-center justify-center rounded-md bg-gradient-to-r from-indigo-600 to-emerald-500 px-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105">
-                Obtén Suscripción Pro
+                Ver planes
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,27 +88,27 @@ export function Header() {
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col gap-2">
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.label}
-                  href={item.href}
+                  to={item.to}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="px-4 py-3 text-base font-medium text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/10"
                 >
                   {item.label}
-                </a>
+                </Link>
               ))}
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-white/10">
                 <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white">
                   Acceso
                 </Link>
-                <Link to="/aplicar-maestro" onClick={() => setIsMobileMenuOpen(false)} className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-white/10 px-4 text-sm font-semibold text-white/80">
+                <Link to="/ser-maestro" onClick={() => setIsMobileMenuOpen(false)} className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-white/10 px-4 text-sm font-semibold text-white/80">
                   Ser Maestro
                 </Link>
-                <a href="#precios" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link to="/precios" onClick={() => setIsMobileMenuOpen(false)}>
                   <span className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-emerald-500 px-4 text-sm font-semibold text-white">
-                    Obtén Suscripción Pro
+                    Ver planes
                   </span>
-                </a>
+                </Link>
               </div>
             </nav>
           </div>

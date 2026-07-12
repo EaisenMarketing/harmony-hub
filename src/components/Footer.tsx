@@ -5,22 +5,21 @@ import { Button } from '@/components/ui/button';
 
 const footerLinks = {
   platform: [
-    { label: 'Cursos', href: '#instrumentos' },
-    { label: 'Clases en Vivo', href: '#calendario' },
-    { label: 'Precios', href: '#precios' },
-    { label: 'Certificados', href: '#' },
+    { label: 'Cursos', to: '/cursos' },
+    { label: 'Clases en Vivo', to: '/clases-en-vivo' },
+    { label: 'Precios', to: '/precios' },
+    { label: 'Maestros', to: '/maestros' },
   ],
   support: [
-    { label: 'Centro de Ayuda', href: '#' },
-    { label: 'Contacto', href: '#' },
-    { label: 'FAQ', href: '#faq' },
-    { label: 'Comunidad', href: '#' },
+    { label: 'Preguntas frecuentes', to: '/preguntas-frecuentes' },
+    { label: 'Contacto', to: '/contacto' },
+    { label: 'Ser Maestro', to: '/ser-maestro' },
+    { label: 'Nosotros', to: '/nosotros' },
   ],
   legal: [
-    { label: 'Términos y Condiciones', href: '#' },
-    { label: 'Política de Privacidad', href: '#' },
-    { label: 'Cookies', href: '#' },
-    { label: 'Reembolsos', href: '#' },
+    { label: 'Términos y Condiciones', to: '/terminos' },
+    { label: 'Política de Privacidad', to: '/privacidad' },
+    { label: 'Política de Cancelación', to: '/politica-de-cancelacion' },
   ],
 };
 
@@ -37,12 +36,12 @@ export function Footer() {
                 ¿Listo para comenzar tu viaje musical?
               </h3>
               <p className="text-white/60">
-                Únete a miles de estudiantes que ya están aprendiendo con nosotros.
+                Elige tu plan y empieza hoy con maestros reales.
               </p>
             </div>
-            <Link to="/auth">
+            <Link to="/precios">
               <Button variant="gradient" size="xl" className="flex-shrink-0">
-                Comenzar Gratis
+                Ver planes
               </Button>
             </Link>
           </div>
@@ -52,12 +51,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <a href="#" className="flex items-center gap-3 mb-6">
+            <Link to="/" className="flex items-center gap-3 mb-6">
               <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-10 h-10 rounded-xl object-cover" />
               <span className="text-xl font-bold">Acorde Live</span>
-            </a>
+            </Link>
             <p className="text-white/60 mb-6 max-w-sm">
-              Aprende música desde cualquier lugar con profesores reales. Clases en vivo, cursos grabados y una comunidad que te apoya.
+              Escuela de música 100% online. Guitarra, bajo, batería, piano, trompeta y producción musical
+              con maestros reales.
             </p>
 
             {/* Contact Info */}
@@ -66,24 +66,19 @@ export function Footer() {
                 <Mail className="w-5 h-5" />
                 <span>hola@acordelive.com</span>
               </a>
-              <a href="#" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors">
+              <Link to="/contacto" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors">
                 <Phone className="w-5 h-5" />
-                <span>WhatsApp: +52 55 1234 5678</span>
-              </a>
+                <span>Formulario de contacto</span>
+              </Link>
             </div>
 
             {/* Social Links */}
             <div className="flex gap-4 mt-6">
-              <a href="#" className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+              <a href="https://instagram.com/acordelive" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+              <a href="https://youtube.com/@acordelive" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                 <Youtube className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                </svg>
               </a>
             </div>
           </div>
@@ -94,9 +89,9 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.platform.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-white/60 hover:text-white transition-colors">
+                  <Link to={link.to} className="text-white/60 hover:text-white transition-colors">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -107,9 +102,9 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-white/60 hover:text-white transition-colors">
+                  <Link to={link.to} className="text-white/60 hover:text-white transition-colors">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -120,9 +115,9 @@ export function Footer() {
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-white/60 hover:text-white transition-colors">
+                  <Link to={link.to} className="text-white/60 hover:text-white transition-colors">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
