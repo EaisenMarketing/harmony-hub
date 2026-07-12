@@ -1,41 +1,34 @@
+import { useEffect, useState } from 'react';
 import { Star, Quote } from 'lucide-react';
 import { ScrollReveal } from '@/components/landing/ScrollReveal';
-import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
-const testimonials = [
-  {
-    name: 'Alejandro Ramírez',
-    instrument: 'Guitarra',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-    rating: 5,
-    text: 'Después de años intentando aprender solo, finalmente encontré una escuela que entiende cómo enseñar. Las clases en vivo son increíbles y el feedback personalizado me ayudó a mejorar rápidamente.',
-  },
-  {
-    name: 'Laura Mendoza',
-    instrument: 'Piano',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face',
-    rating: 5,
-    text: 'La calidad de los cursos es excepcional. Los profesores son muy profesionales y el material descargable es muy completo. Ahora toco piezas que nunca pensé poder tocar.',
-  },
-  {
-    name: 'Miguel Torres',
-    instrument: 'Producción Musical',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
-    rating: 5,
-    text: 'El curso de producción musical cambió mi carrera. Aprendí mezcla, mastering y diseño sonoro con profesionales de la industria. El plan Pro realmente vale cada centavo.',
-  },
-];
+interface Testimonial {
+  id: string;
+  author_name: string;
+  role_or_instrument: string | null;
+  quote: string;
+  avatar_url: string | null;
+}
 
 export function TestimonialsSection() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('testimonials')
+      .select('id, author_name, role_or_instrument, quote, avatar_url')
+      .eq('is_approved', true)
+      .order('sort_order', { ascending: true })
+      .limit(6)
+      .then(({ data }) => setTestimonials(data ?? []));
+  }, []);
+
+  // Si no hay testimonios aprobados aún, no rendereamos la sección.
+  if (testimonials.length === 0) return null;
+
   return (
     <section id="testimonios" className="py-24 bg-[hsl(222,47%,6%)] relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, hsl(0 0% 100%) 1px, transparent 0)`,
-          backgroundSize: '40px 40px',
-        }} />
-      </div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px]" />
 
       <div className="container mx-auto px-4 relative z-10">
@@ -49,48 +42,40 @@ export function TestimonialsSection() {
               <span className="gradient-text">estudiantes</span>
             </h2>
             <p className="text-lg text-white/50">
-              Miles de músicos ya transformaron su forma de aprender con nosotros.
+              Historias reales de estudiantes de Acorde Live.
             </p>
           </div>
         </ScrollReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <ScrollReveal key={index} delay={index * 0.15}>
-              <motion.div
-                whileHover={{ y: -6 }}
-                className="relative bg-white/[0.03] rounded-2xl border border-white/[0.06] p-8 hover:border-primary/20 transition-all duration-300"
-              >
+          {testimonials.map((t, index) => (
+            <ScrollReveal key={t.id} delay={index * 0.15}>
+              <div className="relative bg-white/[0.03] rounded-2xl border border-white/[0.06] p-8 hover:border-primary/20 transition-all duration-300">
                 <div className="absolute -top-4 -left-2 w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
                   <Quote className="w-5 h-5 text-white" />
                 </div>
-
                 <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
+                  {[0,1,2,3,4].map(i => (
                     <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-
-                <p className="text-white/70 mb-6 leading-relaxed">
-                  "{testimonial.text}"
-                </p>
-
+                <p className="text-white/70 mb-6 leading-relaxed">"{t.quote}"</p>
                 <div className="flex items-center gap-4">
-                  <img loading="lazy" decoding="async"
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
-                  />
+                  {t.avatar_url && (
+                    <img loading="lazy" decoding="async"
+                      src={t.avatar_url}
+                      alt={t.author_name}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
+                    />
+                  )}
                   <div>
-                    <h4 className="font-semibold text-white">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-white/40">
-                      Estudiante de {testimonial.instrument}
-                    </p>
+                    <h4 className="font-semibold text-white">{t.author_name}</h4>
+                    {t.role_or_instrument && (
+                      <p className="text-sm text-white/40">{t.role_or_instrument}</p>
+                    )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </ScrollReveal>
           ))}
         </div>

@@ -4,14 +4,14 @@ import producerImage from '@/assets/producer-studio.webp';
 const badges = [
   'Clases en vivo por Zoom',
   'Acceso 24/7',
-  'Certificados oficiales',
+  'Certificado digital de finalización',
 ];
 
-const stats = [
-  { value: '10K+', label: 'Estudiantes' },
-  { value: '500+', label: 'Clases grabadas' },
-  { value: '98%', label: 'Satisfacción' },
-  { value: '3', label: 'Programas' },
+const highlights = [
+  { value: '6', label: 'Instrumentos' },
+  { value: 'En vivo', label: 'Semanal por Zoom' },
+  { value: 'On-demand', label: 'Clases grabadas' },
+  { value: 'Maestros', label: 'Profesionales reales' },
 ];
 
 export function HeroSection() {
@@ -44,7 +44,7 @@ export function HeroSection() {
           >
             <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
             <span className="text-sm font-medium text-white/90">
-              Más de 10,000 estudiantes activos
+              Formación musical online con maestros reales
             </span>
           </div>
 
@@ -63,21 +63,21 @@ export function HeroSection() {
           <p 
             className="hero-fade hero-delay-3 text-lg md:text-xl text-white/60 mb-10 max-w-2xl leading-relaxed"
           >
-            Clases de guitarra, piano y producción musical con profesores profesionales. 
-            Desde principiante hasta avanzado, a tu ritmo.
+            Guitarra acústica y eléctrica, bajo, batería, piano, trompeta y producción musical.
+            Clases en vivo por Zoom, contenido on-demand y maestros profesionales.
           </p>
 
           {/* CTAs */}
           <div 
             className="hero-fade hero-delay-4 flex flex-col sm:flex-row gap-4 mb-14"
           >
-            <a href="#precios" className="inline-flex h-14 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 px-10 text-lg font-semibold text-white shadow-lg transition-transform hover:scale-[1.02]">
+            <Link to="/precios" className="inline-flex h-14 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-emerald-500 px-10 text-lg font-semibold text-white shadow-lg transition-transform hover:scale-[1.02]">
                 <span className="mr-2">▶</span>
-                Comenzar Ahora
-            </a>
-            <Link to="/auth">
+                Ver planes y comenzar
+            </Link>
+            <Link to="/cursos">
               <span className="inline-flex h-14 items-center justify-center rounded-xl border-2 border-white/30 bg-white/10 px-10 text-lg font-semibold text-white transition-colors hover:bg-white/20">
-                Acceder a Clases
+                Explorar cursos
               </span>
             </Link>
           </div>
@@ -98,14 +98,14 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Stats bar */}
+        {/* Highlights */}
         <div
           className="hero-fade hero-delay-6 mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl"
         >
-          {stats.map((stat, i) => (
+          {highlights.map((h, i) => (
             <div key={i} className="text-center md:text-left">
-              <div className="text-3xl md:text-4xl font-black gradient-text mb-1">{stat.value}</div>
-              <div className="text-sm text-white/40 uppercase tracking-wider">{stat.label}</div>
+              <div className="text-3xl md:text-4xl font-black gradient-text mb-1">{h.value}</div>
+              <div className="text-sm text-white/40 uppercase tracking-wider">{h.label}</div>
             </div>
           ))}
         </div>
