@@ -20,13 +20,12 @@ export default function TeachersPage() {
 
   useEffect(() => {
     (async () => {
-      // Solo columnas seguras y públicas
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('instructor_profiles')
         .select('id, bio, instruments, photo_url, professional_title, years_experience')
         .eq('is_active', true)
         .limit(50);
-      setInstructors((data ?? []) as any);
+      setInstructors((data ?? []) as Instructor[]);
       setLoading(false);
     })();
   }, []);
