@@ -138,7 +138,6 @@ export const VideoLibrary = () => {
       guitar: lessons.filter((l) => l.module.course.instrument === 'guitar').length,
       piano: lessons.filter((l) => l.module.course.instrument === 'piano').length,
       drums: lessons.filter((l) => l.module.course.instrument === 'drums').length,
-      banjo: lessons.filter((l) => l.module.course.instrument === 'banjo').length,
     };
   }, [lessons]);
 

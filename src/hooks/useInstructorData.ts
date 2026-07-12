@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface InstructorProfile {
   id: string;
   user_id: string;
-  instrument: 'guitar' | 'piano' | 'drums' | 'banjo';
+  instrument: 'guitar' | 'piano' | 'drums';
   status: 'pending' | 'approved' | 'rejected' | 'suspended';
   bio: string | null;
   specialization: string | null;
@@ -402,7 +402,7 @@ export const useRequestInstructor = () => {
       specialization,
       years_experience,
     }: {
-      instrument: 'guitar' | 'piano' | 'drums' | 'banjo';
+      instrument: 'guitar' | 'piano' | 'drums';
       bio?: string;
       specialization?: string;
       years_experience?: number;

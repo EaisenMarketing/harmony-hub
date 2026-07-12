@@ -21,7 +21,6 @@ const instruments = [
   { value: 'guitar', label: '🎸 Guitarra' },
   { value: 'piano', label: '🎹 Piano' },
   { value: 'drums', label: '🥁 Batería' },
-  { value: 'banjo', label: '🪕 Banjo' },
 ];
 
 const levels = [
@@ -68,7 +67,7 @@ export const CourseForm = ({ open, onClose, course }: CourseFormProps) => {
     const courseData = {
       title,
       description,
-      instrument: instrument as 'guitar' | 'piano' | 'drums' | 'banjo',
+      instrument: instrument as 'guitar' | 'piano' | 'drums',
       level: level as 'beginner' | 'intermediate' | 'advanced',
       required_plan: requiredPlan as 'basic' | 'standard' | 'pro',
       duration_hours: durationHours ? parseInt(durationHours) : null,
