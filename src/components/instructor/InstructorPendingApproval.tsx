@@ -24,13 +24,12 @@ const instrumentOptions = [
   { value: 'guitar', label: 'Guitarra', icon: Guitar },
   { value: 'piano', label: 'Piano', icon: Piano },
   { value: 'drums', label: 'Batería', icon: Drum },
-  { value: 'banjo', label: 'Banjo', icon: Music },
 ];
 
 export const InstructorPendingApproval = ({ profile }: Props) => {
   const requestInstructor = useRequestInstructor();
   const [formData, setFormData] = useState({
-    instrument: '' as 'guitar' | 'piano' | 'drums' | 'banjo' | '',
+    instrument: '' as 'guitar' | 'piano' | 'drums' | '',
     bio: '',
     specialization: '',
     years_experience: '',

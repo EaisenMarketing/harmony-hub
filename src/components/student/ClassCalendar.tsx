@@ -20,7 +20,6 @@ const instrumentEmojis: Record<string, string> = {
   guitar: '🎸',
   piano: '🎹',
   drums: '🥁',
-  banjo: '🪕',
 };
 
 export const ClassCalendar = ({ classes, isLoading }: ClassCalendarProps) => {

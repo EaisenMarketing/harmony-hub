@@ -20,7 +20,6 @@ const instrumentLabels: Record<string, string> = {
   guitar: 'Guitarra',
   piano: 'Piano',
   drums: 'Batería',
-  banjo: 'Banjo',
 };
 
 const levelLabels: Record<string, string> = {
@@ -82,7 +81,6 @@ export const CoursesSection = () => {
             <SelectItem value="guitar">Guitarra</SelectItem>
             <SelectItem value="piano">Piano</SelectItem>
             <SelectItem value="drums">Batería</SelectItem>
-            <SelectItem value="banjo">Banjo</SelectItem>
           </SelectContent>
         </Select>
         <Select value={levelFilter} onValueChange={setLevelFilter}>

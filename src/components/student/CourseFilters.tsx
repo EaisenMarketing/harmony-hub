@@ -24,7 +24,6 @@ const instruments = [
   { value: 'guitar', label: 'Guitarra', emoji: '🎸' },
   { value: 'piano', label: 'Piano', emoji: '🎹' },
   { value: 'drums', label: 'Batería', emoji: '🥁' },
-  { value: 'banjo', label: 'Banjo', emoji: '🪕' },
 ];
 
 const levels = [

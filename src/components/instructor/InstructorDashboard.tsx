@@ -63,7 +63,7 @@ export const InstructorDashboard = () => {
           <p className="text-muted-foreground mt-1">
             Estás enseñando {profile?.instrument === 'guitar' ? 'Guitarra' : 
               profile?.instrument === 'piano' ? 'Piano' : 
-              profile?.instrument === 'drums' ? 'Batería' : 'Banjo'}
+              profile?.instrument === 'drums' ? 'Batería' : profile?.instrument}
             {profile?.specialization && ` • ${profile.specialization}`}
           </p>
         </CardContent>

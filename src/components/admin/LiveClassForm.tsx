@@ -17,7 +17,6 @@ const instruments = [
   { value: 'guitar', label: '🎸 Guitarra' },
   { value: 'piano', label: '🎹 Piano' },
   { value: 'drums', label: '🥁 Batería' },
-  { value: 'banjo', label: '🪕 Banjo' },
 ];
 
 const plans = [
@@ -47,7 +46,7 @@ export const LiveClassForm = ({ open, onClose }: LiveClassFormProps) => {
         title,
         description: description || null,
         scheduled_at: new Date(scheduledAt).toISOString(),
-        instrument: instrument as 'guitar' | 'piano' | 'drums' | 'banjo',
+        instrument: instrument as 'guitar' | 'piano' | 'drums',
         required_plan: requiredPlan as 'basic' | 'standard' | 'pro',
         duration_minutes: parseInt(duration) || 60,
         max_attendees: parseInt(maxAttendees) || 100,

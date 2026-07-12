@@ -24,11 +24,10 @@ import type { Database } from '@/integrations/supabase/types';
 
 type InstrumentType = Database['public']['Enums']['instrument_type'];
 
-const instrumentLabels: Record<InstrumentType, string> = {
+const instrumentLabels: Record<string, string> = {
   guitar: '🎸 Guitarra',
   piano: '🎹 Piano',
   drums: '🥁 Batería',
-  banjo: '🪕 Banjo',
 };
 
 const levelLabels: Record<string, string> = {
@@ -118,11 +117,10 @@ export const VideoLibrary = () => {
   }, [lessons, selectedInstrument, searchQuery]);
 
   const videosByInstrument = useMemo(() => {
-    const grouped: Record<InstrumentType, LessonWithCourse[]> = {
+    const grouped: Record<string, LessonWithCourse[]> = {
       guitar: [],
       piano: [],
       drums: [],
-      banjo: [],
     };
 
     filteredLessons.forEach((lesson) => {
@@ -138,7 +136,6 @@ export const VideoLibrary = () => {
       guitar: lessons.filter((l) => l.module.course.instrument === 'guitar').length,
       piano: lessons.filter((l) => l.module.course.instrument === 'piano').length,
       drums: lessons.filter((l) => l.module.course.instrument === 'drums').length,
-      banjo: lessons.filter((l) => l.module.course.instrument === 'banjo').length,
     };
   }, [lessons]);
 
@@ -191,8 +188,6 @@ export const VideoLibrary = () => {
           </Card>
           <Card className="border-border/50 bg-accent/20">
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">🪕 {stats.banjo}</div>
-              <p className="text-sm text-muted-foreground">Banjo</p>
             </CardContent>
           </Card>
         </div>
@@ -225,7 +220,6 @@ export const VideoLibrary = () => {
                   <SelectItem value="guitar">🎸 Guitarra</SelectItem>
                   <SelectItem value="piano">🎹 Piano</SelectItem>
                   <SelectItem value="drums">🥁 Batería</SelectItem>
-                  <SelectItem value="banjo">🪕 Banjo</SelectItem>
                 </SelectContent>
               </Select>
             </div>

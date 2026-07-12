@@ -31,11 +31,10 @@ interface VideoUploadFormProps {
   onClose: () => void;
 }
 
-const instrumentLabels: Record<InstrumentType, string> = {
+const instrumentLabels: Record<string, string> = {
   guitar: '🎸 Guitarra',
   piano: '🎹 Piano',
   drums: '🥁 Batería',
-  banjo: '🪕 Banjo',
 };
 
 export const VideoUploadForm = ({ open, onClose }: VideoUploadFormProps) => {

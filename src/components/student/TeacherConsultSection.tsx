@@ -23,7 +23,6 @@ const instrumentLabels: Record<Instrument, string> = {
   guitar: 'Guitarra',
   piano: 'Piano',
   drums: 'Producción',
-  banjo: 'Banjo',
 };
 
 export const TeacherConsultSection = () => {
