@@ -76,15 +76,102 @@ export const CoursesTable = () => {
   return (
     <>
       <Card className="border-border/50">
-        <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <CardHeader className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-lg">Gestión de Cursos</CardTitle>
-          <Button onClick={() => setShowCourseForm(true)} className="gap-2">
+          <Button onClick={() => setShowCourseForm(true)} className="gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             Nuevo Curso
           </Button>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="md:hidden space-y-3">
+            {courses.map((course) => (
+              <div key={course.id} className="rounded-lg border border-border/50 bg-muted/20 p-3 space-y-3">
+                <div className="flex items-start gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 shrink-0"
+                    onClick={() => setExpandedCourse(expandedCourse === course.id ? null : course.id)}
+                  >
+                    <ChevronRight className={`w-4 h-4 transition-transform ${expandedCourse === course.id ? 'rotate-90' : ''}`} />
+                  </Button>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-foreground leading-tight">{course.title}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{course.description}</p>
+                  </div>
+                  <span className="text-2xl shrink-0">{instrumentEmojis[course.instrument]}</span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="rounded-md bg-background/70 p-2">
+                    <p className="text-muted-foreground">Nivel</p>
+                    <p className="font-medium">{levelLabels[course.level]}</p>
+                  </div>
+                  <div className="rounded-md bg-background/70 p-2">
+                    <p className="text-muted-foreground">Módulos</p>
+                    <p className="font-medium">{course.course_modules?.length || 0}</p>
+                  </div>
+                  <div className="rounded-md bg-background/70 p-2">
+                    <p className="text-muted-foreground">Estado</p>
+                    <p className="font-medium">{course.is_published ? 'Publicado' : 'Borrador'}</p>
+                  </div>
+                </div>
+
+                {expandedCourse === course.id && (
+                  <div className="rounded-lg bg-background/70 p-3 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-medium text-sm">Módulos y Lecciones</h4>
+                      <Button size="sm" variant="outline" onClick={() => handleAddContent()}>
+                        <Plus className="w-4 h-4 mr-1" />
+                        Módulo
+                      </Button>
+                    </div>
+                    {modules.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No hay módulos aún.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {modules.map((module) => (
+                          <div key={module.id} className="rounded-md border border-border/50 p-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm truncate">{module.title}</p>
+                                <p className="text-xs text-muted-foreground">{module.lessons?.length || 0} lecciones</p>
+                              </div>
+                              <Button size="sm" variant="ghost" onClick={() => handleAddContent(module.id)}>
+                                <Plus className="w-4 h-4 mr-1" />
+                                Lección
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-3 gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setExpandedCourse(course.id); handleAddContent(); }}>
+                    <FolderPlus className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => { setEditingCourse(course); setShowCourseForm(true); }}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-destructive" onClick={() => setDeleteId(course.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {courses.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No hay cursos. Crea tu primer curso.
+              </div>
+            )}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8"></TableHead>
@@ -230,7 +317,8 @@ export const CoursesTable = () => {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

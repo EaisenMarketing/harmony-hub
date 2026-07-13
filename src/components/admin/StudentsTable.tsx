@@ -45,7 +45,47 @@ export const StudentsTable = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
+        <div className="md:hidden space-y-3">
+          {students.map((student) => (
+            <div key={student.id} className="rounded-lg border border-border/50 bg-muted/20 p-3 space-y-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-10 h-10 shrink-0">
+                  <AvatarImage src={student.avatar_url || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                    {getInitials(student.full_name || 'U')}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-foreground truncate">{student.full_name || 'Sin nombre'}</p>
+                  <p className="text-sm text-muted-foreground truncate">{student.phone || 'Sin teléfono'}</p>
+                </div>
+                <Badge className={`${planColors[student.subscription_plan || 'basic']} gap-1 shrink-0`}>
+                  {student.subscription_plan === 'pro' && <Crown className="w-3 h-3" />}
+                  {student.subscription_plan?.toUpperCase() || 'BASIC'}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded-md bg-background/70 p-2">
+                  <p className="text-muted-foreground">Estado</p>
+                  <p className="font-medium">{student.subscription_status === 'active' ? 'Activo' : 'Inactivo'}</p>
+                </div>
+                <div className="rounded-md bg-background/70 p-2">
+                  <p className="text-muted-foreground">Registro</p>
+                  <p className="font-medium">{format(new Date(student.created_at), "d MMM yyyy", { locale: es })}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+          {students.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No hay estudiantes registrados.
+            </div>
+          )}
+        </div>
+
+        <div className="hidden md:block overflow-x-auto">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Estudiante</TableHead>
@@ -107,7 +147,8 @@ export const StudentsTable = () => {
               </TableRow>
             )}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
