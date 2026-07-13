@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +12,18 @@ import logo from '@/assets/logo.webp';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
+
+const resolveDestination = async (userId: string): Promise<string> => {
+  const { data: roles } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId);
+  const list = (roles ?? []).map((r) => r.role);
+  if (list.includes('admin')) return '/admin';
+  if (list.includes('instructor')) return '/instructor';
+  return '/portal';
+};
+
 
 const emailSchema = z.string().email('Email inválido').max(255, 'Email muy largo');
 const passwordSchema = z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').max(72, 'Contraseña muy larga');
@@ -31,9 +44,10 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      resolveDestination(user.id).then((dest) => navigate(dest, { replace: true }));
     }
   }, [user, navigate]);
+
 
   const validateLogin = () => {
     const newErrors: Record<string, string> = {};
@@ -98,8 +112,13 @@ const Auth = () => {
         title: '¡Bienvenido!',
         description: 'Has iniciado sesión correctamente',
       });
-      navigate('/');
+      const { data: sessionData } = await supabase.auth.getUser();
+      if (sessionData.user) {
+        const dest = await resolveDestination(sessionData.user.id);
+        navigate(dest, { replace: true });
+      }
     }
+
     setIsLoading(false);
   };
 
@@ -127,7 +146,7 @@ const Auth = () => {
         title: '¡Cuenta creada!',
         description: 'Tu cuenta ha sido creada exitosamente',
       });
-      navigate('/');
+      navigate('/portal', { replace: true });
     }
     setIsLoading(false);
   };
