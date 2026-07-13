@@ -1,0 +1,1 @@
+CREATE POLICY "Users read own contact leads by email" ON public.contact_leads FOR SELECT TO authenticated USING (email = (auth.jwt() ->> 'email'));
