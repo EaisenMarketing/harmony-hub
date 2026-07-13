@@ -128,7 +128,7 @@ const AdminPanel = () => {
   const pageInfo = getPageInfo();
 
   return (
-    <div className="min-h-screen bg-background flex overflow-x-hidden">
+    <div className="admin-mobile-shell min-h-screen bg-background flex overflow-x-hidden">
       {/* Desktop sidebar */}
       <div className="hidden md:block">
         <AdminSidebar />
@@ -158,7 +158,7 @@ const AdminPanel = () => {
               <Shield className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl lg:text-3xl font-bold text-foreground truncate">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground leading-tight break-words">
                 {pageInfo.title}
               </h1>
               <p className="text-muted-foreground text-sm md:text-base">

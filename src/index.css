@@ -294,3 +294,20 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary));
 }
+
+@media (pointer: coarse), (hover: none) {
+  .admin-mobile-shell .hidden.md\:block,
+  .admin-mobile-shell .hidden.md\:flex,
+  .admin-mobile-shell .hidden.md\:grid {
+    display: none !important;
+  }
+
+  .admin-mobile-shell .md\:hidden {
+    display: block !important;
+  }
+
+  .admin-mobile-shell .flex.md\:hidden,
+  .admin-mobile-shell header.md\:hidden {
+    display: flex !important;
+  }
+}
