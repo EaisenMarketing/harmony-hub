@@ -1,9 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+async function requireUser(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) return null;
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  if (!supabaseUrl || !supabaseAnonKey) return null;
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: { user } } = await client.auth.getUser();
+  return user;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,15 +25,28 @@ serve(async (req) => {
   }
 
   try {
+    const user = await requireUser(req);
+    if (!user) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const { chordName, instrument } = await req.json();
+    const body = await req.json();
+    const chordName = typeof body?.chordName === 'string' ? body.chordName.slice(0, 60) : '';
+    const instrument = body?.instrument === 'piano' ? 'piano' : body?.instrument === 'guitar' ? 'guitar' : '';
 
     if (!chordName || !instrument) {
-      throw new Error('Chord name and instrument are required');
+      return new Response(JSON.stringify({ success: false, error: 'Chord name and instrument are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const systemPrompt = instrument === 'piano' 
@@ -60,7 +87,7 @@ IMPORTANTE:
 
 No incluyas texto adicional fuera del JSON.`;
 
-    console.log(`Generating ${instrument} chord for: ${chordName}`);
+    console.log(`Generating ${instrument} chord for: ${chordName} (user ${user.id})`);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -108,12 +135,8 @@ No incluyas texto adicional fuera del JSON.`;
       throw new Error('No response from AI');
     }
 
-    console.log('AI Response:', content);
-
-    // Parse the JSON response
     let chordData;
     try {
-      // Try to extract JSON from the response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         chordData = JSON.parse(jsonMatch[0]);

@@ -1,9 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+async function requireUser(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) return null;
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  if (!supabaseUrl || !supabaseAnonKey) return null;
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: { user } } = await client.auth.getUser();
+  return user;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,16 +25,34 @@ serve(async (req) => {
   }
 
   try {
+    const user = await requireUser(req);
+    if (!user) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const { question, conversationHistory = [] } = await req.json();
-
-    if (!question) {
-      throw new Error('Question is required');
+    const body = await req.json();
+    const rawQuestion = typeof body?.question === 'string' ? body.question : '';
+    const question = rawQuestion.slice(0, 1000);
+    if (!question.trim()) {
+      return new Response(JSON.stringify({ success: false, error: 'Question is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+
+    const rawHistory = Array.isArray(body?.conversationHistory) ? body.conversationHistory : [];
+    const safeHistory = rawHistory.slice(-20).map((msg: { role?: unknown; content?: unknown }) => ({
+      role: String(msg?.role ?? 'user').slice(0, 20),
+      content: String(msg?.content ?? '').slice(0, 2000),
+    }));
 
     const systemPrompt = `Eres un experto profesor de teoría musical con décadas de experiencia. Tu especialidad incluye:
 
@@ -43,10 +75,7 @@ Usa formato markdown para estructurar tus respuestas:
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...conversationHistory.map((msg: { role: string; content: string }) => ({
-        role: msg.role,
-        content: msg.content
-      })),
+      ...safeHistory,
       { role: 'user', content: question }
     ];
 
