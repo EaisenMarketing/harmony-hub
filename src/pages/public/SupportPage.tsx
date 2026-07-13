@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
+import { Paperclip, X, FileIcon } from 'lucide-react';
 import { PublicLayout } from '@/components/public/PublicLayout';
 import { Seo } from '@/lib/seo';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +23,10 @@ const STATUS_LABELS: Record<string, { label: string; tone: string }> = {
   closed: { label: 'Cerrada', tone: 'bg-white/10 text-white/60 border-white/20' },
 };
 
+const MAX_FILES = 5;
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
+const ACCEPTED_TYPES = 'image/*,application/pdf,.txt,.log,.doc,.docx';
+
 const schema = z.object({
   full_name: z.string().trim().min(2, 'Nombre demasiado corto').max(100),
   email: z.string().trim().email('Email inválido').max(255),
@@ -37,7 +42,17 @@ interface Ticket {
   source: string | null;
   status: string;
   created_at: string;
+  attachment_paths: string[] | null;
 }
+
+const formatBytes = (n: number) => {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(1)} MB`;
+};
+
+const sanitizeFilename = (name: string) =>
+  name.replace(/[^a-zA-Z0-9._-]+/g, '_').slice(0, 120);
 
 export default function SupportPage() {
   const [form, setForm] = useState({ full_name: '', email: '', category: 'access' as Category, message: '' });
@@ -47,6 +62,9 @@ export default function SupportPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(true);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadTickets = async () => {
     setLoadingTickets(true);
@@ -54,15 +72,17 @@ export default function SupportPage() {
     const user = userRes.user;
     if (!user?.email) {
       setIsAuthed(false);
+      setUserId(null);
       setTickets([]);
       setLoadingTickets(false);
       return;
     }
     setIsAuthed(true);
+    setUserId(user.id);
     setForm(f => ({ ...f, email: f.email || user.email!, full_name: f.full_name || (user.user_metadata?.full_name ?? '') }));
     const { data, error } = await (supabase as any)
       .from('contact_leads')
-      .select('id, full_name, email, message, source, status, created_at')
+      .select('id, full_name, email, message, source, status, created_at, attachment_paths')
       .eq('email', user.email)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -75,6 +95,27 @@ export default function SupportPage() {
     const { data: sub } = supabase.auth.onAuthStateChange(() => loadTickets());
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  const handleFilesSelected = (list: FileList | null) => {
+    if (!list) return;
+    const incoming = Array.from(list);
+    const combined = [...files];
+    for (const f of incoming) {
+      if (combined.length >= MAX_FILES) {
+        toast.error(`Máximo ${MAX_FILES} archivos por solicitud.`);
+        break;
+      }
+      if (f.size > MAX_FILE_BYTES) {
+        toast.error(`"${f.name}" supera el límite de 10 MB.`);
+        continue;
+      }
+      combined.push(f);
+    }
+    setFiles(combined);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeFile = (idx: number) => setFiles(files.filter((_, i) => i !== idx));
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -89,24 +130,69 @@ export default function SupportPage() {
       return;
     }
     setSending(true);
-    const { error } = await (supabase as any).from('contact_leads').insert({
-      full_name: parsed.data.full_name,
-      email: parsed.data.email,
-      message: parsed.data.message,
-      source: `support:${parsed.data.category}`,
-      status: 'new',
-    });
-    setSending(false);
-    if (error) {
+
+    // 1. Insertar ticket
+    const { data: inserted, error: insertErr } = await (supabase as any)
+      .from('contact_leads')
+      .insert({
+        full_name: parsed.data.full_name,
+        email: parsed.data.email,
+        message: parsed.data.message,
+        source: `support:${parsed.data.category}`,
+        status: 'new',
+      })
+      .select('id')
+      .single();
+
+    if (insertErr || !inserted) {
+      setSending(false);
       setFailMsg('No pudimos enviar tu solicitud. Escríbenos a soporte@acordelive.com.');
       return;
     }
+
+    const ticketId = inserted.id as string;
+
+    // 2. Subir archivos (si hay)
+    if (files.length && userId) {
+      const uploadedPaths: string[] = [];
+      for (const f of files) {
+        const path = `${userId}/${ticketId}/${Date.now()}-${sanitizeFilename(f.name)}`;
+        const { error: upErr } = await supabase.storage
+          .from('support-attachments')
+          .upload(path, f, { cacheControl: '3600', upsert: false });
+        if (upErr) {
+          toast.error(`No se pudo subir "${f.name}"`, { description: upErr.message });
+          continue;
+        }
+        uploadedPaths.push(path);
+      }
+      if (uploadedPaths.length) {
+        await (supabase as any)
+          .from('contact_leads')
+          .update({ attachment_paths: uploadedPaths })
+          .eq('id', ticketId);
+      }
+    }
+
+    setSending(false);
     toast.success('Solicitud enviada', {
       description: 'Te responderemos por email en menos de 24 horas hábiles.',
     });
     setForm({ ...form, message: '' });
+    setFiles([]);
     loadTickets();
   }
+
+  const openAttachment = async (path: string) => {
+    const { data, error } = await supabase.storage
+      .from('support-attachments')
+      .createSignedUrl(path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast.error('No pudimos abrir el archivo.');
+      return;
+    }
+    window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const categoryLabel = (source: string | null) => {
     const key = source?.startsWith('support:') ? source.slice(8) : '';
@@ -192,6 +278,58 @@ export default function SupportPage() {
                 />
                 {errors.message && <p className="text-xs text-red-400 mt-1">{errors.message}</p>}
               </div>
+
+              {/* Adjuntos */}
+              <div>
+                <label className="text-sm text-white/70">Adjuntos (opcional)</label>
+                <div className="mt-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept={ACCEPTED_TYPES}
+                    onChange={e => handleFilesSelected(e.target.files)}
+                    className="hidden"
+                    id="support-files"
+                  />
+                  <label
+                    htmlFor="support-files"
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 px-3 py-2 text-sm text-white/80 cursor-pointer"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                    Agregar archivos
+                  </label>
+                  <p className="text-[11px] text-white/40 mt-1">
+                    Hasta {MAX_FILES} archivos · 10 MB cada uno · imágenes, PDF, TXT o Word
+                  </p>
+                </div>
+
+                {files.length > 0 && (
+                  <ul className="mt-3 space-y-2">
+                    {files.map((f, idx) => (
+                      <li
+                        key={`${f.name}-${idx}`}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileIcon className="w-4 h-4 text-white/50 shrink-0" />
+                          <span className="text-sm text-white/80 truncate">{f.name}</span>
+                          <span className="text-[11px] text-white/40 shrink-0">{formatBytes(f.size)}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(idx)}
+                          className="text-white/50 hover:text-white"
+                          aria-label={`Quitar ${f.name}`}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
               {failMsg && <p className="text-sm text-red-400">{failMsg}</p>}
               <button
                 disabled={sending}
@@ -217,6 +355,7 @@ export default function SupportPage() {
               <ul className="space-y-3">
                 {tickets.map(t => {
                   const st = STATUS_LABELS[t.status] ?? STATUS_LABELS.new;
+                  const attachments = t.attachment_paths ?? [];
                   return (
                     <li key={t.id} className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
                       <div className="flex items-center justify-between gap-2 mb-1">
@@ -228,6 +367,24 @@ export default function SupportPage() {
                         </span>
                       </div>
                       <p className="text-sm text-white/80 line-clamp-3">{t.message}</p>
+                      {attachments.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {attachments.map(path => {
+                            const filename = path.split('/').pop() ?? 'archivo';
+                            return (
+                              <button
+                                key={path}
+                                type="button"
+                                onClick={() => openAttachment(path)}
+                                className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 px-2 py-1 text-[11px] text-white/70"
+                              >
+                                <Paperclip className="w-3 h-3" />
+                                {filename.replace(/^\d+-/, '')}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                       <div className="mt-2 flex items-center justify-between text-[11px] text-white/40">
                         <span>#{t.id.slice(0, 8)}</span>
                         <span>{new Date(t.created_at).toLocaleString()}</span>
