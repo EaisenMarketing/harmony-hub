@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import logo from '@/assets/logo.webp';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin, useAdminStats } from '@/hooks/useAdminData';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -13,10 +14,11 @@ import { LiveClassesTable } from '@/components/admin/LiveClassesTable';
 import { StudentsTable } from '@/components/admin/StudentsTable';
 import { VideoLibrary } from '@/components/admin/VideoLibrary';
 import { ProductionManagement } from '@/components/admin/ProductionManagement';
-import { Shield } from 'lucide-react';
+import { LogOut, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const AdminPanel = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
   const { data: stats } = useAdminStats();
   const navigate = useNavigate();
@@ -126,52 +128,46 @@ const AdminPanel = () => {
   const pageInfo = getPageInfo();
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex overflow-x-hidden">
       {/* Desktop sidebar */}
       <div className="hidden md:block">
         <AdminSidebar />
       </div>
 
-      <main
-        className="flex-1 overflow-y-auto pb-24 md:pb-0"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
-      >
-        {/* Mobile sticky header */}
-        <header className="md:hidden sticky top-0 z-30 border-b border-white/10 bg-premium-dark/80 backdrop-blur-xl px-4 pt-12 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/15">
-              <Shield className="w-5 h-5 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-base font-bold text-white truncate">
-                {pageInfo.title}
-              </h1>
-              <p className="text-[11px] text-white/60 truncate">
-                {pageInfo.subtitle}
-              </p>
-            </div>
-          </div>
+      <main className="flex-1 min-w-0 overflow-y-auto">
+        {/* Mobile top header like student portal */}
+        <header className="sticky top-0 z-40 flex items-center justify-between px-4 pt-12 pb-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
+          <Link to="/" className="flex items-center gap-2 min-w-0">
+            <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-8 h-8 rounded-lg object-cover shrink-0" />
+            <span className="font-bold text-foreground truncate">Admin</span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground gap-2 shrink-0"
+            onClick={signOut}
+          >
+            <LogOut className="w-4 h-4" />
+            Salir
+          </Button>
         </header>
 
-        <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-6">
-          {/* Desktop header */}
-          <header className="hidden md:flex items-center gap-3">
+        <div className="w-full max-w-6xl mx-auto p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 pb-24 md:pb-8">
+          <header className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
-              <Shield className="w-6 h-6 text-primary" />
+              <Shield className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">
+            <div className="min-w-0">
+              <h1 className="text-2xl lg:text-3xl font-bold text-foreground truncate">
                 {pageInfo.title}
               </h1>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-sm md:text-base">
                 {pageInfo.subtitle}
               </p>
             </div>
           </header>
 
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-            {renderContent()}
-          </div>
+          {renderContent()}
         </div>
       </main>
 
