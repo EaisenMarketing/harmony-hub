@@ -44,9 +44,10 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      resolveDestination(user.id).then((dest) => navigate(dest, { replace: true }));
     }
   }, [user, navigate]);
+
 
   const validateLogin = () => {
     const newErrors: Record<string, string> = {};
