@@ -143,10 +143,12 @@ const Auth = () => {
       });
     } else {
       toast({
-        title: '¡Cuenta creada!',
-        description: 'Tu cuenta ha sido creada exitosamente',
+        title: '¡Revisa tu email!',
+        description: `Enviamos un enlace de verificación a ${signupEmail}. Confírmalo para activar tu cuenta.`,
       });
-      navigate('/portal', { replace: true });
+      setSignupEmail('');
+      setSignupPassword('');
+      setSignupName('');
     }
     setIsLoading(false);
   };
