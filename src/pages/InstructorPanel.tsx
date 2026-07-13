@@ -71,12 +71,37 @@ const InstructorPanel = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <InstructorSidebar />
-      
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8 space-y-6">
-          {/* Header */}
-          <header className="flex items-center gap-3">
+      {/* Desktop sidebar */}
+      <div className="hidden md:block">
+        <InstructorSidebar />
+      </div>
+
+      <main
+        className="flex-1 overflow-y-auto pb-24 md:pb-0"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        {/* Mobile sticky header (iOS-style, blurred) */}
+        <header className="md:hidden sticky top-0 z-30 border-b border-white/10 bg-premium-dark/80 backdrop-blur-xl px-4 pt-12 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/15">
+              <Music className="w-5 h-5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-base font-bold text-white truncate">
+                {getPageTitle()}
+              </h1>
+              <p className="text-[11px] text-white/60 truncate">
+                Instructor de {profile.instrument === 'guitar' ? 'Guitarra' :
+                  profile.instrument === 'piano' ? 'Piano' :
+                  profile.instrument === 'drums' ? 'Batería' : profile.instrument}
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+          {/* Desktop header */}
+          <header className="hidden md:flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <Music className="w-6 h-6 text-primary" />
             </div>
@@ -85,8 +110,8 @@ const InstructorPanel = () => {
                 {getPageTitle()}
               </h1>
               <p className="text-muted-foreground text-sm">
-                Instructor de {profile.instrument === 'guitar' ? 'Guitarra' : 
-                  profile.instrument === 'piano' ? 'Piano' : 
+                Instructor de {profile.instrument === 'guitar' ? 'Guitarra' :
+                  profile.instrument === 'piano' ? 'Piano' :
                   profile.instrument === 'drums' ? 'Batería' : profile.instrument}
               </p>
             </div>
@@ -95,6 +120,9 @@ const InstructorPanel = () => {
           {renderContent()}
         </div>
       </main>
+
+      {/* Mobile bottom nav */}
+      <InstructorMobileNav />
     </div>
   );
 };
