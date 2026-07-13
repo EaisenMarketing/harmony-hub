@@ -12,17 +12,7 @@ import logo from '@/assets/logo.webp';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
-
-const resolveDestination = async (userId: string): Promise<string> => {
-  const { data: roles } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId);
-  const list = (roles ?? []).map((r) => r.role);
-  if (list.includes('admin')) return '/admin';
-  if (list.includes('instructor')) return '/instructor';
-  return '/portal';
-};
+import { resolveDestination } from '@/lib/auth-redirect';
 
 
 const emailSchema = z.string().email('Email inválido').max(255, 'Email muy largo');

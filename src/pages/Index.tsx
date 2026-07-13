@@ -1,4 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { resolveDestination } from '@/lib/auth-redirect';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 
@@ -88,6 +91,37 @@ const DeferredLandingSections = () => {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    const redirectIfVerified = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !user.email_confirmed_at) return;
+      const dest = await resolveDestination(user.id);
+      if (isMounted) navigate(dest, { replace: true });
+    };
+
+    redirectIfVerified();
+
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        const user = session?.user;
+        if (user && user.email_confirmed_at) {
+          redirectIfVerified();
+        }
+      }
+    });
+    subscription = data.subscription;
+
+    return () => {
+      isMounted = false;
+      subscription?.unsubscribe();
+    };
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-[hsl(222,47%,5%)]">
       <DeferredLandingEffects />
