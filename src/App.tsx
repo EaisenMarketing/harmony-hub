@@ -21,6 +21,7 @@ const LiveClassesPublicPage = lazy(() => import("./pages/public/LiveClassesPubli
 const PricingPage = lazy(() => import("./pages/public/PricingPage"));
 const TeachersPage = lazy(() => import("./pages/public/TeachersPage"));
 const ContactPage = lazy(() => import("./pages/public/ContactPage"));
+const SupportPage = lazy(() => import("./pages/public/SupportPage"));
 // (StaticPages se carga vía helper S abajo)
 
 const PageFallback = () => (
@@ -59,6 +60,7 @@ const App = () => (
         <Route path="/precios" element={<PricingPage />} />
         <Route path="/maestros" element={<TeachersPage />} />
         <Route path="/contacto" element={<ContactPage />} />
+        <Route path="/soporte" element={<WithAuth><SupportPage /></WithAuth>} />
         <Route path="/nosotros" element={S('AboutPage')} />
         <Route path="/preguntas-frecuentes" element={S('FaqPage')} />
         <Route path="/terminos" element={S('TermsPage')} />
