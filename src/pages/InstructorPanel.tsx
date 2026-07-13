@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsInstructor, useInstructorProfile } from '@/hooks/useInstructorData';
 import { InstructorSidebar } from '@/components/instructor/InstructorSidebar';
+import { InstructorMobileNav } from '@/components/instructor/InstructorMobileNav';
 import { InstructorDashboard } from '@/components/instructor/InstructorDashboard';
 import { InstructorStudents } from '@/components/instructor/InstructorStudents';
 import { InstructorCourses } from '@/components/instructor/InstructorCourses';
