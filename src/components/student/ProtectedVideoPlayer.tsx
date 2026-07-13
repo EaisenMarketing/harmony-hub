@@ -213,6 +213,22 @@ export const ProtectedVideoPlayer = ({
     );
   }
 
+  if (urlError) {
+    return (
+      <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center text-white/80 text-sm p-4 text-center">
+        No se pudo cargar el video: {urlError}
+      </div>
+    );
+  }
+
+  if (!resolvedUrl) {
+    return (
+      <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-white/70" />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -222,7 +238,7 @@ export const ProtectedVideoPlayer = ({
     >
       <video
         ref={videoRef}
-        src={videoUrl}
+        src={resolvedUrl}
         className="w-full h-full object-contain"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
@@ -234,6 +250,7 @@ export const ProtectedVideoPlayer = ({
         }}
         onClick={togglePlay}
       />
+
 
       {/* Play overlay */}
       {!isPlaying && (
