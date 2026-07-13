@@ -41,6 +41,7 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupName, setSignupName] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showResendVerification, setShowResendVerification] = useState(false);
 
   useEffect(() => {
     if (user) {
