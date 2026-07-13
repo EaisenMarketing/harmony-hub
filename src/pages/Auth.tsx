@@ -94,6 +94,7 @@ const Auth = () => {
     if (!validateLogin()) return;
     
     setIsLoading(true);
+    setShowResendVerification(false);
     const { error } = await signIn(loginEmail, loginPassword);
     
     if (error) {
@@ -102,6 +103,7 @@ const Auth = () => {
         message = 'Email o contraseña incorrectos';
       } else if (error.message.includes('Email not confirmed')) {
         message = 'Por favor confirma tu email antes de iniciar sesión';
+        setShowResendVerification(true);
       }
       toast({
         title: 'Error',
@@ -121,6 +123,36 @@ const Auth = () => {
     }
 
     setIsLoading(false);
+  };
+
+  const handleResendVerification = async () => {
+    const emailResult = emailSchema.safeParse(loginEmail);
+    if (!emailResult.success) {
+      toast({
+        title: 'Ingresa tu email',
+        description: 'Escribe tu email en el campo de arriba para reenviar el enlace de verificación.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.auth.resend({
+      email: loginEmail,
+      type: 'signup',
+    });
+    setIsLoading(false);
+    if (error) {
+      let message = error.message;
+      if (error.message.includes('over_email_send_rate_limit')) {
+        message = 'Espera un momento antes de volver a solicitar el correo.';
+      }
+      toast({ title: 'Error', description: message, variant: 'destructive' });
+    } else {
+      toast({
+        title: 'Correo reenviado',
+        description: `Revisa tu bandeja de entrada (${loginEmail}) y también la carpeta de spam.`,
+      });
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
