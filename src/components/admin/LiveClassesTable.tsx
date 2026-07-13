@@ -59,18 +59,65 @@ export const LiveClassesTable = () => {
   return (
     <>
       <Card className="border-border/50">
-        <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <CardHeader className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Video className="w-5 h-5 text-primary" />
             Clases en Vivo
           </CardTitle>
-          <Button onClick={() => setShowForm(true)} className="gap-2">
+          <Button onClick={() => setShowForm(true)} className="gap-2 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             Nueva Clase
           </Button>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="md:hidden space-y-3">
+            {classes.map((cls) => {
+              const scheduledDate = new Date(cls.scheduled_at);
+              const isUpcoming = isFuture(scheduledDate);
+              const isPassed = isPast(scheduledDate);
+
+              return (
+                <div key={cls.id} className="rounded-lg border border-border/50 bg-muted/20 p-3 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{cls.instrument ? instrumentEmojis[cls.instrument] : '🎵'}</span>
+                        <p className="font-medium text-foreground leading-tight truncate">{cls.title}</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{cls.description}</p>
+                    </div>
+                    {isUpcoming ? (
+                      <Badge className="bg-secondary/20 text-secondary shrink-0">Próxima</Badge>
+                    ) : isPassed ? (
+                      <Badge variant="secondary" className="shrink-0">Finalizada</Badge>
+                    ) : (
+                      <Badge className="bg-amber-500/20 text-amber-600 shrink-0">En curso</Badge>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(scheduledDate, "d MMM yyyy", { locale: es })}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{format(scheduledDate, 'HH:mm')} · {cls.duration_minutes} min</span>
+                    <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{cls.live_class_registrations?.length || 0}/{cls.max_attendees}</span>
+                    <Badge variant="outline" className="w-fit capitalize">{cls.required_plan}</Badge>
+                  </div>
+
+                  <Button variant="outline" size="sm" className="w-full text-destructive" onClick={() => setDeleteId(cls.id)}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Eliminar
+                  </Button>
+                </div>
+              );
+            })}
+            {classes.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No hay clases programadas. Crea tu primera clase en vivo.
+              </div>
+            )}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Clase</TableHead>
@@ -157,7 +204,8 @@ export const LiveClassesTable = () => {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

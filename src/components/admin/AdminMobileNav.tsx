@@ -48,11 +48,8 @@ export const AdminMobileNav = () => {
   const isMoreActive = more.some((i) => pathname.startsWith(i.href));
 
   return (
-    <nav
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/10 bg-premium-dark/85 backdrop-blur-xl"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-    >
-      <ul className="grid grid-cols-5">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border md:hidden safe-area-bottom">
+      <ul className="flex items-center justify-around h-16 px-1">
         {primary.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -62,19 +59,18 @@ export const AdminMobileNav = () => {
               <Link
                 to={item.href}
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium transition-colors',
-                  isActive
-                    ? 'text-primary'
-                    : 'text-white/60 hover:text-white'
+                  'flex flex-col items-center justify-center gap-0.5 flex-1 py-1 rounded-xl transition-colors min-w-0',
+                  isActive ? 'text-primary' : 'text-muted-foreground active:text-foreground'
                 )}
               >
                 <item.icon
                   className={cn(
-                    'w-5 h-5',
-                    isActive && 'drop-shadow-[0_0_6px_hsl(var(--primary))]'
+                    'w-5 h-5 shrink-0',
+                    isActive && 'drop-shadow-sm'
                   )}
+                  strokeWidth={isActive ? 2.5 : 1.8}
                 />
-                <span>{item.name}</span>
+                <span className={cn('text-[10px] leading-tight truncate', isActive ? 'font-semibold' : 'font-medium')}>{item.name}</span>
               </Link>
             </li>
           );
@@ -84,17 +80,18 @@ export const AdminMobileNav = () => {
             <SheetTrigger asChild>
               <button
                 className={cn(
-                  'w-full flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium transition-colors',
-                  isMoreActive ? 'text-primary' : 'text-white/60 hover:text-white'
+                  'w-full flex flex-col items-center justify-center gap-0.5 flex-1 py-1 rounded-xl transition-colors min-w-0',
+                  isMoreActive ? 'text-primary' : 'text-muted-foreground active:text-foreground'
                 )}
               >
                 <MoreHorizontal
                   className={cn(
-                    'w-5 h-5',
-                    isMoreActive && 'drop-shadow-[0_0_6px_hsl(var(--primary))]'
+                    'w-5 h-5 shrink-0',
+                    isMoreActive && 'drop-shadow-sm'
                   )}
+                  strokeWidth={isMoreActive ? 2.5 : 1.8}
                 />
-                <span>Más</span>
+                <span className={cn('text-[10px] leading-tight truncate', isMoreActive ? 'font-semibold' : 'font-medium')}>Más</span>
               </button>
             </SheetTrigger>
             <SheetContent
