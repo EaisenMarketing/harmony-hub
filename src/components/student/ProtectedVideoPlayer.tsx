@@ -26,6 +26,7 @@ const planHierarchy = PLAN_HIERARCHY;
 
 export const ProtectedVideoPlayer = ({
   videoUrl,
+  lessonId,
   isLocked,
   requiredPlan,
   currentPlan,
@@ -43,9 +44,42 @@ export const ProtectedVideoPlayer = ({
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const hasAccess = !isLocked || planHierarchy[currentPlan] >= planHierarchy[requiredPlan];
+  const needsSignedUrl = videoUrl.includes('/course-content/');
+
+  // Fetch signed URL for private bucket videos
+  useEffect(() => {
+    if (!hasAccess) return;
+    if (!needsSignedUrl) {
+      setResolvedUrl(videoUrl);
+      return;
+    }
+    if (!lessonId) {
+      setUrlError('Falta identificador de lección');
+      return;
+    }
+    let cancelled = false;
+    setResolvedUrl(null);
+    setUrlError(null);
+    supabase.functions
+      .invoke('get-video-signed-url', { body: { lessonId } })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.url) {
+          setUrlError(error?.message || data?.error || 'No se pudo cargar el video');
+          return;
+        }
+        setResolvedUrl(data.url);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [videoUrl, lessonId, hasAccess, needsSignedUrl]);
+
 
   // Handle seek to time from notes
   useEffect(() => {
