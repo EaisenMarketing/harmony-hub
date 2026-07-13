@@ -175,11 +175,10 @@ export const VideoUploader = ({ value, onChange, folder = 'videos' }: VideoUploa
             </Button>
           </div>
           
-          <video
-            src={value}
-            controls
-            className="mt-3 w-full rounded-lg max-h-48 bg-black"
-          />
+          <p className="text-xs text-muted-foreground mt-3">
+            Video privado. Los estudiantes lo verán mediante una URL firmada temporal.
+          </p>
+
         </div>
       )}
     </div>
