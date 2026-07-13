@@ -166,6 +166,31 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    const emailResult = emailSchema.safeParse(loginEmail);
+    if (!emailResult.success) {
+      toast({
+        title: 'Ingresa tu email',
+        description: 'Escribe tu email en el campo de arriba para enviarte el enlace de recuperación.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(loginEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setIsLoading(false);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({
+        title: 'Revisa tu email',
+        description: 'Te enviamos un enlace para restablecer tu contraseña.',
+      });
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -262,7 +287,18 @@ const Auth = () => {
                       <p className="text-sm text-destructive">{errors.loginPassword}</p>
                     )}
                   </div>
-                  
+
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="text-xs text-primary hover:underline"
+                      disabled={isLoading}
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </div>
+
                   <Button type="submit" className="w-full" variant="gradient" disabled={isLoading}>
                     {isLoading ? (
                       <>

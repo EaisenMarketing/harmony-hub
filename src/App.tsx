@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 
 const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const StudentPortal = lazy(() => import("./pages/StudentPortal"));
 const CourseViewer = lazy(() => import("./pages/CourseViewer"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
