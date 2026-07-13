@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin, useAdminStats } from '@/hooks/useAdminData';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { AdminMobileNav } from '@/components/admin/AdminMobileNav';
 import { AdminStats } from '@/components/admin/AdminStats';
 import { AdminDashboardCharts } from '@/components/admin/AdminDashboardCharts';
 import { InstructorsManagement } from '@/components/admin/InstructorsManagement';
