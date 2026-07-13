@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Lock } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedVideoPlayerProps {
   videoUrl: string;
+  lessonId?: string;
   isLocked: boolean;
   requiredPlan: string;
   currentPlan: string;
@@ -16,6 +18,7 @@ interface ProtectedVideoPlayerProps {
   seekToTime?: number | null;
 }
 
+
 import { PLAN_HIERARCHY, PLAN_LABELS, type PlanKey } from '@/lib/plans';
 
 const planLabels = PLAN_LABELS;
@@ -23,6 +26,7 @@ const planHierarchy = PLAN_HIERARCHY;
 
 export const ProtectedVideoPlayer = ({
   videoUrl,
+  lessonId,
   isLocked,
   requiredPlan,
   currentPlan,
@@ -40,9 +44,42 @@ export const ProtectedVideoPlayer = ({
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const hasAccess = !isLocked || planHierarchy[currentPlan] >= planHierarchy[requiredPlan];
+  const needsSignedUrl = videoUrl.includes('/course-content/');
+
+  // Fetch signed URL for private bucket videos
+  useEffect(() => {
+    if (!hasAccess) return;
+    if (!needsSignedUrl) {
+      setResolvedUrl(videoUrl);
+      return;
+    }
+    if (!lessonId) {
+      setUrlError('Falta identificador de lección');
+      return;
+    }
+    let cancelled = false;
+    setResolvedUrl(null);
+    setUrlError(null);
+    supabase.functions
+      .invoke('get-video-signed-url', { body: { lessonId } })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.url) {
+          setUrlError(error?.message || data?.error || 'No se pudo cargar el video');
+          return;
+        }
+        setResolvedUrl(data.url);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [videoUrl, lessonId, hasAccess, needsSignedUrl]);
+
 
   // Handle seek to time from notes
   useEffect(() => {
@@ -176,6 +213,22 @@ export const ProtectedVideoPlayer = ({
     );
   }
 
+  if (urlError) {
+    return (
+      <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center text-white/80 text-sm p-4 text-center">
+        No se pudo cargar el video: {urlError}
+      </div>
+    );
+  }
+
+  if (!resolvedUrl) {
+    return (
+      <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-white/70" />
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -185,7 +238,7 @@ export const ProtectedVideoPlayer = ({
     >
       <video
         ref={videoRef}
-        src={videoUrl}
+        src={resolvedUrl}
         className="w-full h-full object-contain"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
@@ -197,6 +250,7 @@ export const ProtectedVideoPlayer = ({
         }}
         onClick={togglePlay}
       />
+
 
       {/* Play overlay */}
       {!isPlaying && (

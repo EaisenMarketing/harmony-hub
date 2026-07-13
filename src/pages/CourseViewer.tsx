@@ -184,6 +184,7 @@ const CourseViewer = () => {
           {selectedLesson?.video_url ? (
             <ProtectedVideoPlayer
               videoUrl={selectedLesson.video_url}
+              lessonId={selectedLesson.id}
               isLocked={!!isLocked}
               requiredPlan={course.required_plan || 'basic'}
               currentPlan={userPlan}
@@ -193,6 +194,7 @@ const CourseViewer = () => {
               initialProgress={userProgress?.lessonProgress[selectedLesson.id] || 0}
               seekToTime={seekToTime}
             />
+
           ) : (
             <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
               <div className="text-center">

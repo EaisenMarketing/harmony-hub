@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
-import { Play, Filter, Music, Search, Upload } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Play, Filter, Music, Search, Upload, Loader2 } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +60,39 @@ export const VideoLibrary = () => {
   const [selectedInstrument, setSelectedInstrument] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<LessonWithCourse | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
+
+  useEffect(() => {
+    if (!selectedVideo?.id || !selectedVideo.video_url) {
+      setPreviewUrl(null);
+      setPreviewError(null);
+      return;
+    }
+    const raw = selectedVideo.video_url;
+    if (!raw.includes('/course-content/')) {
+      setPreviewUrl(raw);
+      return;
+    }
+    let cancelled = false;
+    setPreviewUrl(null);
+    setPreviewError(null);
+    supabase.functions
+      .invoke('get-video-signed-url', { body: { lessonId: selectedVideo.id } })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.url) {
+          setPreviewError(error?.message || data?.error || 'No se pudo cargar el video');
+          return;
+        }
+        setPreviewUrl(data.url);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedVideo]);
+
 
   const { data: lessons = [], isLoading } = useQuery({
     queryKey: ['admin-video-library'],
@@ -307,20 +340,24 @@ export const VideoLibrary = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="aspect-video bg-black rounded-lg overflow-hidden">
-              {selectedVideo?.video_url ? (
-                <video
-                  src={selectedVideo.video_url}
-                  controls
-                  autoPlay
-                  className="w-full h-full"
-                >
-                  Tu navegador no soporta la reproducción de video.
-                </video>
-              ) : (
+              {!selectedVideo?.video_url ? (
                 <div className="w-full h-full flex items-center justify-center text-white/50">
                   Video no disponible
                 </div>
+              ) : previewError ? (
+                <div className="w-full h-full flex items-center justify-center text-white/70 text-sm p-4 text-center">
+                  {previewError}
+                </div>
+              ) : !previewUrl ? (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-white/70" />
+                </div>
+              ) : (
+                <video src={previewUrl} controls autoPlay className="w-full h-full">
+                  Tu navegador no soporta la reproducción de video.
+                </video>
               )}
+
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
