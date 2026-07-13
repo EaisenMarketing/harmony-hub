@@ -73,36 +73,29 @@ serve(async (req) => {
 
     console.log(`Analyzing song from YouTube: ${youtubeUrl}`);
 
-    if (authHeader && videoId) {
+    if (videoId) {
       try {
-        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-        const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-        const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-          global: { headers: { Authorization: authHeader } },
-        });
-        const { data: { user } } = await userClient.auth.getUser();
-        if (user) {
-          const { data: correction } = await userClient
-            .from('song_corrections')
-            .select('corrected_analysis')
-            .eq('user_id', user.id)
-            .eq('video_id', videoId)
-            .maybeSingle();
-          if (correction?.corrected_analysis) {
-            console.log('Returning saved user correction for video', videoId);
-            return new Response(JSON.stringify({
-              success: true,
-              analysis: correction.corrected_analysis,
-              fromCorrection: true,
-            }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          }
+        const { data: correction } = await authClient
+          .from('song_corrections')
+          .select('corrected_analysis')
+          .eq('user_id', authedUser.id)
+          .eq('video_id', videoId)
+          .maybeSingle();
+        if (correction?.corrected_analysis) {
+          console.log('Returning saved user correction for video', videoId);
+          return new Response(JSON.stringify({
+            success: true,
+            analysis: correction.corrected_analysis,
+            fromCorrection: true,
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
         }
       } catch (e) {
         console.warn('Correction lookup failed', e);
       }
     }
+
 
     // Step 1: Get reliable song identification via YouTube oEmbed
     const metadata = await fetchYouTubeMetadata(youtubeUrl);
