@@ -450,6 +450,7 @@ export type Database = {
       }
       contact_leads: {
         Row: {
+          attachment_paths: string[]
           created_at: string
           email: string
           full_name: string
@@ -461,6 +462,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachment_paths?: string[]
           created_at?: string
           email: string
           full_name: string
@@ -472,6 +474,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachment_paths?: string[]
           created_at?: string
           email?: string
           full_name?: string
