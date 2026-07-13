@@ -73,6 +73,7 @@ const App = () => (
 
         {/* Rutas privadas existentes */}
         <Route path="/auth" element={<WithAuth><Auth /></WithAuth>} />
+        <Route path="/reset-password" element={<WithAuth><ResetPassword /></WithAuth>} />
         <Route path="/portal" element={<WithAuth><StudentPortal /></WithAuth>} />
         <Route path="/portal/curso/:courseId" element={<WithAuth><CourseViewer /></WithAuth>} />
         <Route path="/portal/curso/:courseId/leccion/:lessonId" element={<WithAuth><CourseViewer /></WithAuth>} />
