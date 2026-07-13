@@ -167,15 +167,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error: error as Error | null };
   };
 
-  const signOut = async (opts?: { silent?: boolean; reason?: string }) => {
+  const signOut = async (opts?: unknown) => {
+    const options = (opts && typeof opts === 'object' && !('nativeEvent' in (opts as object)))
+      ? (opts as { silent?: boolean; reason?: string })
+      : {};
     manualSignOutRef.current = true;
     clearExpiryTimer();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     hadSessionRef.current = false;
-    if (!opts?.silent) {
-      toast.success(opts?.reason ?? 'Sesión cerrada correctamente');
+    if (!options.silent) {
+      toast.success(options.reason ?? 'Sesión cerrada correctamente');
     }
   };
 
