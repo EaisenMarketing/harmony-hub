@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
-import { Play, Filter, Music, Search, Upload } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Play, Filter, Music, Search, Upload, Loader2 } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
