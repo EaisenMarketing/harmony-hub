@@ -60,7 +60,39 @@ export const VideoLibrary = () => {
   const [selectedInstrument, setSelectedInstrument] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVideo, setSelectedVideo] = useState<LessonWithCourse | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
+
+  useEffect(() => {
+    if (!selectedVideo?.id || !selectedVideo.video_url) {
+      setPreviewUrl(null);
+      setPreviewError(null);
+      return;
+    }
+    const raw = selectedVideo.video_url;
+    if (!raw.includes('/course-content/')) {
+      setPreviewUrl(raw);
+      return;
+    }
+    let cancelled = false;
+    setPreviewUrl(null);
+    setPreviewError(null);
+    supabase.functions
+      .invoke('get-video-signed-url', { body: { lessonId: selectedVideo.id } })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.url) {
+          setPreviewError(error?.message || data?.error || 'No se pudo cargar el video');
+          return;
+        }
+        setPreviewUrl(data.url);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedVideo]);
+
 
   const { data: lessons = [], isLoading } = useQuery({
     queryKey: ['admin-video-library'],
