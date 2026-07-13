@@ -33,21 +33,46 @@ serve(async (req) => {
   }
 
   try {
+    // Require an authenticated user to prevent unauthenticated abuse of the AI budget
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const supabaseUrl0 = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey0 = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authClient = createClient(supabaseUrl0, supabaseAnonKey0, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: authedUser } } = await authClient.auth.getUser();
+    if (!authedUser) {
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const { youtubeUrl, videoId } = await req.json();
+    const bodyIn = await req.json();
+    const youtubeUrl = typeof bodyIn?.youtubeUrl === 'string' ? bodyIn.youtubeUrl.slice(0, 500) : '';
+    const videoId = typeof bodyIn?.videoId === 'string' ? bodyIn.videoId.slice(0, 60) : '';
 
-    if (!youtubeUrl) {
-      throw new Error('YouTube URL is required');
+    // Basic YouTube URL validation
+    if (!youtubeUrl || !/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//i.test(youtubeUrl)) {
+      return new Response(JSON.stringify({ success: false, error: 'Valid YouTube URL is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     console.log(`Analyzing song from YouTube: ${youtubeUrl}`);
 
-    // Check for a saved user correction for this video first
-    const authHeader = req.headers.get('Authorization');
     if (authHeader && videoId) {
       try {
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
