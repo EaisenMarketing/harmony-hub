@@ -112,8 +112,13 @@ const Auth = () => {
         title: '¡Bienvenido!',
         description: 'Has iniciado sesión correctamente',
       });
-      navigate('/');
+      const { data: sessionData } = await supabase.auth.getUser();
+      if (sessionData.user) {
+        const dest = await resolveDestination(sessionData.user.id);
+        navigate(dest, { replace: true });
+      }
     }
+
     setIsLoading(false);
   };
 
