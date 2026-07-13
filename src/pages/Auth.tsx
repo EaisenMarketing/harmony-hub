@@ -146,7 +146,7 @@ const Auth = () => {
         title: '¡Cuenta creada!',
         description: 'Tu cuenta ha sido creada exitosamente',
       });
-      navigate('/');
+      navigate('/portal', { replace: true });
     }
     setIsLoading(false);
   };
