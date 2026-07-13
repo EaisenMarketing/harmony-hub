@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Lock } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedVideoPlayerProps {
   videoUrl: string;
+  lessonId?: string;
   isLocked: boolean;
   requiredPlan: string;
   currentPlan: string;
@@ -15,6 +17,7 @@ interface ProtectedVideoPlayerProps {
   initialProgress?: number;
   seekToTime?: number | null;
 }
+
 
 import { PLAN_HIERARCHY, PLAN_LABELS, type PlanKey } from '@/lib/plans';
 
