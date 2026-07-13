@@ -335,15 +335,15 @@ const Auth = () => {
                   </div>
 
                   {showResendVerification && (
-                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 space-y-2">
-                      <p className="text-sm text-amber-200">
+                    <div className="rounded-lg border border-border bg-muted/50 p-3 space-y-2">
+                      <p className="text-sm text-muted-foreground">
                         ¿No recibiste el correo de verificación?
                       </p>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="w-full border-amber-500/50 text-amber-100 hover:bg-amber-500/20 hover:text-amber-50"
+                        className="w-full"
                         onClick={handleResendVerification}
                         disabled={isLoading}
                       >
