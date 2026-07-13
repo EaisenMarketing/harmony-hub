@@ -340,20 +340,24 @@ export const VideoLibrary = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="aspect-video bg-black rounded-lg overflow-hidden">
-              {selectedVideo?.video_url ? (
-                <video
-                  src={selectedVideo.video_url}
-                  controls
-                  autoPlay
-                  className="w-full h-full"
-                >
-                  Tu navegador no soporta la reproducción de video.
-                </video>
-              ) : (
+              {!selectedVideo?.video_url ? (
                 <div className="w-full h-full flex items-center justify-center text-white/50">
                   Video no disponible
                 </div>
+              ) : previewError ? (
+                <div className="w-full h-full flex items-center justify-center text-white/70 text-sm p-4 text-center">
+                  {previewError}
+                </div>
+              ) : !previewUrl ? (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-white/70" />
+                </div>
+              ) : (
+                <video src={previewUrl} controls autoPlay className="w-full h-full">
+                  Tu navegador no soporta la reproducción de video.
+                </video>
               )}
+
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
