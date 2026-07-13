@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 
 const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const StudentPortal = lazy(() => import("./pages/StudentPortal"));
 const CourseViewer = lazy(() => import("./pages/CourseViewer"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
@@ -72,6 +73,7 @@ const App = () => (
 
         {/* Rutas privadas existentes */}
         <Route path="/auth" element={<WithAuth><Auth /></WithAuth>} />
+        <Route path="/reset-password" element={<WithAuth><ResetPassword /></WithAuth>} />
         <Route path="/portal" element={<WithAuth><StudentPortal /></WithAuth>} />
         <Route path="/portal/curso/:courseId" element={<WithAuth><CourseViewer /></WithAuth>} />
         <Route path="/portal/curso/:courseId/leccion/:lessonId" element={<WithAuth><CourseViewer /></WithAuth>} />
