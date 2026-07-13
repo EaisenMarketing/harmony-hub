@@ -1700,6 +1700,16 @@ export type Database = {
         Returns: boolean
       }
       slugify: { Args: { input: string }; Returns: string }
+      verify_certificate: {
+        Args: { _code: string }
+        Returns: {
+          course_title: string
+          id: string
+          issued_at: string
+          student_name: string
+          verification_code: string
+        }[]
+      }
     }
     Enums: {
       ad_platform: "facebook" | "instagram" | "tiktok" | "google"
