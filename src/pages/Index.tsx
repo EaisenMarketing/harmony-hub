@@ -1,4 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { resolveDestination } from '@/lib/auth-redirect';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 
