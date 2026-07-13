@@ -13,6 +13,7 @@ const footerLinks = {
   support: [
     { label: 'Preguntas frecuentes', to: '/preguntas-frecuentes' },
     { label: 'Contacto', to: '/contacto' },
+    { label: 'Soporte', to: '/soporte' },
     { label: 'Ser Maestro', to: '/ser-maestro' },
     { label: 'Nosotros', to: '/nosotros' },
   ],
