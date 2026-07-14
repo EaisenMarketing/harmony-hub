@@ -218,6 +218,7 @@ const CourseViewer = () => {
               </p>
             )}
           </div>
+          <ContinueWatchingButton variant="inline" courseId={courseId} className="hidden md:inline-flex shrink-0" />
         </header>
 
         {/* Video Player */}
