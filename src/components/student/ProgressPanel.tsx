@@ -124,6 +124,9 @@ export const ProgressPanel = () => {
               Resumen personalizado de tu plan de {planInfo?.label}.
             </p>
           </div>
+          <Button onClick={handleDownloadPdf} variant="outline" className="gap-2 shrink-0">
+            <Download className="w-4 h-4" /> Descargar PDF
+          </Button>
         </div>
       </div>
 
