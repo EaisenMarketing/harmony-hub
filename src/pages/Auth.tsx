@@ -260,12 +260,28 @@ const Auth = () => {
         </div>
 
         <Card className="border-border/50 shadow-xl">
+          {selectedPlan && (
+            <div className="mx-4 mt-4 rounded-lg border border-primary/40 bg-primary/10 p-3 flex items-center gap-3">
+              <div className="text-2xl">{selectedPlan.emoji}</div>
+              <div className="flex-1 text-sm">
+                <div className="font-semibold text-foreground flex items-center gap-1">
+                  <Music className="w-3.5 h-3.5" /> Plan seleccionado: {selectedPlan.label}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  ${selectedPlan.price}/mes · se activará al crear tu cuenta.
+                </div>
+              </div>
+            </div>
+          )}
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">Accede a tu cuenta</CardTitle>
             <CardDescription className="text-center">
-              Inicia sesión o crea una cuenta nueva
+              {selectedPlan
+                ? `Crea tu cuenta para empezar con ${selectedPlan.label}.`
+                : 'Inicia sesión o crea una cuenta nueva'}
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <Button
               type="button"
