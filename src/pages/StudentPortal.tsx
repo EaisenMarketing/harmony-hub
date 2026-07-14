@@ -15,6 +15,7 @@ import { CertificatesPage } from '@/components/student/CertificatesPage';
 import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
 import { ProductionDashboard } from '@/components/student/ProductionDashboard';
+import { ProgressPanel } from '@/components/student/ProgressPanel';
 import { PracticeSection } from '@/components/student/PracticeSection';
 import { TeacherConsultSection } from '@/components/student/TeacherConsultSection';
 import { CommunitySection } from '@/components/student/CommunitySection';
