@@ -141,6 +141,9 @@ const StudentPortal = () => {
             </header>
 
 
+            {/* Continuar donde lo dejé */}
+            <ContinueWatchingButton />
+
             {/* Stats */}
             <DashboardStats
               completedLessons={stats?.completedLessons || 0}
