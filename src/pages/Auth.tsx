@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,12 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Music } from 'lucide-react';
 import logo from '@/assets/logo.webp';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
-import { resolveDestination } from '@/lib/auth-redirect';
+import {
+  resolveDestination,
+  savePendingInstrument,
+  readPendingInstrument,
+} from '@/lib/auth-redirect';
+import { INSTRUMENT_PLAN_MAP, isValidInstrument } from '@/lib/instrument-access';
 
 
 const emailSchema = z.string().email('Email inválido').max(255, 'Email muy largo');
@@ -21,9 +26,10 @@ const nameSchema = z.string().min(2, 'El nombre debe tener al menos 2 caracteres
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, signIn, signUp, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -32,12 +38,29 @@ const Auth = () => {
   const [signupName, setSignupName] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showResendVerification, setShowResendVerification] = useState(false);
+  const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
+
+  // Persist any ?plan= from the pricing page so we can apply it after signup / email verification.
+  const planParam = searchParams.get('plan');
+  const selectedInstrument = isValidInstrument(planParam)
+    ? planParam
+    : readPendingInstrument();
+  const selectedPlan = selectedInstrument ? INSTRUMENT_PLAN_MAP[selectedInstrument] : null;
+
+  useEffect(() => {
+    if (planParam) {
+      savePendingInstrument(planParam);
+      // If the user landed with a plan, they most likely want to create an account.
+      setDefaultTab('signup');
+    }
+  }, [planParam]);
 
   useEffect(() => {
     if (user) {
       resolveDestination(user.id).then((dest) => navigate(dest, { replace: true }));
     }
   }, [user, navigate]);
+
 
 
   const validateLogin = () => {
