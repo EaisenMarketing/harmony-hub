@@ -27,7 +27,7 @@ const productionPlan = INSTRUMENT_PLANS.find((p) => p.id === 'production')!;
 
 export const PaymentsSection = () => {
   const { data: profile } = useStudentProfile();
-  const currentPlan = profile?.subscription_plan || 'basic';
+  const currentPlan: string = profile?.subscription_plan || 'basic';
   const currentInstrument = profile?.primary_instrument || 'piano';
   const [selected, setSelected] = useState<InstrumentSlug>(
     isValidInstrument(currentInstrument) ? currentInstrument : instrumentOptions[0].id
