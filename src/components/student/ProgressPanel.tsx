@@ -33,15 +33,15 @@ export const ProgressPanel = () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('user_progress')
-        .select('lesson_id, completed_at, lessons(id, title, module_id, course_modules(course_id, courses(id, title, instrument, required_plan)))')
+        .select('lesson_id, last_watched_at, lessons(id, title, module_id, course_modules(course_id, courses(id, title, instrument, required_plan)))')
         .eq('user_id', user.id)
         .eq('completed', true)
-        .order('completed_at', { ascending: false })
+        .order('last_watched_at', { ascending: false })
         .limit(20);
       if (error) throw error;
-      const rows = (data || []) as Array<{
+      const rows = (data || []) as unknown as Array<{
         lesson_id: string;
-        completed_at: string | null;
+        last_watched_at: string | null;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         lessons: any;
       }>;
