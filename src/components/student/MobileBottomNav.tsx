@@ -1,30 +1,36 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
+import {
+  LayoutDashboard,
+  BookOpen,
   Music,
   Users,
   MessageCircleQuestion,
+  Headphones,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const tabs = [
-  { name: 'Inicio', href: '/portal', icon: LayoutDashboard },
-  { name: 'Cursos', href: '/portal/cursos', icon: BookOpen },
-  { name: 'Práctica', href: '/portal/practica', icon: Music },
-  { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
-  { name: 'Maestros', href: '/portal/consultas', icon: MessageCircleQuestion },
-];
+import { useUserInstrument } from '@/hooks/useUserInstrument';
 
 export const MobileBottomNav = () => {
   const location = useLocation();
+  const { data: userIns } = useUserInstrument();
+  const isProduction = userIns?.instrument === 'production';
+
+  const tabs = [
+    { name: 'Inicio', href: '/portal', icon: LayoutDashboard },
+    { name: 'Cursos', href: '/portal/cursos', icon: BookOpen },
+    ...(isProduction
+      ? [{ name: 'Producción', href: '/portal/produccion', icon: Headphones }]
+      : [{ name: 'Práctica', href: '/portal/practica', icon: Music }]),
+    { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
+    { name: 'Maestros', href: '/portal/consultas', icon: MessageCircleQuestion },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-xl border-t border-border md:hidden safe-area-bottom">
       <div className="flex items-center justify-around h-16 px-1">
         {tabs.map((tab) => {
-          const isActive = tab.href === '/portal' 
-            ? location.pathname === '/portal' 
+          const isActive = tab.href === '/portal'
+            ? location.pathname === '/portal'
             : location.pathname.startsWith(tab.href);
           return (
             <Link

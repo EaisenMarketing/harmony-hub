@@ -68,8 +68,18 @@ export const useStudentCourses = () => {
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // Get user's primary instrument
+      const { data: prof } = await supabase
+        .from('profiles')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .select('primary_instrument' as any)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const primary = (prof as any)?.primary_instrument as string | null;
+
       // Get all published courses
-      const { data: courses, error: coursesError } = await supabase
+      let query = supabase
         .from('courses')
         .select(`
           id,
@@ -78,9 +88,22 @@ export const useStudentCourses = () => {
           thumbnail_url,
           instrument,
           level,
-          duration_hours
+          duration_hours,
+          required_plan
         `)
         .eq('is_published', true);
+
+      // Filter by user's instrument
+      if (primary === 'production') {
+        query = query.eq('required_plan', 'production');
+      } else if (primary) {
+        query = query.eq('instrument', primary as 'guitar' | 'piano' | 'drums');
+      } else {
+        // No instrument yet → no courses visible
+        return [];
+      }
+
+      const { data: courses, error: coursesError } = await query;
 
       if (coursesError) throw coursesError;
 
@@ -107,7 +130,7 @@ export const useStudentCourses = () => {
         const courseModules = modules?.filter(m => m.course_id === course.id) || [];
         const lessonIds = courseModules.flatMap(m => m.lessons?.map((l: { id: string }) => l.id) || []);
         const totalLessons = lessonIds.length;
-        
+
         const userLessonProgress = progress?.filter(p => lessonIds.includes(p.lesson_id)) || [];
         const completedLessons = userLessonProgress.filter(p => p.completed).length;
         const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
@@ -125,6 +148,7 @@ export const useStudentCourses = () => {
     enabled: !!user?.id,
   });
 };
+
 
 export const useUpcomingClasses = () => {
   const { user } = useAuth();
@@ -224,10 +248,23 @@ export const useStudentStats = () => {
 };
 
 export const useAvailableCourses = () => {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ['available-courses'],
+    queryKey: ['available-courses', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let primary: string | null = null;
+      if (user?.id) {
+        const { data: prof } = await supabase
+          .from('profiles')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .select('primary_instrument' as any)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        primary = (prof as any)?.primary_instrument ?? null;
+      }
+
+      let query = supabase
         .from('courses')
         .select(`
           id,
@@ -242,11 +279,21 @@ export const useAvailableCourses = () => {
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 
+      if (primary === 'production') {
+        query = query.eq('required_plan', 'production');
+      } else if (primary) {
+        query = query.eq('instrument', primary as 'guitar' | 'piano' | 'drums');
+      } else {
+        return [] as AvailableCourse[];
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return (data || []) as AvailableCourse[];
     },
   });
 };
+
 
 export const useUserRegistrations = () => {
   const { user } = useAuth();

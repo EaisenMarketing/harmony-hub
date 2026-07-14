@@ -22,12 +22,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useStudentProfile } from '@/hooks/useStudentData';
 import { useIsAdmin } from '@/hooks/useAdminData';
 import { useIsInstructor, useInstructorProfile } from '@/hooks/useInstructorData';
+import { useUserInstrument } from '@/hooks/useUserInstrument';
 
-const navigation = [
+const baseNavigation = [
   { name: 'Dashboard', href: '/portal', icon: LayoutDashboard },
   { name: 'Mis Cursos', href: '/portal/cursos', icon: BookOpen },
   { name: 'Sala de Práctica', href: '/portal/practica', icon: Music },
-  { name: 'Producción', href: '/portal/produccion', icon: Headphones },
   { name: 'Pregunta al Maestro', href: '/portal/consultas', icon: MessageCircleQuestion },
   { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
   { name: 'Calendario', href: '/portal/calendario', icon: Calendar },
@@ -36,6 +36,7 @@ const navigation = [
   { name: 'Configuración', href: '/portal/configuracion', icon: Settings },
 ];
 
+
 export const StudentSidebar = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
@@ -43,6 +44,15 @@ export const StudentSidebar = () => {
   const { data: isAdmin } = useIsAdmin();
   const { data: isInstructor } = useIsInstructor();
   const { data: instructorProfile } = useInstructorProfile();
+  const { data: userIns } = useUserInstrument();
+
+  const navigation = [
+    ...baseNavigation.slice(0, 3),
+    ...(userIns?.instrument === 'production'
+      ? [{ name: 'Producción', href: '/portal/produccion', icon: Headphones }]
+      : []),
+    ...baseNavigation.slice(3),
+  ];
 
   const getInitials = (name: string) => {
     return name
@@ -55,6 +65,7 @@ export const StudentSidebar = () => {
 
   // Show instructor link if user is instructor or has a pending request
   const showInstructorLink = isInstructor || instructorProfile;
+
 
   return (
     <aside className="hidden md:flex w-64 bg-card border-r border-border h-screen sticky top-0 flex-col">
@@ -80,8 +91,9 @@ export const StudentSidebar = () => {
               {profile?.full_name || 'Estudiante'}
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              Plan {profile?.subscription_plan || 'Basic'}
+              {userIns?.instrument ? `Plan ${userIns.instrument}` : 'Sin instrumento'}
             </p>
+
           </div>
         </div>
       </div>

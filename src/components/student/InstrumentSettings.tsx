@@ -1,41 +1,29 @@
-import { Piano, Guitar, Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  useEnabledInstruments,
-  useUpdateEnabledInstruments,
-  type Instrument,
-} from '@/hooks/useEnabledInstruments';
+import { cn } from '@/lib/utils';
+import { INSTRUMENT_PLANS, type InstrumentSlug } from '@/lib/instrument-access';
+import { useUserInstrument, useSetUserInstrument } from '@/hooks/useUserInstrument';
 
 export const InstrumentSettings = () => {
-  const { data, isLoading } = useEnabledInstruments();
-  const updateMutation = useUpdateEnabledInstruments();
-  const [selected, setSelected] = useState<Instrument[]>([]);
+  const { data, isLoading } = useUserInstrument();
+  const updateMutation = useSetUserInstrument();
+  const [selected, setSelected] = useState<InstrumentSlug | null>(null);
 
   useEffect(() => {
-    if (data?.instruments) setSelected(data.instruments);
-  }, [data?.instruments]);
+    if (data?.instrument) setSelected(data.instrument);
+  }, [data?.instrument]);
 
-  const toggle = (inst: Instrument) => {
-    setSelected((prev) =>
-      prev.includes(inst) ? prev.filter((i) => i !== inst) : [...prev, inst]
-    );
-  };
-
-  const canSave = selected.length > 0 && !updateMutation.isPending;
+  const canSave = !!selected && selected !== data?.instrument && !updateMutation.isPending;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Piano className="w-5 h-5 text-primary" />
-          Mis instrumentos
-        </CardTitle>
+        <CardTitle>Mi instrumento</CardTitle>
         <CardDescription>
-          Elige qué instrumentos estás aprendiendo. Solo verás las herramientas de IA (generador de acordes, sheets,
-          detector por foto) del instrumento que tengas seleccionado.
+          Cada plan da acceso a un único instrumento. Cambiar tu instrumento actualiza los cursos,
+          clases y herramientas de IA disponibles.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -43,52 +31,34 @@ export const InstrumentSettings = () => {
           <div className="h-24 bg-muted/30 animate-pulse rounded-lg" />
         ) : (
           <>
-            {data?.isUnset && (
-              <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
-                Aún no has elegido tus instrumentos. Mientras tanto puedes usar todas las herramientas.
-              </div>
-            )}
-
-            <div className="grid sm:grid-cols-2 gap-3">
-              <label
-                className={`flex items-center gap-3 rounded-lg border p-4 cursor-pointer transition ${
-                  selected.includes('piano')
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <Checkbox
-                  checked={selected.includes('piano')}
-                  onCheckedChange={() => toggle('piano')}
-                />
-                <Piano className="w-6 h-6 text-primary" />
-                <div className="flex-1">
-                  <p className="font-medium">Piano</p>
-                  <p className="text-xs text-muted-foreground">Acordes, sheets y herramientas de piano</p>
-                </div>
-              </label>
-
-              <label
-                className={`flex items-center gap-3 rounded-lg border p-4 cursor-pointer transition ${
-                  selected.includes('guitar')
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <Checkbox
-                  checked={selected.includes('guitar')}
-                  onCheckedChange={() => toggle('guitar')}
-                />
-                <Guitar className="w-6 h-6 text-primary" />
-                <div className="flex-1">
-                  <p className="font-medium">Guitarra</p>
-                  <p className="text-xs text-muted-foreground">Acordes, diagramas y herramientas de guitarra</p>
-                </div>
-              </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {INSTRUMENT_PLANS.map((p) => {
+                const isSel = selected === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelected(p.id)}
+                    className={cn(
+                      'relative rounded-lg border p-4 text-left transition-all',
+                      isSel
+                        ? 'border-primary ring-2 ring-primary/40 bg-primary/5'
+                        : 'border-border hover:border-primary/50',
+                    )}
+                  >
+                    {isSel && (
+                      <Check className="absolute top-2 right-2 w-4 h-4 text-primary" />
+                    )}
+                    <div className="text-2xl mb-2">{p.emoji}</div>
+                    <div className="font-medium text-sm">{p.label}</div>
+                    <div className="text-xs text-muted-foreground">${p.price}/mes</div>
+                  </button>
+                );
+              })}
             </div>
 
             <Button
-              onClick={() => updateMutation.mutate(selected)}
+              onClick={() => selected && updateMutation.mutate(selected)}
               disabled={!canSave}
             >
               {updateMutation.isPending ? (
@@ -96,11 +66,8 @@ export const InstrumentSettings = () => {
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              Guardar
+              Guardar cambios
             </Button>
-            {selected.length === 0 && (
-              <p className="text-xs text-destructive">Selecciona al menos un instrumento.</p>
-            )}
           </>
         )}
       </CardContent>
