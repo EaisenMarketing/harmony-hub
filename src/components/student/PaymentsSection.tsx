@@ -1,72 +1,48 @@
-import { CreditCard, Check, Crown, Star, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CreditCard, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useStudentProfile } from '@/hooks/useStudentData';
+import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/instrument-access';
 
-const plans = [
-  {
-    id: 'basic',
-    name: 'Básico',
-    price: 0,
-    description: 'Perfecto para comenzar tu viaje musical',
-    icon: Zap,
-    features: [
-      'Primeras 3 lecciones de cada curso',
-      'Metrónomo y afinador básico',
-      'Calendario visible',
-    ],
-  },
-  {
-    id: 'standard',
-    name: 'Estándar',
-    price: 45,
-    description: 'Acceso completo a un instrumento',
-    icon: Star,
-    popular: true,
-    features: [
-      'Acceso completo a 1 instrumento',
-      '1 clase grupal en vivo por semana (1hr)',
-      'Herramientas de IA (acordes y teoría)',
-      'Sala de Práctica: Rítmica, Batería y Progresiones',
-      'Material descargable',
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 75,
-    description: 'Acceso total + comunidad y grabaciones',
-    icon: Crown,
-    features: [
-      'Acceso a TODOS los instrumentos',
-      'Todo lo del plan Estándar',
-      'Galería de acordes avanzados (PDF descargable)',
-      'Grabaciones de práctica → enviar al maestro',
-      'Comunidad estilo Facebook (publicar, likes, comentarios)',
-      'Feedback 1:1 mensual + Certificados oficiales',
-    ],
-  },
-  {
-    id: 'production',
-    name: 'Producción Musical',
-    price: 99,
-    description: 'Todo lo del Pro + producción musical',
-    icon: Crown,
-    features: [
-      'Todo lo incluido en el plan Pro',
-      'Clases de producción musical mensual',
-      'Acceso a DAWs, mezcla y mastering',
-      'Tareas y material descargable (PDF)',
-      'Grabación y técnicas de estudio',
-    ],
-  },
+const sharedFeatures = [
+  'Acceso completo a los cursos del instrumento',
+  '1 clase grupal en vivo por semana',
+  'Herramientas de IA específicas del instrumento',
+  'Comunidad, feedback del maestro y certificado',
 ];
+
+const productionExtras = [
+  'Cursos de DAW, mezcla y mastering',
+  'Clases en vivo de producción musical',
+  'Biblioteca de samples y presets',
+  'Tareas y material descargable',
+];
+
+const instrumentOptions = INSTRUMENT_PLANS.filter((p) => p.id !== 'production');
+const productionPlan = INSTRUMENT_PLANS.find((p) => p.id === 'production')!;
 
 export const PaymentsSection = () => {
   const { data: profile } = useStudentProfile();
-  const currentPlan = profile?.subscription_plan || 'basic';
+  const currentPlan: string = profile?.subscription_plan || 'basic';
+  const currentInstrument = profile?.primary_instrument || 'piano';
+  const [selected, setSelected] = useState<InstrumentSlug>(
+    isValidInstrument(currentInstrument) ? currentInstrument : instrumentOptions[0].id
+  );
+
+  const currentInstrumentPlan = instrumentOptions.find((p) => p.id === selected)!;
+  const isCurrentInstrument = isValidInstrument(currentPlan) && currentPlan === selected;
+  const isProduction = currentPlan === 'production';
+
+  const planLabel =
+    currentPlan === 'production'
+      ? 'Producción Musical'
+      : currentPlan === 'basic'
+      ? 'Básico'
+      : INSTRUMENT_PLANS.find((p) => p.id === currentPlan)?.label || currentPlan;
 
   return (
     <div className="space-y-6">
@@ -83,9 +59,7 @@ export const PaymentsSection = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Tu plan actual</p>
-              <h2 className="text-2xl font-bold text-foreground capitalize">
-                {currentPlan === 'basic' ? 'Básico' : currentPlan === 'standard' ? 'Estándar' : currentPlan === 'production' ? 'Producción Musical' : 'Pro'}
-              </h2>
+              <h2 className="text-2xl font-bold text-foreground capitalize">{planLabel}</h2>
               {currentPlan !== 'basic' && profile?.subscription_expires_at && (
                 <p className="text-sm text-muted-foreground mt-1">
                   Válido hasta: {new Date(profile.subscription_expires_at).toLocaleDateString('es-MX', {
@@ -106,60 +80,129 @@ export const PaymentsSection = () => {
       {/* Plans */}
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4">Planes Disponibles</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {plans.map((plan) => {
-            const isCurrentPlan = currentPlan === plan.id;
-            const Icon = plan.icon;
+        <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr] items-stretch">
+          {/* $75 instrument plan */}
+          <Card
+            className={cn(
+              'relative flex flex-col',
+              isCurrentInstrument && 'ring-2 ring-primary'
+            )}
+          >
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-14 h-14 rounded-xl bg-gradient-to-br ${currentInstrumentPlan.color} flex items-center justify-center text-3xl`}
+                >
+                  {currentInstrumentPlan.emoji}
+                </div>
+                <div>
+                  <CardTitle>{currentInstrumentPlan.label}</CardTitle>
+                  <CardDescription>{currentInstrumentPlan.description}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col">
+              <div className="mb-4">
+                <span className="text-5xl font-black text-foreground">$75</span>
+                <span className="text-muted-foreground">/mes</span>
+              </div>
 
-            return (
-              <Card
-                key={plan.id}
-                className={cn(
-                  'relative transition-all',
-                  plan.popular && 'border-primary shadow-lg',
-                  isCurrentPlan && 'ring-2 ring-primary'
-                )}
-              >
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    Más Popular
-                  </Badge>
-                )}
-                <CardHeader className="text-center pb-2">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center">
-                    <span className="text-4xl font-bold text-foreground">
-                      ${plan.price}
-                    </span>
-                    <span className="text-muted-foreground">/mes</span>
-                  </div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
+                Elige tu instrumento
+              </p>
+              <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory mb-5">
+                {instrumentOptions.map((p) => {
+                  const isSel = p.id === selected;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setSelected(p.id)}
+                      className={cn(
+                        'snap-start flex-shrink-0 flex flex-col items-center gap-1 rounded-xl border px-3 py-2 min-w-[80px] transition-all',
+                        isSel
+                          ? 'border-primary bg-primary/10 ring-2 ring-primary/40'
+                          : 'border-border bg-muted hover:border-primary/50',
+                      )}
+                    >
+                      <span className="text-2xl">{p.emoji}</span>
+                      <span className="text-[11px] font-medium text-foreground text-center leading-tight">
+                        {p.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+              <ul className="space-y-2 mb-6 flex-1">
+                {sharedFeatures.map((f) => (
+                  <li key={f} className="flex gap-2 text-sm text-muted-foreground">
+                    <Check className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
 
-                  <Button
-                    className="w-full"
-                    variant={isCurrentPlan ? 'secondary' : plan.popular ? 'default' : 'outline'}
-                    disabled={isCurrentPlan}
-                  >
-                    {isCurrentPlan ? 'Plan Actual' : 'Seleccionar Plan'}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+              <Link to={`/precios?plan=${currentInstrumentPlan.id}`}>
+                <Button
+                  className="w-full"
+                  variant={isCurrentInstrument ? 'secondary' : 'default'}
+                  disabled={isCurrentInstrument}
+                >
+                  {isCurrentInstrument ? 'Plan Actual' : 'Cambiar a este instrumento'}
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Production plan */}
+          <Card
+            className={cn(
+              'relative flex flex-col border-violet-500/60 bg-violet-500/5 shadow-[0_0_60px_-20px_hsl(280_80%_60%/0.3)]',
+              isProduction && 'ring-2 ring-violet-400'
+            )}
+          >
+            <Badge className="absolute -top-3 left-4 bg-violet-600 hover:bg-violet-600">
+              Especializado
+            </Badge>
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-14 h-14 rounded-xl bg-gradient-to-br ${productionPlan.color} flex items-center justify-center text-3xl`}
+                >
+                  {productionPlan.emoji}
+                </div>
+                <div>
+                  <CardTitle>{productionPlan.label}</CardTitle>
+                  <CardDescription>{productionPlan.description}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col">
+              <div className="mb-4">
+                <span className="text-5xl font-black text-foreground">$99</span>
+                <span className="text-muted-foreground">/mes</span>
+              </div>
+
+              <ul className="space-y-2 mb-6 flex-1">
+                {productionExtras.map((f) => (
+                  <li key={f} className="flex gap-2 text-sm text-muted-foreground">
+                    <Check className="w-4 h-4 mt-0.5 text-violet-400 flex-shrink-0" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link to="/precios?plan=production">
+                <Button
+                  className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500"
+                  disabled={isProduction}
+                >
+                  {isProduction ? 'Plan Actual' : 'Cambiar a Producción'}
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
