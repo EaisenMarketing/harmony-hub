@@ -306,7 +306,7 @@ const Auth = () => {
                 <span className="bg-card px-2 text-muted-foreground">O continúa con email</span>
               </div>
             </div>
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs value={defaultTab} onValueChange={(v) => setDefaultTab(v as 'login' | 'signup')} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
                 <TabsTrigger value="signup">Registrarse</TabsTrigger>
