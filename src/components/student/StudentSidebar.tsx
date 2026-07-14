@@ -28,6 +28,7 @@ import { useUserInstrument } from '@/hooks/useUserInstrument';
 const baseNavigation = [
   { name: 'Dashboard', href: '/portal', icon: LayoutDashboard },
   { name: 'Mis Cursos', href: '/portal/cursos', icon: BookOpen },
+  { name: 'Mi Progreso', href: '/portal/progreso', icon: TrendingUp },
   { name: 'Sala de Práctica', href: '/portal/practica', icon: Music },
   { name: 'Pregunta al Maestro', href: '/portal/consultas', icon: MessageCircleQuestion },
   { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
