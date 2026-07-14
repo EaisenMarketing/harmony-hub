@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { hasAccessToCourseInstrument } from '@/lib/instrument-access';
 import { ProtectedVideoPlayer } from '@/components/student/ProtectedVideoPlayer';
+import { ContinueWatchingButton } from '@/components/student/ContinueWatchingButton';
 import { LessonSidebar } from '@/components/student/LessonSidebar';
 import { LessonNotesPanel } from '@/components/student/LessonNotesPanel';
 import { 
