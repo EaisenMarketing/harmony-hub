@@ -27,6 +27,7 @@ import { SongLibraryModal } from '@/components/student/SongLibraryModal';
 import { MetronomeTunerModal } from '@/components/student/MetronomeTunerModal';
 import { ChordPhotoDetector } from '@/components/student/ChordPhotoDetector';
 import { SelectInstrumentGate } from '@/components/student/SelectInstrumentGate';
+import { AIToolGate } from '@/components/student/AIToolGate';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { AI_TOOL_INSTRUMENTS, INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
 import {
@@ -51,12 +52,6 @@ const StudentPortal = () => {
   const { data: userIns, isLoading: insLoading } = useUserInstrument();
   const primaryInstrument = userIns?.instrument ?? null;
   const needsInstrument = !!user && !insLoading && !primaryInstrument;
-  const showChordTools = primaryInstrument
-    ? AI_TOOL_INSTRUMENTS.chord_generator.includes(primaryInstrument)
-    : false;
-  const showChordPhoto = primaryInstrument
-    ? AI_TOOL_INSTRUMENTS.chord_photo.includes(primaryInstrument)
-    : false;
   const instrumentLabel = primaryInstrument
     ? INSTRUMENT_PLAN_MAP[primaryInstrument]?.label
     : null;
@@ -132,8 +127,20 @@ const StudentPortal = () => {
               </div>
               <div className="flex gap-2 flex-wrap">
                 <MetronomeTunerModal />
-                {showChordTools && <ChordGeneratorModal userPlan={userPlan} />}
-                {showChordPhoto && <ChordPhotoDetector userPlan={userPlan} />}
+                <AIToolGate
+                  toolName="Generador de acordes"
+                  allowedInstruments={AI_TOOL_INSTRUMENTS.chord_generator}
+                  buttonLabel="Acordes"
+                >
+                  <ChordGeneratorModal userPlan={userPlan} />
+                </AIToolGate>
+                <AIToolGate
+                  toolName="Detector de acordes por foto"
+                  allowedInstruments={AI_TOOL_INSTRUMENTS.chord_photo}
+                  buttonLabel="Foto acordes"
+                >
+                  <ChordPhotoDetector userPlan={userPlan} />
+                </AIToolGate>
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <SongAnalyzerModal userPlan={userPlan} />
                 <SongLibraryModal userPlan={userPlan} />

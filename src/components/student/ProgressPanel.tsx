@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
-  TrendingUp, CheckCircle2, Clock, Calendar, Play, BookOpen, ArrowRight, Trophy,
+  TrendingUp, CheckCircle2, Clock, Calendar, Play, BookOpen, ArrowRight, Trophy, Download,
 } from 'lucide-react';
 import { format, isFuture } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -13,9 +13,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { useStudentCourses, useUpcomingClasses, useStudentStats } from '@/hooks/useStudentData';
+import { useStudentProfile } from '@/hooks/useStudentData';
+import { useStudyAnalytics } from '@/hooks/useStudyAnalytics';
 import { INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
 import { ProgressCharts } from '@/components/student/ProgressCharts';
 import { ContinueWatchingButton } from '@/components/student/ContinueWatchingButton';
+import { generateProgressReportPdf } from '@/lib/progress-report-pdf';
+import { useToast } from '@/hooks/use-toast';
 
 export const ProgressPanel = () => {
   const { user } = useAuth();
@@ -64,6 +68,34 @@ export const ProgressPanel = () => {
   const completedLessons = courses.reduce((a, c) => a + c.completedLessons, 0);
   const globalPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
+  const { data: profile } = useStudentProfile();
+  const { data: analytics } = useStudyAnalytics();
+  const { toast } = useToast();
+
+  const handleDownloadPdf = () => {
+    try {
+      generateProgressReportPdf({
+        studentName: profile?.full_name || 'Estudiante',
+        studentEmail: user?.email || '',
+        plan: planInfo ?? null,
+        courses,
+        upcoming,
+        recentCompleted: recentCompleted.map((r) => ({
+          lessonTitle: r.lessons?.title ?? 'Lección',
+          courseTitle: r.lessons?.course_modules?.courses?.title ?? '—',
+          date: r.last_watched_at ? format(new Date(r.last_watched_at), 'd MMM yyyy', { locale: es }) : null,
+        })),
+        totalCompletedLessons: stats?.completedLessons ?? 0,
+        totalHours: stats?.totalHours ?? 0,
+        streakDays: analytics?.streakDays ?? 0,
+      });
+      toast({ title: 'PDF generado', description: 'Tu historial se descargó correctamente.' });
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Error', description: 'No se pudo generar el PDF.', variant: 'destructive' });
+    }
+  };
+
   if (!primary) {
     return (
       <Card className="border-dashed">
@@ -73,6 +105,7 @@ export const ProgressPanel = () => {
       </Card>
     );
   }
+
 
   return (
     <div className="space-y-6">
@@ -91,6 +124,9 @@ export const ProgressPanel = () => {
               Resumen personalizado de tu plan de {planInfo?.label}.
             </p>
           </div>
+          <Button onClick={handleDownloadPdf} variant="outline" className="gap-2 shrink-0">
+            <Download className="w-4 h-4" /> Descargar PDF
+          </Button>
         </div>
       </div>
 
