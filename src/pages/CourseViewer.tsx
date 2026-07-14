@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, StickyNote, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, BookOpen, StickyNote, ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { hasAccessToCourseInstrument } from '@/lib/instrument-access';
 import { ProtectedVideoPlayer } from '@/components/student/ProtectedVideoPlayer';
 import { LessonSidebar } from '@/components/student/LessonSidebar';
 import { LessonNotesPanel } from '@/components/student/LessonNotesPanel';
