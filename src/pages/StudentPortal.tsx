@@ -107,7 +107,12 @@ const StudentPortal = () => {
       case '/portal/configuracion':
         return <SettingsSection />;
       case '/portal/produccion':
+        if (primaryInstrument && primaryInstrument !== 'production') {
+          return <Navigate to="/portal" replace />;
+        }
         return <ProductionDashboard />;
+      case '/portal/progreso':
+        return <ProgressPanel />;
       default:
         // Dashboard
         return (
