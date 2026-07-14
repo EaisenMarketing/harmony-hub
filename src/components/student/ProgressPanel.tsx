@@ -185,7 +185,7 @@ export const ProgressPanel = () => {
                       <p className="font-medium truncate">{r.lessons?.title ?? 'Lección'}</p>
                       <p className="text-xs text-muted-foreground truncate">
                         {course?.title ?? '—'}
-                        {r.completed_at && ` · ${format(new Date(r.completed_at), "d MMM yyyy", { locale: es })}`}
+                        {r.last_watched_at && ` · ${format(new Date(r.last_watched_at), "d MMM yyyy", { locale: es })}`}
                       </p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground" />
