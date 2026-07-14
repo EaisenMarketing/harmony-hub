@@ -91,7 +91,10 @@ export const ProgressPanel = () => {
               Resumen personalizado de tu plan de {planInfo?.label}.
             </p>
           </div>
+        </div>
       </div>
+
+
 
       {/* Continuar */}
       <ContinueWatchingButton />
