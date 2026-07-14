@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -7,12 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Music } from 'lucide-react';
 import logo from '@/assets/logo.webp';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { lovable } from '@/integrations/lovable';
-import { resolveDestination } from '@/lib/auth-redirect';
+import {
+  resolveDestination,
+  savePendingInstrument,
+  readPendingInstrument,
+} from '@/lib/auth-redirect';
+import { INSTRUMENT_PLAN_MAP, isValidInstrument } from '@/lib/instrument-access';
 
 
 const emailSchema = z.string().email('Email inválido').max(255, 'Email muy largo');
@@ -21,9 +26,10 @@ const nameSchema = z.string().min(2, 'El nombre debe tener al menos 2 caracteres
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, signIn, signUp, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -32,12 +38,29 @@ const Auth = () => {
   const [signupName, setSignupName] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showResendVerification, setShowResendVerification] = useState(false);
+  const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
+
+  // Persist any ?plan= from the pricing page so we can apply it after signup / email verification.
+  const planParam = searchParams.get('plan');
+  const selectedInstrument = isValidInstrument(planParam)
+    ? planParam
+    : readPendingInstrument();
+  const selectedPlan = selectedInstrument ? INSTRUMENT_PLAN_MAP[selectedInstrument] : null;
+
+  useEffect(() => {
+    if (planParam) {
+      savePendingInstrument(planParam);
+      // If the user landed with a plan, they most likely want to create an account.
+      setDefaultTab('signup');
+    }
+  }, [planParam]);
 
   useEffect(() => {
     if (user) {
       resolveDestination(user.id).then((dest) => navigate(dest, { replace: true }));
     }
   }, [user, navigate]);
+
 
 
   const validateLogin = () => {
@@ -237,12 +260,28 @@ const Auth = () => {
         </div>
 
         <Card className="border-border/50 shadow-xl">
+          {selectedPlan && (
+            <div className="mx-4 mt-4 rounded-lg border border-primary/40 bg-primary/10 p-3 flex items-center gap-3">
+              <div className="text-2xl">{selectedPlan.emoji}</div>
+              <div className="flex-1 text-sm">
+                <div className="font-semibold text-foreground flex items-center gap-1">
+                  <Music className="w-3.5 h-3.5" /> Plan seleccionado: {selectedPlan.label}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  ${selectedPlan.price}/mes · se activará al crear tu cuenta.
+                </div>
+              </div>
+            </div>
+          )}
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">Accede a tu cuenta</CardTitle>
             <CardDescription className="text-center">
-              Inicia sesión o crea una cuenta nueva
+              {selectedPlan
+                ? `Crea tu cuenta para empezar con ${selectedPlan.label}.`
+                : 'Inicia sesión o crea una cuenta nueva'}
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <Button
               type="button"
@@ -267,7 +306,7 @@ const Auth = () => {
                 <span className="bg-card px-2 text-muted-foreground">O continúa con email</span>
               </div>
             </div>
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs value={defaultTab} onValueChange={(v) => setDefaultTab(v as 'login' | 'signup')} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
                 <TabsTrigger value="signup">Registrarse</TabsTrigger>
