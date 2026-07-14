@@ -68,6 +68,34 @@ export const ProgressPanel = () => {
   const completedLessons = courses.reduce((a, c) => a + c.completedLessons, 0);
   const globalPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
+  const { data: profile } = useStudentProfile();
+  const { data: analytics } = useStudyAnalytics();
+  const { toast } = useToast();
+
+  const handleDownloadPdf = () => {
+    try {
+      generateProgressReportPdf({
+        studentName: profile?.full_name || 'Estudiante',
+        studentEmail: user?.email || '',
+        plan: planInfo ?? null,
+        courses,
+        upcoming,
+        recentCompleted: recentCompleted.map((r) => ({
+          lessonTitle: r.lessons?.title ?? 'Lección',
+          courseTitle: r.lessons?.course_modules?.courses?.title ?? '—',
+          date: r.last_watched_at ? format(new Date(r.last_watched_at), 'd MMM yyyy', { locale: es }) : null,
+        })),
+        totalCompletedLessons: stats?.completedLessons ?? 0,
+        totalHours: stats?.totalHours ?? 0,
+        streakDays: analytics?.streakDays ?? 0,
+      });
+      toast({ title: 'PDF generado', description: 'Tu historial se descargó correctamente.' });
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Error', description: 'No se pudo generar el PDF.', variant: 'destructive' });
+    }
+  };
+
   if (!primary) {
     return (
       <Card className="border-dashed">
@@ -77,6 +105,7 @@ export const ProgressPanel = () => {
       </Card>
     );
   }
+
 
   return (
     <div className="space-y-6">
