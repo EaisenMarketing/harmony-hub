@@ -27,6 +27,7 @@ import { SongLibraryModal } from '@/components/student/SongLibraryModal';
 import { MetronomeTunerModal } from '@/components/student/MetronomeTunerModal';
 import { ChordPhotoDetector } from '@/components/student/ChordPhotoDetector';
 import { SelectInstrumentGate } from '@/components/student/SelectInstrumentGate';
+import { AIToolGate } from '@/components/student/AIToolGate';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { AI_TOOL_INSTRUMENTS, INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
 import {
