@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import {
-  TrendingUp, CheckCircle2, Clock, Calendar, Play, BookOpen, ArrowRight, Trophy,
+  TrendingUp, CheckCircle2, Clock, Calendar, Play, BookOpen, ArrowRight, Trophy, Download,
 } from 'lucide-react';
 import { format, isFuture } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -13,9 +13,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { useStudentCourses, useUpcomingClasses, useStudentStats } from '@/hooks/useStudentData';
+import { useStudentProfile } from '@/hooks/useStudentData';
+import { useStudyAnalytics } from '@/hooks/useStudyAnalytics';
 import { INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
 import { ProgressCharts } from '@/components/student/ProgressCharts';
 import { ContinueWatchingButton } from '@/components/student/ContinueWatchingButton';
+import { generateProgressReportPdf } from '@/lib/progress-report-pdf';
+import { useToast } from '@/hooks/use-toast';
 
 export const ProgressPanel = () => {
   const { user } = useAuth();
