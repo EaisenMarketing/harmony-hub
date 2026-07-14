@@ -52,12 +52,6 @@ const StudentPortal = () => {
   const { data: userIns, isLoading: insLoading } = useUserInstrument();
   const primaryInstrument = userIns?.instrument ?? null;
   const needsInstrument = !!user && !insLoading && !primaryInstrument;
-  const showChordTools = primaryInstrument
-    ? AI_TOOL_INSTRUMENTS.chord_generator.includes(primaryInstrument)
-    : false;
-  const showChordPhoto = primaryInstrument
-    ? AI_TOOL_INSTRUMENTS.chord_photo.includes(primaryInstrument)
-    : false;
   const instrumentLabel = primaryInstrument
     ? INSTRUMENT_PLAN_MAP[primaryInstrument]?.label
     : null;
