@@ -14,6 +14,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { useStudentCourses, useUpcomingClasses, useStudentStats } from '@/hooks/useStudentData';
 import { INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
+import { ProgressCharts } from '@/components/student/ProgressCharts';
+import { ContinueWatchingButton } from '@/components/student/ContinueWatchingButton';
 
 export const ProgressPanel = () => {
   const { user } = useAuth();
