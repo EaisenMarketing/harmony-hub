@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useStudentProfile } from '@/hooks/useStudentData';
-import { INSTRUMENT_PLANS, type InstrumentSlug } from '@/lib/instrument-access';
+import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/instrument-access';
 
 const sharedFeatures = [
   'Acceso completo a los cursos del instrumento',
@@ -30,11 +30,11 @@ export const PaymentsSection = () => {
   const currentPlan = profile?.subscription_plan || 'basic';
   const currentInstrument = profile?.primary_instrument || 'piano';
   const [selected, setSelected] = useState<InstrumentSlug>(
-    instrumentOptions.some((p) => p.id === currentInstrument) ? currentInstrument : instrumentOptions[0].id
+    isValidInstrument(currentInstrument) ? currentInstrument : instrumentOptions[0].id
   );
 
   const currentInstrumentPlan = instrumentOptions.find((p) => p.id === selected)!;
-  const isCurrentInstrument = currentPlan === selected;
+  const isCurrentInstrument = isValidInstrument(currentPlan) && currentPlan === selected;
   const isProduction = currentPlan === 'production';
 
   const planLabel =
