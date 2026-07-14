@@ -28,6 +28,7 @@ const CourseViewer = () => {
   const { data: modules = [], isLoading: contentLoading } = useCourseContent(courseId);
   const { data: userProgress } = useUserProgress(courseId);
   const { data: userProfile } = useUserProfile();
+  const { data: userIns, isLoading: insLoading } = useUserInstrument();
   const updateProgress = useUpdateLessonProgress();
 
   // Get all lessons in order
