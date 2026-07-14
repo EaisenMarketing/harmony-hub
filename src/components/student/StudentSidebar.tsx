@@ -12,7 +12,8 @@ import {
   Headphones,
   Music,
   MessageCircleQuestion,
-  Users
+  Users,
+  TrendingUp
 } from 'lucide-react';
 import logo from '@/assets/logo.webp';
 import { cn } from '@/lib/utils';
