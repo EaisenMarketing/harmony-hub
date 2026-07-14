@@ -132,8 +132,20 @@ const StudentPortal = () => {
               </div>
               <div className="flex gap-2 flex-wrap">
                 <MetronomeTunerModal />
-                {showChordTools && <ChordGeneratorModal userPlan={userPlan} />}
-                {showChordPhoto && <ChordPhotoDetector userPlan={userPlan} />}
+                <AIToolGate
+                  toolName="Generador de acordes"
+                  allowedInstruments={AI_TOOL_INSTRUMENTS.chord_generator}
+                  buttonLabel="Acordes"
+                >
+                  <ChordGeneratorModal userPlan={userPlan} />
+                </AIToolGate>
+                <AIToolGate
+                  toolName="Detector de acordes por foto"
+                  allowedInstruments={AI_TOOL_INSTRUMENTS.chord_photo}
+                  buttonLabel="Foto acordes"
+                >
+                  <ChordPhotoDetector userPlan={userPlan} />
+                </AIToolGate>
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <SongAnalyzerModal userPlan={userPlan} />
                 <SongLibraryModal userPlan={userPlan} />
