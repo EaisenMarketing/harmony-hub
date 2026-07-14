@@ -91,35 +91,14 @@ export const ProgressPanel = () => {
               Resumen personalizado de tu plan de {planInfo?.label}.
             </p>
           </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl bg-card border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <TrendingUp className="w-4 h-4" /> Progreso global
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-bold">{globalPct}%</span>
-              <span className="text-xs text-muted-foreground">{completedLessons}/{totalLessons} lecciones</span>
-            </div>
-            <Progress value={globalPct} className="mt-2 h-2" />
-          </div>
-          <div className="rounded-xl bg-card border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <CheckCircle2 className="w-4 h-4" /> Lecciones completadas
-            </div>
-            <div className="mt-2 text-3xl font-bold">{stats?.completedLessons ?? 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">~ {stats?.totalHours ?? 0} h de estudio</p>
-          </div>
-          <div className="rounded-xl bg-card border border-border p-4">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Calendar className="w-4 h-4" /> Próximas clases
-            </div>
-            <div className="mt-2 text-3xl font-bold">{upcoming.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">Filtradas por tu instrumento</p>
-          </div>
-        </div>
       </div>
+
+      {/* Continuar */}
+      <ContinueWatchingButton />
+
+      {/* Gráficas: %, racha y tiempo estudiado */}
+      <ProgressCharts />
+
 
       {/* Progreso por curso */}
       <section>
