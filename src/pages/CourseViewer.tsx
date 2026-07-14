@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, StickyNote, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, BookOpen, StickyNote, ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { hasAccessToCourseInstrument } from '@/lib/instrument-access';
 import { ProtectedVideoPlayer } from '@/components/student/ProtectedVideoPlayer';
 import { LessonSidebar } from '@/components/student/LessonSidebar';
 import { LessonNotesPanel } from '@/components/student/LessonNotesPanel';
@@ -26,6 +28,7 @@ const CourseViewer = () => {
   const { data: modules = [], isLoading: contentLoading } = useCourseContent(courseId);
   const { data: userProgress } = useUserProgress(courseId);
   const { data: userProfile } = useUserProfile();
+  const { data: userIns, isLoading: insLoading } = useUserInstrument();
   const updateProgress = useUpdateLessonProgress();
 
   // Get all lessons in order
@@ -123,7 +126,7 @@ const CourseViewer = () => {
   const isLocked = selectedLesson && !selectedLesson.is_free_preview && 
     (!hasInstrumentAccess || (userPlan === 'basic'));
 
-  if (authLoading || courseLoading || contentLoading) {
+  if (authLoading || courseLoading || contentLoading || insLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
@@ -142,6 +145,44 @@ const CourseViewer = () => {
       </div>
     );
   }
+
+  // Instrument/plan access guard: user must have picked an instrument and it must
+  // match the course's instrument (or production plan for production courses).
+  const primaryInstrument = userIns?.instrument ?? null;
+  if (!primaryInstrument) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">
+        <Lock className="w-12 h-12 text-muted-foreground" />
+        <h1 className="text-xl font-semibold">Selecciona tu instrumento</h1>
+        <p className="text-muted-foreground max-w-md">
+          Antes de acceder a un curso necesitas elegir el instrumento que estudiarás.
+        </p>
+        <Button onClick={() => navigate('/portal')}>Elegir instrumento</Button>
+      </div>
+    );
+  }
+  const canAccessCourse = hasAccessToCourseInstrument(
+    primaryInstrument,
+    course.instrument,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (course as any).required_plan ?? null,
+  );
+  if (!canAccessCourse) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">
+        <Lock className="w-12 h-12 text-muted-foreground" />
+        <h1 className="text-xl font-semibold">Este curso no está incluido en tu plan</h1>
+        <p className="text-muted-foreground max-w-md">
+          Tu plan actual es de otro instrumento. Cambia de plan o vuelve a los cursos disponibles para ti.
+        </p>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/portal/cursos')}>Mis cursos</Button>
+          <Button onClick={() => navigate('/precios')}>Ver planes</Button>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">

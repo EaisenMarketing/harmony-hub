@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
 import logo from '@/assets/logo.webp';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,7 @@ import { CertificatesPage } from '@/components/student/CertificatesPage';
 import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
 import { ProductionDashboard } from '@/components/student/ProductionDashboard';
+import { ProgressPanel } from '@/components/student/ProgressPanel';
 import { PracticeSection } from '@/components/student/PracticeSection';
 import { TeacherConsultSection } from '@/components/student/TeacherConsultSection';
 import { CommunitySection } from '@/components/student/CommunitySection';
@@ -106,7 +107,12 @@ const StudentPortal = () => {
       case '/portal/configuracion':
         return <SettingsSection />;
       case '/portal/produccion':
+        if (primaryInstrument && primaryInstrument !== 'production') {
+          return <Navigate to="/portal" replace />;
+        }
         return <ProductionDashboard />;
+      case '/portal/progreso':
+        return <ProgressPanel />;
       default:
         // Dashboard
         return (
