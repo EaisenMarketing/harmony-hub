@@ -1247,6 +1247,7 @@ export type Database = {
           phone: string | null
           preferred_instrument: string | null
           preferred_language: string | null
+          primary_instrument: string | null
           subscription_expires_at: string | null
           subscription_plan:
             | Database["public"]["Enums"]["subscription_plan"]
@@ -1265,6 +1266,7 @@ export type Database = {
           phone?: string | null
           preferred_instrument?: string | null
           preferred_language?: string | null
+          primary_instrument?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
@@ -1283,6 +1285,7 @@ export type Database = {
           phone?: string | null
           preferred_instrument?: string | null
           preferred_language?: string | null
+          primary_instrument?: string | null
           subscription_expires_at?: string | null
           subscription_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
@@ -1686,12 +1689,17 @@ export type Database = {
       }
     }
     Functions: {
+      get_user_instrument: { Args: { _user_id: string }; Returns: string }
       get_user_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["subscription_plan"]
       }
       has_course_access: {
         Args: { _course_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_instrument_access: {
+        Args: { _instrument: string; _user_id: string }
         Returns: boolean
       }
       has_pro_access: { Args: { _user_id: string }; Returns: boolean }

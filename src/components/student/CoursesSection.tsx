@@ -18,8 +18,12 @@ import { useStudentCourses, useAvailableCourses } from '@/hooks/useStudentData';
 
 const instrumentLabels: Record<string, string> = {
   guitar: 'Guitarra',
+  electric_guitar: 'Guitarra Eléctrica',
+  bass: 'Bajo',
   piano: 'Piano',
   drums: 'Batería',
+  trumpet: 'Trompeta',
+  production: 'Producción',
 };
 
 const levelLabels: Record<string, string> = {
@@ -32,18 +36,16 @@ export const CoursesSection = () => {
   const navigate = useNavigate();
   const { data: enrolledCourses = [], isLoading: loadingEnrolled } = useStudentCourses();
   const { data: availableCourses = [], isLoading: loadingAvailable } = useAvailableCourses();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [instrumentFilter, setInstrumentFilter] = useState<string>('all');
   const [levelFilter, setLevelFilter] = useState<string>('all');
 
   const filterCourses = <T extends { title: string; description?: string | null; instrument: string; level: string }>(courses: T[]) => {
     return courses.filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         course.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesInstrument = instrumentFilter === 'all' || course.instrument === instrumentFilter;
       const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
-      return matchesSearch && matchesInstrument && matchesLevel;
+      return matchesSearch && matchesLevel;
     });
   };
 
@@ -57,7 +59,7 @@ export const CoursesSection = () => {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Mis Cursos</h1>
         <p className="text-muted-foreground mt-1">
-          Explora y continúa tu aprendizaje musical
+          Cursos disponibles con tu plan actual.
         </p>
       </div>
 
@@ -72,17 +74,6 @@ export const CoursesSection = () => {
             className="pl-10"
           />
         </div>
-        <Select value={instrumentFilter} onValueChange={setInstrumentFilter}>
-          <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="Instrumento" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="guitar">Guitarra</SelectItem>
-            <SelectItem value="piano">Piano</SelectItem>
-            <SelectItem value="drums">Batería</SelectItem>
-          </SelectContent>
-        </Select>
         <Select value={levelFilter} onValueChange={setLevelFilter}>
           <SelectTrigger className="w-full sm:w-40">
             <SelectValue placeholder="Nivel" />
@@ -95,6 +86,7 @@ export const CoursesSection = () => {
           </SelectContent>
         </Select>
       </div>
+
 
       <Tabs defaultValue="enrolled" className="space-y-6">
         <TabsList>

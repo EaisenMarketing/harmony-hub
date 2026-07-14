@@ -14,7 +14,7 @@ import { CalendarSection } from '@/components/student/CalendarSection';
 import { CertificatesPage } from '@/components/student/CertificatesPage';
 import { PaymentsSection } from '@/components/student/PaymentsSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
-import { ProductionClassesSection } from '@/components/student/ProductionClassesSection';
+import { ProductionDashboard } from '@/components/student/ProductionDashboard';
 import { PracticeSection } from '@/components/student/PracticeSection';
 import { TeacherConsultSection } from '@/components/student/TeacherConsultSection';
 import { CommunitySection } from '@/components/student/CommunitySection';
@@ -24,11 +24,14 @@ import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
 import { SongLibraryModal } from '@/components/student/SongLibraryModal';
 import { MetronomeTunerModal } from '@/components/student/MetronomeTunerModal';
 import { ChordPhotoDetector } from '@/components/student/ChordPhotoDetector';
-import { 
-  useStudentProfile, 
-  useStudentCourses, 
-  useUpcomingClasses, 
-  useStudentStats 
+import { SelectInstrumentGate } from '@/components/student/SelectInstrumentGate';
+import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { AI_TOOL_INSTRUMENTS, INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
+import {
+  useStudentProfile,
+  useStudentCourses,
+  useUpcomingClasses,
+  useStudentStats
 } from '@/hooks/useStudentData';
 import { useUserPlan } from '@/hooks/useCourseViewer';
 import { MobileBottomNav } from '@/components/student/MobileBottomNav';
@@ -37,12 +40,25 @@ const StudentPortal = () => {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const { data: profile } = useStudentProfile();
   const { data: courses = [], isLoading: coursesLoading } = useStudentCourses();
   const { data: classes = [], isLoading: classesLoading } = useUpcomingClasses();
   const { data: stats } = useStudentStats();
   const { data: userPlan = 'basic' } = useUserPlan();
+  const { data: userIns, isLoading: insLoading } = useUserInstrument();
+  const primaryInstrument = userIns?.instrument ?? null;
+  const needsInstrument = !!user && !insLoading && !primaryInstrument;
+  const showChordTools = primaryInstrument
+    ? AI_TOOL_INSTRUMENTS.chord_generator.includes(primaryInstrument)
+    : false;
+  const showChordPhoto = primaryInstrument
+    ? AI_TOOL_INSTRUMENTS.chord_photo.includes(primaryInstrument)
+    : false;
+  const instrumentLabel = primaryInstrument
+    ? INSTRUMENT_PLAN_MAP[primaryInstrument]?.label
+    : null;
+
 
   useEffect(() => {
     if (!loading && !user) {
@@ -90,7 +106,7 @@ const StudentPortal = () => {
       case '/portal/configuracion':
         return <SettingsSection />;
       case '/portal/produccion':
-        return <ProductionClassesSection />;
+        return <ProductionDashboard />;
       default:
         // Dashboard
         return (
@@ -102,18 +118,21 @@ const StudentPortal = () => {
                   {greeting()}, {profile?.full_name?.split(' ')[0] || 'Estudiante'}! 👋
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                  Continúa donde lo dejaste y alcanza tus metas musicales.
+                  {instrumentLabel
+                    ? `Tu plan: ${instrumentLabel}. Sigue avanzando con tu instrumento.`
+                    : 'Continúa donde lo dejaste y alcanza tus metas musicales.'}
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <MetronomeTunerModal />
-                <ChordGeneratorModal userPlan={userPlan} />
-                <ChordPhotoDetector userPlan={userPlan} />
+                {showChordTools && <ChordGeneratorModal userPlan={userPlan} />}
+                {showChordPhoto && <ChordPhotoDetector userPlan={userPlan} />}
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <SongAnalyzerModal userPlan={userPlan} />
                 <SongLibraryModal userPlan={userPlan} />
               </div>
             </header>
+
 
             {/* Stats */}
             <DashboardStats
@@ -164,6 +183,7 @@ const StudentPortal = () => {
       </main>
 
       <MobileBottomNav />
+      <SelectInstrumentGate open={needsInstrument} />
     </div>
   );
 };
