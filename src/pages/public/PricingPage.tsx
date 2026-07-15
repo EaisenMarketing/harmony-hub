@@ -141,6 +141,10 @@ export default function PricingPage() {
 
             <Link
               to={`/auth?next=${encodeURIComponent(next)}&plan=production`}
+              onClick={() => {
+                savePendingCheckout('production');
+                savePendingInstrument('production');
+              }}
               className="block text-center w-full rounded-xl py-3 font-semibold transition-transform hover:scale-[1.02] bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
             >
               Empezar con Producción
