@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Check } from 'lucide-react';
 import { PublicLayout } from '@/components/public/PublicLayout';
 import { Seo } from '@/lib/seo';
-import { INSTRUMENT_PLANS, type InstrumentSlug } from '@/lib/instrument-access';
+import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/instrument-access';
+import { savePendingCheckout } from '@/lib/checkout';
+import { savePendingInstrument } from '@/lib/auth-redirect';
 import { cn } from '@/lib/utils';
 
 const sharedFeatures = [
@@ -27,8 +29,19 @@ export default function PricingPage() {
   const [params] = useSearchParams();
   const courseHint = params.get('course');
   const next = courseHint ? `/cursos/${courseHint}` : '/portal';
-  const [selected, setSelected] = useState<InstrumentSlug>(instrumentOptions[0].id);
+  const planParam = params.get('plan');
+  const initial: InstrumentSlug =
+    isValidInstrument(planParam) && planParam !== 'production'
+      ? planParam
+      : instrumentOptions[0].id;
+  const [selected, setSelected] = useState<InstrumentSlug>(initial);
   const current = instrumentOptions.find((p) => p.id === selected)!;
+
+  // Keep the checkout intent in sync with the instrument the user picks here.
+  useEffect(() => {
+    savePendingCheckout(selected);
+    savePendingInstrument(selected);
+  }, [selected]);
 
   return (
     <PublicLayout>
@@ -128,6 +141,10 @@ export default function PricingPage() {
 
             <Link
               to={`/auth?next=${encodeURIComponent(next)}&plan=production`}
+              onClick={() => {
+                savePendingCheckout('production');
+                savePendingInstrument('production');
+              }}
               className="block text-center w-full rounded-xl py-3 font-semibold transition-transform hover:scale-[1.02] bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
             >
               Empezar con Producción

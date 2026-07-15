@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useStudentProfile } from '@/hooks/useStudentData';
+import { useSetUserInstrument } from '@/hooks/useUserInstrument';
+import { savePendingCheckout, buildCheckoutIntent } from '@/lib/checkout';
 import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/instrument-access';
 
 const sharedFeatures = [
@@ -27,6 +29,7 @@ const productionPlan = INSTRUMENT_PLANS.find((p) => p.id === 'production')!;
 
 export const PaymentsSection = () => {
   const { data: profile } = useStudentProfile();
+  const setInstrument = useSetUserInstrument();
   const currentPlan: string = profile?.subscription_plan || 'basic';
   const currentInstrument = profile?.primary_instrument || 'piano';
   const [selected, setSelected] = useState<InstrumentSlug>(
@@ -36,6 +39,19 @@ export const PaymentsSection = () => {
   const currentInstrumentPlan = instrumentOptions.find((p) => p.id === selected)!;
   const isCurrentInstrument = isValidInstrument(currentPlan) && currentPlan === selected;
   const isProduction = currentPlan === 'production';
+
+  // Sync the chosen instrument with the checkout that will be billed.
+  // - Persist the checkout intent (price/plan/instrument) for the pricing/auth flow.
+  // - If the profile's primary_instrument doesn't match the pick, update it so the
+  //   backend and future subscription renewal are aligned with the UI selection.
+  const goToCheckout = (target: InstrumentSlug) => {
+    savePendingCheckout(target);
+    if (isValidInstrument(currentInstrument) && currentInstrument !== target) {
+      setInstrument.mutate(target);
+    }
+  };
+
+  const intentPreview = buildCheckoutIntent(selected);
 
   const planLabel =
     currentPlan === 'production'
@@ -143,7 +159,14 @@ export const PaymentsSection = () => {
                 ))}
               </ul>
 
-              <Link to={`/precios?plan=${currentInstrumentPlan.id}`}>
+              <div className="mb-3 rounded-lg border border-border/60 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                Se facturará: <span className="font-semibold text-foreground">{intentPreview.label}</span> · ${intentPreview.priceUsd} USD/mes
+              </div>
+
+              <Link
+                to={`/precios?plan=${currentInstrumentPlan.id}`}
+                onClick={() => goToCheckout(currentInstrumentPlan.id)}
+              >
                 <Button
                   className="w-full"
                   variant={isCurrentInstrument ? 'secondary' : 'default'}
@@ -193,7 +216,7 @@ export const PaymentsSection = () => {
                 ))}
               </ul>
 
-              <Link to="/precios?plan=production">
+              <Link to="/precios?plan=production" onClick={() => goToCheckout('production')}>
                 <Button
                   className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500"
                   disabled={isProduction}
