@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useStudentProfile } from '@/hooks/useStudentData';
+import { useSetUserInstrument } from '@/hooks/useUserInstrument';
+import { savePendingCheckout, buildCheckoutIntent } from '@/lib/checkout';
 import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/instrument-access';
 
 const sharedFeatures = [
