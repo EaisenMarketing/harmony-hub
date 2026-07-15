@@ -159,7 +159,14 @@ export const PaymentsSection = () => {
                 ))}
               </ul>
 
-              <Link to={`/precios?plan=${currentInstrumentPlan.id}`}>
+              <div className="mb-3 rounded-lg border border-border/60 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                Se facturará: <span className="font-semibold text-foreground">{intentPreview.label}</span> · ${intentPreview.priceUsd} USD/mes
+              </div>
+
+              <Link
+                to={`/precios?plan=${currentInstrumentPlan.id}`}
+                onClick={() => goToCheckout(currentInstrumentPlan.id)}
+              >
                 <Button
                   className="w-full"
                   variant={isCurrentInstrument ? 'secondary' : 'default'}
