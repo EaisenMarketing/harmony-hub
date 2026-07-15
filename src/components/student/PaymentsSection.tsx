@@ -216,7 +216,7 @@ export const PaymentsSection = () => {
                 ))}
               </ul>
 
-              <Link to="/precios?plan=production">
+              <Link to="/precios?plan=production" onClick={() => goToCheckout('production')}>
                 <Button
                   className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500"
                   disabled={isProduction}
