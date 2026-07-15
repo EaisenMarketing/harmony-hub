@@ -29,6 +29,7 @@ const productionPlan = INSTRUMENT_PLANS.find((p) => p.id === 'production')!;
 
 export const PaymentsSection = () => {
   const { data: profile } = useStudentProfile();
+  const setInstrument = useSetUserInstrument();
   const currentPlan: string = profile?.subscription_plan || 'basic';
   const currentInstrument = profile?.primary_instrument || 'piano';
   const [selected, setSelected] = useState<InstrumentSlug>(
@@ -38,6 +39,19 @@ export const PaymentsSection = () => {
   const currentInstrumentPlan = instrumentOptions.find((p) => p.id === selected)!;
   const isCurrentInstrument = isValidInstrument(currentPlan) && currentPlan === selected;
   const isProduction = currentPlan === 'production';
+
+  // Sync the chosen instrument with the checkout that will be billed.
+  // - Persist the checkout intent (price/plan/instrument) for the pricing/auth flow.
+  // - If the profile's primary_instrument doesn't match the pick, update it so the
+  //   backend and future subscription renewal are aligned with the UI selection.
+  const goToCheckout = (target: InstrumentSlug) => {
+    savePendingCheckout(target);
+    if (isValidInstrument(currentInstrument) && currentInstrument !== target) {
+      setInstrument.mutate(target);
+    }
+  };
+
+  const intentPreview = buildCheckoutIntent(selected);
 
   const planLabel =
     currentPlan === 'production'
