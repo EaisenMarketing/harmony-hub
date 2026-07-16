@@ -40,11 +40,10 @@ export const PaymentsSection = () => {
   const isCurrentInstrument = isValidInstrument(currentPlan) && currentPlan === selected;
   const isProduction = currentPlan === 'production';
 
+  const [confirmTarget, setConfirmTarget] = useState<InstrumentSlug | null>(null);
+
   // Sync the chosen instrument with the checkout that will be billed.
-  // - Persist the checkout intent (price/plan/instrument) for the pricing/auth flow.
-  // - If the profile's primary_instrument doesn't match the pick, update it so the
-  //   backend and future subscription renewal are aligned with the UI selection.
-  const goToCheckout = (target: InstrumentSlug) => {
+  const confirmCheckout = (target: InstrumentSlug) => {
     savePendingCheckout(target);
     if (isValidInstrument(currentInstrument) && currentInstrument !== target) {
       setInstrument.mutate(target);
