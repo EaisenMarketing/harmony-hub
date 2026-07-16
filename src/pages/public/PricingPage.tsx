@@ -111,12 +111,13 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              to={`/auth?next=${encodeURIComponent(next)}&plan=${current.id}`}
+            <button
+              type="button"
+              onClick={() => setConfirmTarget(current.id)}
               className="block text-center w-full rounded-xl py-3 font-semibold transition-transform hover:scale-[1.02] bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
             >
               Empezar con {current.label}
-            </Link>
+            </button>
           </div>
 
           <div className="relative rounded-2xl border border-violet-500/60 bg-violet-500/5 p-8 flex flex-col shadow-[0_0_60px_-20px_hsl(280_80%_60%/0.6)]">
