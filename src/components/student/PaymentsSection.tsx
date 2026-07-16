@@ -162,18 +162,14 @@ export const PaymentsSection = () => {
                 Se facturará: <span className="font-semibold text-foreground">{intentPreview.label}</span> · ${intentPreview.priceUsd} USD/mes
               </div>
 
-              <Link
-                to={`/precios?plan=${currentInstrumentPlan.id}`}
-                onClick={() => goToCheckout(currentInstrumentPlan.id)}
+              <Button
+                className="w-full"
+                variant={isCurrentInstrument ? 'secondary' : 'default'}
+                disabled={isCurrentInstrument}
+                onClick={() => setConfirmTarget(currentInstrumentPlan.id)}
               >
-                <Button
-                  className="w-full"
-                  variant={isCurrentInstrument ? 'secondary' : 'default'}
-                  disabled={isCurrentInstrument}
-                >
-                  {isCurrentInstrument ? 'Plan Actual' : 'Cambiar a este instrumento'}
-                </Button>
-              </Link>
+                {isCurrentInstrument ? 'Plan Actual' : 'Revisar y cambiar a este instrumento'}
+              </Button>
             </CardContent>
           </Card>
 
