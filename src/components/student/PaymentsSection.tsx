@@ -211,14 +211,13 @@ export const PaymentsSection = () => {
                 ))}
               </ul>
 
-              <Link to="/precios?plan=production" onClick={() => goToCheckout('production')}>
-                <Button
-                  className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500"
-                  disabled={isProduction}
-                >
-                  {isProduction ? 'Plan Actual' : 'Cambiar a Producción'}
-                </Button>
-              </Link>
+              <Button
+                className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500"
+                disabled={isProduction}
+                onClick={() => setConfirmTarget('production')}
+              >
+                {isProduction ? 'Plan Actual' : 'Revisar y cambiar a Producción'}
+              </Button>
             </CardContent>
           </Card>
         </div>
