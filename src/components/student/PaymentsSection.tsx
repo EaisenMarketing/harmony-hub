@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { CreditCard, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { useStudentProfile } from '@/hooks/useStudentData';
 import { useSetUserInstrument } from '@/hooks/useUserInstrument';
 import { savePendingCheckout, buildCheckoutIntent } from '@/lib/checkout';
 import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/instrument-access';
+import { CheckoutSummaryDialog } from '@/components/student/CheckoutSummaryDialog';
 
 const sharedFeatures = [
   'Acceso completo a los cursos del instrumento',
@@ -40,11 +40,10 @@ export const PaymentsSection = () => {
   const isCurrentInstrument = isValidInstrument(currentPlan) && currentPlan === selected;
   const isProduction = currentPlan === 'production';
 
+  const [confirmTarget, setConfirmTarget] = useState<InstrumentSlug | null>(null);
+
   // Sync the chosen instrument with the checkout that will be billed.
-  // - Persist the checkout intent (price/plan/instrument) for the pricing/auth flow.
-  // - If the profile's primary_instrument doesn't match the pick, update it so the
-  //   backend and future subscription renewal are aligned with the UI selection.
-  const goToCheckout = (target: InstrumentSlug) => {
+  const confirmCheckout = (target: InstrumentSlug) => {
     savePendingCheckout(target);
     if (isValidInstrument(currentInstrument) && currentInstrument !== target) {
       setInstrument.mutate(target);
@@ -163,18 +162,14 @@ export const PaymentsSection = () => {
                 Se facturará: <span className="font-semibold text-foreground">{intentPreview.label}</span> · ${intentPreview.priceUsd} USD/mes
               </div>
 
-              <Link
-                to={`/precios?plan=${currentInstrumentPlan.id}`}
-                onClick={() => goToCheckout(currentInstrumentPlan.id)}
+              <Button
+                className="w-full"
+                variant={isCurrentInstrument ? 'secondary' : 'default'}
+                disabled={isCurrentInstrument}
+                onClick={() => setConfirmTarget(currentInstrumentPlan.id)}
               >
-                <Button
-                  className="w-full"
-                  variant={isCurrentInstrument ? 'secondary' : 'default'}
-                  disabled={isCurrentInstrument}
-                >
-                  {isCurrentInstrument ? 'Plan Actual' : 'Cambiar a este instrumento'}
-                </Button>
-              </Link>
+                {isCurrentInstrument ? 'Plan Actual' : 'Revisar y cambiar a este instrumento'}
+              </Button>
             </CardContent>
           </Card>
 
@@ -216,14 +211,13 @@ export const PaymentsSection = () => {
                 ))}
               </ul>
 
-              <Link to="/precios?plan=production" onClick={() => goToCheckout('production')}>
-                <Button
-                  className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500"
-                  disabled={isProduction}
-                >
-                  {isProduction ? 'Plan Actual' : 'Cambiar a Producción'}
-                </Button>
-              </Link>
+              <Button
+                className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500"
+                disabled={isProduction}
+                onClick={() => setConfirmTarget('production')}
+              >
+                {isProduction ? 'Plan Actual' : 'Revisar y cambiar a Producción'}
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -252,6 +246,16 @@ export const PaymentsSection = () => {
           )}
         </CardContent>
       </Card>
+
+      {confirmTarget && (
+        <CheckoutSummaryDialog
+          open={!!confirmTarget}
+          onOpenChange={(o) => !o && setConfirmTarget(null)}
+          instrument={confirmTarget}
+          continueHref={`/precios?plan=${confirmTarget}`}
+          onConfirm={() => confirmCheckout(confirmTarget)}
+        />
+      )}
     </div>
   );
 };

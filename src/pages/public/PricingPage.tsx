@@ -7,6 +7,7 @@ import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/
 import { savePendingCheckout } from '@/lib/checkout';
 import { savePendingInstrument } from '@/lib/auth-redirect';
 import { cn } from '@/lib/utils';
+import { CheckoutSummaryDialog } from '@/components/student/CheckoutSummaryDialog';
 
 const sharedFeatures = [
   'Acceso completo a los cursos del instrumento',
@@ -36,6 +37,7 @@ export default function PricingPage() {
       : instrumentOptions[0].id;
   const [selected, setSelected] = useState<InstrumentSlug>(initial);
   const current = instrumentOptions.find((p) => p.id === selected)!;
+  const [confirmTarget, setConfirmTarget] = useState<InstrumentSlug | null>(null);
 
   // Keep the checkout intent in sync with the instrument the user picks here.
   useEffect(() => {
@@ -109,12 +111,13 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              to={`/auth?next=${encodeURIComponent(next)}&plan=${current.id}`}
+            <button
+              type="button"
+              onClick={() => setConfirmTarget(current.id)}
               className="block text-center w-full rounded-xl py-3 font-semibold transition-transform hover:scale-[1.02] bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
             >
               Empezar con {current.label}
-            </Link>
+            </button>
           </div>
 
           <div className="relative rounded-2xl border border-violet-500/60 bg-violet-500/5 p-8 flex flex-col shadow-[0_0_60px_-20px_hsl(280_80%_60%/0.6)]">
@@ -139,16 +142,13 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              to={`/auth?next=${encodeURIComponent(next)}&plan=production`}
-              onClick={() => {
-                savePendingCheckout('production');
-                savePendingInstrument('production');
-              }}
+            <button
+              type="button"
+              onClick={() => setConfirmTarget('production')}
               className="block text-center w-full rounded-xl py-3 font-semibold transition-transform hover:scale-[1.02] bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
             >
               Empezar con Producción
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -160,6 +160,19 @@ export default function PricingPage() {
           <Link to="/politica-de-cancelacion" className="underline hover:text-white">Política de Cancelación</Link>.
         </p>
       </div>
+
+      {confirmTarget && (
+        <CheckoutSummaryDialog
+          open={!!confirmTarget}
+          onOpenChange={(o) => !o && setConfirmTarget(null)}
+          instrument={confirmTarget}
+          continueHref={`/auth?next=${encodeURIComponent(next)}&plan=${confirmTarget}`}
+          onConfirm={() => {
+            savePendingCheckout(confirmTarget);
+            savePendingInstrument(confirmTarget);
+          }}
+        />
+      )}
     </PublicLayout>
   );
 }
