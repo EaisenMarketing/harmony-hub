@@ -246,6 +246,16 @@ export const PaymentsSection = () => {
           )}
         </CardContent>
       </Card>
+
+      {confirmTarget && (
+        <CheckoutSummaryDialog
+          open={!!confirmTarget}
+          onOpenChange={(o) => !o && setConfirmTarget(null)}
+          instrument={confirmTarget}
+          continueHref={`/precios?plan=${confirmTarget}`}
+          onConfirm={() => confirmCheckout(confirmTarget)}
+        />
+      )}
     </div>
   );
 };
