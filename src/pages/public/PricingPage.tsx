@@ -37,6 +37,7 @@ export default function PricingPage() {
       : instrumentOptions[0].id;
   const [selected, setSelected] = useState<InstrumentSlug>(initial);
   const current = instrumentOptions.find((p) => p.id === selected)!;
+  const [confirmTarget, setConfirmTarget] = useState<InstrumentSlug | null>(null);
 
   // Keep the checkout intent in sync with the instrument the user picks here.
   useEffect(() => {
