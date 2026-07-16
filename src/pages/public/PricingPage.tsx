@@ -7,6 +7,7 @@ import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/
 import { savePendingCheckout } from '@/lib/checkout';
 import { savePendingInstrument } from '@/lib/auth-redirect';
 import { cn } from '@/lib/utils';
+import { CheckoutSummaryDialog } from '@/components/student/CheckoutSummaryDialog';
 
 const sharedFeatures = [
   'Acceso completo a los cursos del instrumento',
