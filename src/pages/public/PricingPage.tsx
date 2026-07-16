@@ -160,6 +160,19 @@ export default function PricingPage() {
           <Link to="/politica-de-cancelacion" className="underline hover:text-white">Política de Cancelación</Link>.
         </p>
       </div>
+
+      {confirmTarget && (
+        <CheckoutSummaryDialog
+          open={!!confirmTarget}
+          onOpenChange={(o) => !o && setConfirmTarget(null)}
+          instrument={confirmTarget}
+          continueHref={`/auth?next=${encodeURIComponent(next)}&plan=${confirmTarget}`}
+          onConfirm={() => {
+            savePendingCheckout(confirmTarget);
+            savePendingInstrument(confirmTarget);
+          }}
+        />
+      )}
     </PublicLayout>
   );
 }
