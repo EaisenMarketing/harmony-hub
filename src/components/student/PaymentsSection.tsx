@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { CreditCard, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { useStudentProfile } from '@/hooks/useStudentData';
 import { useSetUserInstrument } from '@/hooks/useUserInstrument';
 import { savePendingCheckout, buildCheckoutIntent } from '@/lib/checkout';
 import { INSTRUMENT_PLANS, isValidInstrument, type InstrumentSlug } from '@/lib/instrument-access';
+import { CheckoutSummaryDialog } from '@/components/student/CheckoutSummaryDialog';
 
 const sharedFeatures = [
   'Acceso completo a los cursos del instrumento',
