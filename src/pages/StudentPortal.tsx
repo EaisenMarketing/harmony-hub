@@ -22,6 +22,7 @@ import { TeacherConsultSection } from '@/components/student/TeacherConsultSectio
 import { CommunitySection } from '@/components/student/CommunitySection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
+import { PracticeCoachModal } from '@/components/student/PracticeCoachModal';
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
 import { SongLibraryModal } from '@/components/student/SongLibraryModal';
 import { MetronomeTunerModal } from '@/components/student/MetronomeTunerModal';
@@ -142,6 +143,7 @@ const StudentPortal = () => {
                   <ChordPhotoDetector userPlan={userPlan} />
                 </AIToolGate>
                 <MusicTheoryAssistant userPlan={userPlan} />
+                <PracticeCoachModal />
                 <SongAnalyzerModal userPlan={userPlan} />
                 <SongLibraryModal userPlan={userPlan} />
               </div>
