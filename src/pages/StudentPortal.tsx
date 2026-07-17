@@ -146,6 +146,8 @@ const StudentPortal = () => {
                 </AIToolGate>
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <PracticeCoachModal />
+                <EarTrainerModal />
+                <PracticeFeedbackModal />
                 <SongAnalyzerModal userPlan={userPlan} />
                 <SongLibraryModal userPlan={userPlan} />
               </div>
