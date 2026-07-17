@@ -23,6 +23,8 @@ import { CommunitySection } from '@/components/student/CommunitySection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
 import { MusicTheoryAssistant } from '@/components/student/MusicTheoryAssistant';
 import { PracticeCoachModal } from '@/components/student/PracticeCoachModal';
+import { EarTrainerModal } from '@/components/student/EarTrainerModal';
+import { PracticeFeedbackModal } from '@/components/student/PracticeFeedbackModal';
 import { SongAnalyzerModal } from '@/components/student/SongAnalyzerModal';
 import { SongLibraryModal } from '@/components/student/SongLibraryModal';
 import { MetronomeTunerModal } from '@/components/student/MetronomeTunerModal';
