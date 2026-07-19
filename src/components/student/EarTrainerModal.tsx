@@ -1,12 +1,14 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
-import { Ear, Loader2, Play, RotateCcw, Sparkles, Check, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Ear, Loader2, Play, RotateCcw, Sparkles, Check, X, TrendingUp, History } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { INSTRUMENT_PLAN_MAP, type InstrumentSlug } from '@/lib/instrument-access';
