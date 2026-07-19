@@ -114,8 +114,26 @@ const playExercise = async (pb: Playback) => {
   setTimeout(() => ctx.close(), 4000);
 };
 
+interface HistoryRow {
+  id: string;
+  category: string;
+  level: string;
+  accuracy: number;
+  count: number;
+  correct: number;
+  per_type: Record<string, number>;
+  created_at: string;
+}
+interface AdaptiveInfo {
+  level?: string;
+  smoothedAccuracy?: number | null;
+  weakTypes?: string[];
+  adjustmentNote?: string;
+}
+
 export const EarTrainerModal = () => {
   const { data: userIns } = useUserInstrument();
+  const { user } = useAuth();
   const primary = (userIns?.instrument ?? null) as InstrumentSlug | null;
   const instrumentLabel = primary ? INSTRUMENT_PLAN_MAP[primary]?.label : 'general';
 
@@ -128,23 +146,46 @@ export const EarTrainerModal = () => {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [answered, setAnswered] = useState<boolean[]>([]);
+  const [correctByEx, setCorrectByEx] = useState<boolean[]>([]);
   const [correct, setCorrect] = useState(0);
+  const [adaptive, setAdaptive] = useState<AdaptiveInfo | null>(null);
+  const [history, setHistory] = useState<HistoryRow[]>([]);
+  const savedRef = useRef(false);
   const { toast } = useToast();
-  const lastAccuracy = useRef<number | null>(null);
 
   const finished = useMemo(
     () => session && answered.length === session.exercises.length && answered.every(Boolean),
     [session, answered],
   );
 
+  const loadHistory = async () => {
+    if (!user?.id) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase.from('ear_training_sessions' as any)
+      .select('id, category, level, accuracy, count, correct, per_type, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10) as any);
+    if (Array.isArray(data)) setHistory(data as HistoryRow[]);
+  };
+
+  useEffect(() => { if (open) loadHistory(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [open, user?.id]);
+
   const startSession = async () => {
     setLoading(true);
     setSession(null);
+    setAdaptive(null);
+    savedRef.current = false;
     try {
+      const recentAccuracy = history[0]?.accuracy;
+      const historyPayload = history.slice(0, 5).map(h => ({
+        accuracy: h.accuracy, level: h.level, category: h.category, perType: h.per_type,
+      }));
       const { data, error } = await supabase.functions.invoke('ear-training', {
         body: {
           category, level, instrument: instrumentLabel, count,
-          recentAccuracy: lastAccuracy.current ?? undefined,
+          recentAccuracy,
+          history: historyPayload,
         },
       });
       if (error) throw error;
@@ -152,9 +193,14 @@ export const EarTrainerModal = () => {
       const s: Session = data.session;
       if (!s?.exercises?.length) throw new Error('Sesión sin ejercicios');
       setSession(s);
+      setAdaptive(data.adaptive ?? null);
+      if (data.adaptive?.level && data.adaptive.level !== level) {
+        setLevel(data.adaptive.level);
+      }
       setCurrent(0);
       setSelected(null);
       setAnswered(new Array(s.exercises.length).fill(false));
+      setCorrectByEx(new Array(s.exercises.length).fill(false));
       setCorrect(0);
     } catch (e: unknown) {
       toast({
@@ -171,12 +217,36 @@ export const EarTrainerModal = () => {
     if (!session || selected === null) return;
     const ex = session.exercises[current];
     const isCorrect = selected === ex.answerIndex;
-    setAnswered((prev) => {
-      const next = [...prev];
-      next[current] = true;
-      return next;
-    });
+    setAnswered((prev) => { const n = [...prev]; n[current] = true; return n; });
+    setCorrectByEx((prev) => { const n = [...prev]; n[current] = isCorrect; return n; });
     if (isCorrect) setCorrect((c) => c + 1);
+  };
+
+  const saveSession = async (finalCorrect: number) => {
+    if (!session || !user?.id || savedRef.current) return;
+    savedRef.current = true;
+    const accuracy = Math.round((finalCorrect / session.exercises.length) * 100);
+    // Per-type accuracy
+    const buckets: Record<string, { c: number; n: number }> = {};
+    session.exercises.forEach((ex, i) => {
+      const t = ex.type;
+      if (!buckets[t]) buckets[t] = { c: 0, n: 0 };
+      buckets[t].n += 1;
+      if (correctByEx[i]) buckets[t].c += 1;
+    });
+    const per_type: Record<string, number> = {};
+    Object.entries(buckets).forEach(([k, v]) => { per_type[k] = Math.round((v.c / v.n) * 100); });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from('ear_training_sessions' as any).insert({
+      user_id: user.id,
+      category, level, instrument: instrumentLabel,
+      count: session.exercises.length,
+      correct: finalCorrect,
+      accuracy,
+      per_type,
+    }) as any);
+    if (!error) loadHistory();
   };
 
   const nextExercise = () => {
@@ -185,23 +255,26 @@ export const EarTrainerModal = () => {
       setCurrent(current + 1);
       setSelected(null);
     } else {
-      // finalize
-      const acc = Math.round((correct / session.exercises.length) * 100);
-      lastAccuracy.current = acc;
+      saveSession(correct);
     }
   };
 
   const resetAll = () => {
     setSession(null);
+    setAdaptive(null);
     setCurrent(0);
     setSelected(null);
     setAnswered([]);
+    setCorrectByEx([]);
     setCorrect(0);
   };
 
   const ex = session?.exercises[current];
   const hasAnswered = ex ? answered[current] : false;
   const accuracy = session ? Math.round((correct / session.exercises.length) * 100) : 0;
+  const avgHistory = history.length
+    ? Math.round(history.reduce((s, h) => s + h.accuracy, 0) / history.length)
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
