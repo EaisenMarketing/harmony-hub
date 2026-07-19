@@ -143,8 +143,11 @@ Reglas del campo "playback":
 Las opciones deben incluir la correcta y 3 distractores plausibles. Ajusta la dificultad al nivel indicado. Responde solo el JSON.`;
 
     const userPrompt = `Genera ${count} ejercicios de la categoría "${category}" para un estudiante de nivel "${level}" de ${instrument}.
-${Number.isFinite(recentAccuracy) ? `Precisión reciente del alumno: ${recentAccuracy}%.` : ''}
+${Number.isFinite(smoothedAcc) ? `Precisión ponderada reciente del alumno: ${Math.round(smoothedAcc)}%.` : ''}
+${history.length ? `Historial reciente (más reciente primero): ${history.map(h => `${h.category ?? '?'}/${h.level ?? '?'}:${h.accuracy ?? '?'}%`).join(' | ')}.` : ''}
+${weakTypes.length ? `Puntos débiles a reforzar: ${weakTypes.join(', ')}. Incluye más ejercicios de estos tipos.` : ''}
 ${focus ? `Áreas de enfoque: ${focus}.` : ''}
+Guía de dificultad para este nivel: ${difficultyGuide}
 Adapta la dificultad y varía los ejercicios.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
