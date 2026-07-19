@@ -191,7 +191,16 @@ Adapta la dificultad y varía los ejercicios.`;
       throw new Error('IA devolvió JSON inválido');
     }
 
-    return new Response(JSON.stringify({ success: true, session: parsed }), {
+    return new Response(JSON.stringify({
+      success: true,
+      session: parsed,
+      adaptive: {
+        level,
+        smoothedAccuracy: Number.isFinite(smoothedAcc) ? Math.round(smoothedAcc) : null,
+        weakTypes,
+        adjustmentNote,
+      },
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: unknown) {
