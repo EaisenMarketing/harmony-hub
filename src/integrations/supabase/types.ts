@@ -649,6 +649,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ear_training_sessions: {
+        Row: {
+          accuracy: number
+          category: string
+          correct: number
+          count: number
+          created_at: string
+          id: string
+          instrument: string | null
+          level: string
+          per_type: Json
+          user_id: string
+        }
+        Insert: {
+          accuracy: number
+          category: string
+          correct: number
+          count: number
+          created_at?: string
+          id?: string
+          instrument?: string | null
+          level: string
+          per_type?: Json
+          user_id: string
+        }
+        Update: {
+          accuracy?: number
+          category?: string
+          correct?: number
+          count?: number
+          created_at?: string
+          id?: string
+          instrument?: string | null
+          level?: string
+          per_type?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       enrollments: {
         Row: {
           course_id: string
