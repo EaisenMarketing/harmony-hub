@@ -35,11 +35,77 @@ serve(async (req) => {
 
     const body = await req.json();
     const category = String(body?.category ?? 'intervals'); // intervals | chords | rhythms | mixed
-    const level = String(body?.level ?? 'principiante').slice(0, 40);
+    const requestedLevel = String(body?.level ?? 'principiante').slice(0, 40);
     const instrument = String(body?.instrument ?? 'general').slice(0, 40);
     const count = Math.max(3, Math.min(10, Number(body?.count) || 6));
     const recentAccuracy = Number(body?.recentAccuracy); // 0-100 optional
     const focus = String(body?.focus ?? '').slice(0, 300);
+    // Recent history: [{ accuracy, level, category, perType?: { interval, chord, rhythm } }]
+    const history: Array<{ accuracy?: number; level?: string; category?: string; perType?: Record<string, number> }> =
+      Array.isArray(body?.history) ? body.history.slice(0, 10) : [];
+
+    // ---------- Adaptive difficulty algorithm ----------
+    const LEVELS = ['principiante', 'intermedio', 'avanzado'] as const;
+    type Lvl = typeof LEVELS[number];
+    const clampLvl = (i: number): Lvl => LEVELS[Math.max(0, Math.min(LEVELS.length - 1, i))];
+    const idxOf = (l: string): number => Math.max(0, LEVELS.indexOf((l as Lvl)) );
+
+    // Weight recent sessions more (exponential decay)
+    let weightedAcc = 0, weightSum = 0;
+    history.forEach((h, i) => {
+      const acc = Number(h?.accuracy);
+      if (!Number.isFinite(acc)) return;
+      const w = Math.pow(0.7, i); // most recent first
+      weightedAcc += acc * w;
+      weightSum += w;
+    });
+    const smoothedAcc = weightSum > 0 ? weightedAcc / weightSum
+      : (Number.isFinite(recentAccuracy) ? recentAccuracy : NaN);
+
+    // Consecutive high/low streaks trigger jumps
+    const highStreak = history.slice(0, 3).every(h => Number(h?.accuracy) >= 85) && history.length >= 2;
+    const lowStreak  = history.slice(0, 3).every(h => Number(h?.accuracy) <= 45) && history.length >= 2;
+
+    let level: Lvl = (LEVELS.includes(requestedLevel as Lvl) ? requestedLevel : 'principiante') as Lvl;
+    let adjustmentNote = '';
+    if (Number.isFinite(smoothedAcc)) {
+      let delta = 0;
+      if (smoothedAcc >= 90 || highStreak) delta = +1;
+      else if (smoothedAcc >= 75) delta = 0;
+      else if (smoothedAcc >= 55) delta = 0;
+      else if (smoothedAcc >= 40) delta = -1;
+      else delta = lowStreak ? -1 : -1;
+      const newLvl = clampLvl(idxOf(level) + delta);
+      if (newLvl !== level) {
+        adjustmentNote = `Ajuste automático: nivel cambiado de "${level}" a "${newLvl}" por precisión reciente ${Math.round(smoothedAcc)}%.`;
+        level = newLvl;
+      }
+    }
+
+    // Detect weakest sub-type across history for weighting
+    const typeAcc: Record<string, { sum: number; n: number }> = {};
+    history.forEach(h => {
+      const pt = h?.perType || {};
+      Object.entries(pt).forEach(([k, v]) => {
+        const n = Number(v);
+        if (!Number.isFinite(n)) return;
+        if (!typeAcc[k]) typeAcc[k] = { sum: 0, n: 0 };
+        typeAcc[k].sum += n; typeAcc[k].n += 1;
+      });
+    });
+    const weakTypes = Object.entries(typeAcc)
+      .map(([k, v]) => ({ k, avg: v.sum / v.n }))
+      .filter(x => x.avg < 70)
+      .sort((a, b) => a.avg - b.avg)
+      .slice(0, 2)
+      .map(x => x.k);
+
+    // Difficulty knobs given to the model
+    const difficultyGuide = level === 'principiante'
+      ? 'Usa intervalos simples (2M, 3M, 4J, 5J, 8J), acordes tríadas mayores/menores, ritmos de 8 pulsos en 4/4 sencillos.'
+      : level === 'intermedio'
+      ? 'Incluye intervalos como 3m, 6M, 7m, acordes con séptima (maj7, min7, dom7), y ritmos de 16 pulsos con síncopas moderadas.'
+      : 'Usa intervalos cromáticos (2m, tritono, 7M), acordes dim/aug y extensiones, ritmos de 16 pulsos con síncopas y silencios complejos.';
 
     const systemPrompt = `Eres un experto en entrenamiento auditivo musical. Diseñas ejercicios de ear training progresivos y adaptados al nivel del estudiante.
 
@@ -77,8 +143,11 @@ Reglas del campo "playback":
 Las opciones deben incluir la correcta y 3 distractores plausibles. Ajusta la dificultad al nivel indicado. Responde solo el JSON.`;
 
     const userPrompt = `Genera ${count} ejercicios de la categoría "${category}" para un estudiante de nivel "${level}" de ${instrument}.
-${Number.isFinite(recentAccuracy) ? `Precisión reciente del alumno: ${recentAccuracy}%.` : ''}
+${Number.isFinite(smoothedAcc) ? `Precisión ponderada reciente del alumno: ${Math.round(smoothedAcc)}%.` : ''}
+${history.length ? `Historial reciente (más reciente primero): ${history.map(h => `${h.category ?? '?'}/${h.level ?? '?'}:${h.accuracy ?? '?'}%`).join(' | ')}.` : ''}
+${weakTypes.length ? `Puntos débiles a reforzar: ${weakTypes.join(', ')}. Incluye más ejercicios de estos tipos.` : ''}
 ${focus ? `Áreas de enfoque: ${focus}.` : ''}
+Guía de dificultad para este nivel: ${difficultyGuide}
 Adapta la dificultad y varía los ejercicios.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -122,7 +191,16 @@ Adapta la dificultad y varía los ejercicios.`;
       throw new Error('IA devolvió JSON inválido');
     }
 
-    return new Response(JSON.stringify({ success: true, session: parsed }), {
+    return new Response(JSON.stringify({
+      success: true,
+      session: parsed,
+      adaptive: {
+        level,
+        smoothedAccuracy: Number.isFinite(smoothedAcc) ? Math.round(smoothedAcc) : null,
+        weakTypes,
+        adjustmentNote,
+      },
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: unknown) {
