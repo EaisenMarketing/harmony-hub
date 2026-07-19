@@ -335,15 +335,48 @@ export const EarTrainerModal = () => {
                     </Select>
                   </div>
                 </div>
-                {lastAccuracy.current !== null && (
-                  <p className="text-sm text-muted-foreground">
-                    Última sesión: <span className="font-semibold text-primary">{lastAccuracy.current}%</span> — la IA usará este dato para adaptar la dificultad.
-                  </p>
+                {history.length > 0 && (
+                  <div className="rounded-lg border border-border/60 bg-muted/40 p-3 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <TrendingUp className="w-4 h-4 text-primary" /> Tu progreso
+                      </span>
+                      <span className="text-muted-foreground">
+                        Promedio: <span className="font-semibold text-primary">{avgHistory}%</span>
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      La IA usa tu historial para ajustar la dificultad automáticamente.
+                    </p>
+                  </div>
                 )}
                 <Button onClick={startSession} disabled={loading} className="w-full gap-2">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   {loading ? 'Generando ejercicios...' : 'Comenzar sesión'}
                 </Button>
+                {history.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    <p className="text-sm font-medium flex items-center gap-1.5">
+                      <History className="w-4 h-4" /> Historial reciente
+                    </p>
+                    <div className="space-y-1.5">
+                      {history.slice(0, 6).map((h) => (
+                        <div key={h.id} className="flex items-center justify-between text-xs rounded-md border border-border/50 px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-[10px]">{h.category}</Badge>
+                            <span className="text-muted-foreground">{h.level}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-muted-foreground">{h.correct}/{h.count}</span>
+                            <span className={`font-semibold ${h.accuracy >= 75 ? 'text-emerald-500' : h.accuracy >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+                              {h.accuracy}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </ScrollArea>
           ) : finished ? (
