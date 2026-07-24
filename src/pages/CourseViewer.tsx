@@ -151,8 +151,9 @@ const CourseViewer = () => {
 
   // Instrument/plan access guard: user must have picked an instrument and it must
   // match the course's instrument (or production plan for production courses).
+  // Admins bypass all instrument/plan gates.
   const primaryInstrument = userIns?.instrument ?? null;
-  if (!primaryInstrument) {
+  if (!isAdmin && !primaryInstrument) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">
         <Lock className="w-12 h-12 text-muted-foreground" />
@@ -164,12 +165,12 @@ const CourseViewer = () => {
       </div>
     );
   }
-  const canAccessCourse = hasAccessToCourseInstrument(
+  const canAccessCourse = isAdmin || (primaryInstrument && hasAccessToCourseInstrument(
     primaryInstrument,
     course.instrument,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (course as any).required_plan ?? null,
-  );
+  ));
   if (!canAccessCourse) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">
