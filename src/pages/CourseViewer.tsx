@@ -31,6 +31,7 @@ const CourseViewer = () => {
   const { data: userProgress } = useUserProgress(courseId);
   const { data: userProfile } = useUserProfile();
   const { data: userIns, isLoading: insLoading } = useUserInstrument();
+  const { data: isAdmin } = useIsAdmin();
   const updateProgress = useUpdateLessonProgress();
 
   // Get all lessons in order
