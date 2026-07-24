@@ -33,13 +33,15 @@ export const AIToolGate = ({
 }: Props) => {
   const navigate = useNavigate();
   const { data: userIns } = useUserInstrument();
+  const { data: isAdmin } = useIsAdmin();
   const primary = userIns?.instrument ?? null;
   const [open, setOpen] = useState(false);
 
   const allowed = useMemo(() => {
+    if (isAdmin) return true;
     if (!allowedInstruments || allowedInstruments.length === 0) return !!primary;
     return !!primary && allowedInstruments.includes(primary);
-  }, [allowedInstruments, primary]);
+  }, [allowedInstruments, primary, isAdmin]);
 
   if (allowed) return <>{children}</>;
 
