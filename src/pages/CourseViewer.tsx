@@ -126,7 +126,7 @@ const CourseViewer = () => {
     (hasStandardAccess && course?.instrument === userInstrument) ||
     userPlan === 'basic'; // Basic users are limited by lesson count, not instrument
   
-  const isLocked = selectedLesson && !selectedLesson.is_free_preview && 
+  const isLocked = !isAdmin && selectedLesson && !selectedLesson.is_free_preview && 
     (!hasInstrumentAccess || (userPlan === 'basic'));
 
   if (authLoading || courseLoading || contentLoading || insLoading) {
