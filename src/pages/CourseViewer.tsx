@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen, StickyNote, ChevronDown, ChevronUp, Lock } from 'l
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { useIsAdmin } from '@/hooks/useAdminData';
 import { hasAccessToCourseInstrument } from '@/lib/instrument-access';
 import { ProtectedVideoPlayer } from '@/components/student/ProtectedVideoPlayer';
 import { ContinueWatchingButton } from '@/components/student/ContinueWatchingButton';
@@ -30,6 +31,7 @@ const CourseViewer = () => {
   const { data: userProgress } = useUserProgress(courseId);
   const { data: userProfile } = useUserProfile();
   const { data: userIns, isLoading: insLoading } = useUserInstrument();
+  const { data: isAdmin } = useIsAdmin();
   const updateProgress = useUpdateLessonProgress();
 
   // Get all lessons in order
@@ -124,7 +126,7 @@ const CourseViewer = () => {
     (hasStandardAccess && course?.instrument === userInstrument) ||
     userPlan === 'basic'; // Basic users are limited by lesson count, not instrument
   
-  const isLocked = selectedLesson && !selectedLesson.is_free_preview && 
+  const isLocked = !isAdmin && selectedLesson && !selectedLesson.is_free_preview && 
     (!hasInstrumentAccess || (userPlan === 'basic'));
 
   if (authLoading || courseLoading || contentLoading || insLoading) {
@@ -149,8 +151,9 @@ const CourseViewer = () => {
 
   // Instrument/plan access guard: user must have picked an instrument and it must
   // match the course's instrument (or production plan for production courses).
+  // Admins bypass all instrument/plan gates.
   const primaryInstrument = userIns?.instrument ?? null;
-  if (!primaryInstrument) {
+  if (!isAdmin && !primaryInstrument) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">
         <Lock className="w-12 h-12 text-muted-foreground" />
@@ -162,12 +165,12 @@ const CourseViewer = () => {
       </div>
     );
   }
-  const canAccessCourse = hasAccessToCourseInstrument(
+  const canAccessCourse = isAdmin || (primaryInstrument && hasAccessToCourseInstrument(
     primaryInstrument,
     course.instrument,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (course as any).required_plan ?? null,
-  );
+  ));
   if (!canAccessCourse) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6 text-center">

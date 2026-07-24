@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { Lock } from 'lucide-react';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { useIsAdmin } from '@/hooks/useAdminData';
 import { INSTRUMENT_PLAN_MAP, type InstrumentSlug } from '@/lib/instrument-access';
 
 interface Props {
@@ -32,13 +33,15 @@ export const AIToolGate = ({
 }: Props) => {
   const navigate = useNavigate();
   const { data: userIns } = useUserInstrument();
+  const { data: isAdmin } = useIsAdmin();
   const primary = userIns?.instrument ?? null;
   const [open, setOpen] = useState(false);
 
   const allowed = useMemo(() => {
+    if (isAdmin) return true;
     if (!allowedInstruments || allowedInstruments.length === 0) return !!primary;
     return !!primary && allowedInstruments.includes(primary);
-  }, [allowedInstruments, primary]);
+  }, [allowedInstruments, primary, isAdmin]);
 
   if (allowed) return <>{children}</>;
 
