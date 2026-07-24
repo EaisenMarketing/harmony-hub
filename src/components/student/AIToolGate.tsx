@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { Lock } from 'lucide-react';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { useIsAdmin } from '@/hooks/useAdminData';
 import { INSTRUMENT_PLAN_MAP, type InstrumentSlug } from '@/lib/instrument-access';
 
 interface Props {
