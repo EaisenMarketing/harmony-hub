@@ -145,6 +145,9 @@ const StudentPortal = () => {
                 >
                   <ChordPhotoDetector userPlan={userPlan} />
                 </AIToolGate>
+                {['guitar', 'electric_guitar', 'bass'].includes(userInstrument || '') && (
+                  <ChordCreatorModal userInstrument={userInstrument} />
+                )}
                 <MusicTheoryAssistant userPlan={userPlan} />
                 <PracticeCoachModal />
                 <EarTrainerModal />
