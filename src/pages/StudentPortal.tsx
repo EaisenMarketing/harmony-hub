@@ -33,6 +33,7 @@ import { ChordCreatorModal } from '@/components/student/ChordCreatorModal';
 import { SelectInstrumentGate } from '@/components/student/SelectInstrumentGate';
 import { AIToolGate } from '@/components/student/AIToolGate';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { useIsAdmin } from '@/hooks/useAdminData';
 import { AI_TOOL_INSTRUMENTS, INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
 import {
   useStudentProfile,
