@@ -55,8 +55,9 @@ const StudentPortal = () => {
   const { data: stats } = useStudentStats();
   const { data: userPlan = 'basic' } = useUserPlan();
   const { data: userIns, isLoading: insLoading } = useUserInstrument();
+  const { data: isAdmin } = useIsAdmin();
   const primaryInstrument = userIns?.instrument ?? null;
-  const needsInstrument = !!user && !insLoading && !primaryInstrument;
+  const needsInstrument = !!user && !insLoading && !primaryInstrument && !isAdmin;
   const instrumentLabel = primaryInstrument
     ? INSTRUMENT_PLAN_MAP[primaryInstrument]?.label
     : null;
