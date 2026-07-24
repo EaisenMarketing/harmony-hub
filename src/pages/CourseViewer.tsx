@@ -4,6 +4,7 @@ import { ArrowLeft, BookOpen, StickyNote, ChevronDown, ChevronUp, Lock } from 'l
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
+import { useIsAdmin } from '@/hooks/useAdminData';
 import { hasAccessToCourseInstrument } from '@/lib/instrument-access';
 import { ProtectedVideoPlayer } from '@/components/student/ProtectedVideoPlayer';
 import { ContinueWatchingButton } from '@/components/student/ContinueWatchingButton';
