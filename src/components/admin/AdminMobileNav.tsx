@@ -12,6 +12,7 @@ import {
   MoreHorizontal,
   LogOut,
   Home,
+  Gift,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,7 @@ const more = [
   { name: 'Aplicaciones', href: '/admin/aplicaciones', icon: ClipboardList },
   { name: 'Biblioteca de Videos', href: '/admin/videos', icon: Film },
   { name: 'Producción Musical', href: '/admin/produccion', icon: Headphones },
+  { name: 'Material Gratis / CRM', href: '/admin/materiales', icon: Gift },
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ];

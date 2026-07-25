@@ -9,7 +9,8 @@ import {
   BarChart3,
   Film,
   Headphones,
-  ClipboardList
+  ClipboardList,
+  Gift
 } from 'lucide-react';
 import logo from '@/assets/logo.webp';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ const navigation = [
   { name: 'Producción Musical', href: '/admin/produccion', icon: Headphones },
   { name: 'Clases en Vivo', href: '/admin/clases', icon: Video },
   { name: 'Estudiantes', href: '/admin/estudiantes', icon: Users },
+  { name: 'Material Gratis / CRM', href: '/admin/materiales', icon: Gift },
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ];

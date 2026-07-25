@@ -739,6 +739,48 @@ export type Database = {
           },
         ]
       }
+      free_materials: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          instagram_keyword: string | null
+          is_active: boolean
+          pdf_path: string
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instagram_keyword?: string | null
+          is_active?: boolean
+          pdf_path: string
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          instagram_keyword?: string | null
+          is_active?: boolean
+          pdf_path?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       instructor_activity_logs: {
         Row: {
           action_type: string
@@ -1209,6 +1251,56 @@ export type Database = {
           zoom_meeting_id?: string | null
         }
         Relationships: []
+      }
+      material_leads: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          instagram_handle: string | null
+          material_id: string | null
+          notes: string | null
+          phone: string | null
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          instagram_handle?: string | null
+          material_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          instagram_handle?: string | null
+          material_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_leads_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "free_materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {

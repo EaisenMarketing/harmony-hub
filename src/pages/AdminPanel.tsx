@@ -14,6 +14,7 @@ import { LiveClassesTable } from '@/components/admin/LiveClassesTable';
 import { StudentsTable } from '@/components/admin/StudentsTable';
 import { VideoLibrary } from '@/components/admin/VideoLibrary';
 import { ProductionManagement } from '@/components/admin/ProductionManagement';
+import { FreeMaterialsManagement } from '@/components/admin/FreeMaterialsManagement';
 import { LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -72,6 +73,9 @@ const AdminPanel = () => {
     if (currentPath === '/admin/estudiantes') {
       return <StudentsTable />;
     }
+    if (currentPath === '/admin/materiales') {
+      return <FreeMaterialsManagement />;
+    }
     if (currentPath === '/admin/estadisticas') {
       return (
         <div className="space-y-6">
@@ -116,6 +120,8 @@ const AdminPanel = () => {
         return { title: 'Clases en Vivo', subtitle: 'Gestiona las clases en vivo programadas' };
       case '/admin/estudiantes':
         return { title: 'Estudiantes', subtitle: 'Visualiza todos los estudiantes registrados' };
+      case '/admin/materiales':
+        return { title: 'Material Gratis / CRM', subtitle: 'Sube PDFs gratuitos y captura leads desde Instagram' };
       case '/admin/estadisticas':
         return { title: 'Estadísticas', subtitle: 'Métricas y gráficas de la plataforma' };
       case '/admin/configuracion':
