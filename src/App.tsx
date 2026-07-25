@@ -22,6 +22,7 @@ const PricingPage = lazy(() => import("./pages/public/PricingPage"));
 const TeachersPage = lazy(() => import("./pages/public/TeachersPage"));
 const ContactPage = lazy(() => import("./pages/public/ContactPage"));
 const SupportPage = lazy(() => import("./pages/public/SupportPage"));
+const FreeMaterialPage = lazy(() => import("./pages/public/FreeMaterialPage"));
 // (StaticPages se carga vía helper S abajo)
 
 const PageFallback = () => (
@@ -66,6 +67,8 @@ const App = () => (
         <Route path="/terminos" element={S('TermsPage')} />
         <Route path="/privacidad" element={S('PrivacyPage')} />
         <Route path="/politica-de-cancelacion" element={S('CancelPolicyPage')} />
+        <Route path="/material-gratis" element={<FreeMaterialPage />} />
+        <Route path="/material-gratis/:slug" element={<FreeMaterialPage />} />
 
         {/* Alias */}
         <Route path="/login" element={S('LoginAlias')} />
