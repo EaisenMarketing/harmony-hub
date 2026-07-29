@@ -11,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useMyStudents, useInstructorProfile } from '@/hooks/useInstructorData';
+import { StudentBriefingModal } from './StudentBriefingModal';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -107,6 +108,7 @@ export const InstructorStudents = () => {
                   <TableHead>Plan</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Inscripción</TableHead>
+                  <TableHead className="text-right">Briefing</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -147,6 +149,12 @@ export const InstructorStudents = () => {
                         <Calendar className="w-3.5 h-3.5" />
                         {format(new Date(student.enrolled_at), "d MMM yyyy", { locale: es })}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <StudentBriefingModal
+                        studentId={student.student_id}
+                        studentName={student.student?.full_name || 'Alumno'}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
