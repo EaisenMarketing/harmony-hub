@@ -15,6 +15,7 @@ import { StudentsTable } from '@/components/admin/StudentsTable';
 import { VideoLibrary } from '@/components/admin/VideoLibrary';
 import { ProductionManagement } from '@/components/admin/ProductionManagement';
 import { FreeMaterialsManagement } from '@/components/admin/FreeMaterialsManagement';
+import { CrmDashboard } from '@/components/admin/CrmDashboard';
 import { LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -73,6 +74,9 @@ const AdminPanel = () => {
     if (currentPath === '/admin/estudiantes') {
       return <StudentsTable />;
     }
+    if (currentPath === '/admin/crm') {
+      return <CrmDashboard />;
+    }
     if (currentPath === '/admin/materiales') {
       return <FreeMaterialsManagement />;
     }
@@ -122,6 +126,8 @@ const AdminPanel = () => {
         return { title: 'Estudiantes', subtitle: 'Visualiza todos los estudiantes registrados' };
       case '/admin/materiales':
         return { title: 'Material Gratis / CRM', subtitle: 'Sube PDFs gratuitos y captura leads desde Instagram' };
+      case '/admin/crm':
+        return { title: 'CRM de Leads', subtitle: 'Todos los leads de tus enlaces de material gratuito y del formulario de contacto' };
       case '/admin/estadisticas':
         return { title: 'Estadísticas', subtitle: 'Métricas y gráficas de la plataforma' };
       case '/admin/configuracion':
