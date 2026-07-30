@@ -13,6 +13,7 @@ import {
   LogOut,
   Home,
   Gift,
+  Contact,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -38,6 +39,7 @@ const more = [
   { name: 'Biblioteca de Videos', href: '/admin/videos', icon: Film },
   { name: 'Producción Musical', href: '/admin/produccion', icon: Headphones },
   { name: 'Material Gratis / CRM', href: '/admin/materiales', icon: Gift },
+  { name: 'CRM de Leads', href: '/admin/crm', icon: Contact },
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ];
