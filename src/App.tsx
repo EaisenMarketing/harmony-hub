@@ -10,6 +10,8 @@ const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const InstructorPanel = lazy(() => import("./pages/InstructorPanel"));
 const AdFlowDashboard = lazy(() => import("./pages/AdFlowDashboard"));
 const TeacherApplicationPage = lazy(() => import("./pages/TeacherApplicationPage"));
+const StudioPanel = lazy(() => import("./pages/StudioPanel"));
+const StudioInvitePage = lazy(() => import("./pages/public/StudioInvitePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthProvider = lazy(() => import("@/contexts/AuthContext").then(m => ({ default: m.AuthProvider })));
 const DataProvider = lazy(() => import("@/components/app/DataProvider"));
@@ -87,6 +89,9 @@ const App = () => (
         <Route path="/admin/*" element={<WithAuth><AdminPanel /></WithAuth>} />
         <Route path="/instructor" element={<WithAuth><InstructorPanel /></WithAuth>} />
         <Route path="/instructor/*" element={<WithAuth><InstructorPanel /></WithAuth>} />
+        <Route path="/estudio" element={<WithAuth><StudioPanel /></WithAuth>} />
+        <Route path="/estudio/*" element={<WithAuth><StudioPanel /></WithAuth>} />
+        <Route path="/invitacion/:code" element={<WithAuth><StudioInvitePage /></WithAuth>} />
         <Route path="/adflow" element={<WithAuth><AdFlowDashboard /></WithAuth>} />
         <Route path="/aplicar-maestro" element={<WithData><TeacherApplicationPage /></WithData>} />
 
