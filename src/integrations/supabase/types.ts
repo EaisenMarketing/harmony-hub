@@ -1566,6 +1566,278 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_accounts: {
+        Row: {
+          bio: string | null
+          contact_email: string | null
+          created_at: string
+          id: string
+          invite_code: string
+          owner_user_id: string
+          phone: string | null
+          plan: Database["public"]["Enums"]["teacher_plan"]
+          primary_instrument: string | null
+          seat_limit: number
+          status: Database["public"]["Enums"]["teacher_account_status"]
+          studio_name: string
+          subscription_expires_at: string | null
+          trial_ends_at: string
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          invite_code?: string
+          owner_user_id: string
+          phone?: string | null
+          plan?: Database["public"]["Enums"]["teacher_plan"]
+          primary_instrument?: string | null
+          seat_limit?: number
+          status?: Database["public"]["Enums"]["teacher_account_status"]
+          studio_name: string
+          subscription_expires_at?: string | null
+          trial_ends_at?: string
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          contact_email?: string | null
+          created_at?: string
+          id?: string
+          invite_code?: string
+          owner_user_id?: string
+          phone?: string | null
+          plan?: Database["public"]["Enums"]["teacher_plan"]
+          primary_instrument?: string | null
+          seat_limit?: number
+          status?: Database["public"]["Enums"]["teacher_account_status"]
+          studio_name?: string
+          subscription_expires_at?: string | null
+          trial_ends_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      teacher_assignments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          instructions: string | null
+          status: string
+          student_notes: string | null
+          teacher_account_id: string
+          teacher_student_id: string
+          title: string
+          tool_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          status?: string
+          student_notes?: string | null
+          teacher_account_id: string
+          teacher_student_id: string
+          title: string
+          tool_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          status?: string
+          student_notes?: string | null
+          teacher_account_id?: string
+          teacher_student_id?: string
+          title?: string
+          tool_key?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_assignments_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_assignments_teacher_student_id_fkey"
+            columns: ["teacher_student_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_courses: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          instrument: string | null
+          is_published: boolean
+          level: string
+          sort_order: number
+          teacher_account_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string | null
+          is_published?: boolean
+          level?: string
+          sort_order?: number
+          teacher_account_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string | null
+          is_published?: boolean
+          level?: string
+          sort_order?: number
+          teacher_account_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_courses_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_lesson_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          last_position_seconds: number
+          student_user_id: string
+          teacher_account_id: string
+          teacher_lesson_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_position_seconds?: number
+          student_user_id: string
+          teacher_account_id: string
+          teacher_lesson_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_position_seconds?: number
+          student_user_id?: string
+          teacher_account_id?: string
+          teacher_lesson_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_lesson_progress_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_lesson_progress_teacher_lesson_id_fkey"
+            columns: ["teacher_lesson_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_lessons: {
+        Row: {
+          attachment_url: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          sort_order: number
+          teacher_account_id: string
+          teacher_course_id: string
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          sort_order?: number
+          teacher_account_id: string
+          teacher_course_id: string
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          sort_order?: number
+          teacher_account_id?: string
+          teacher_course_id?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_lessons_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_lessons_teacher_course_id_fkey"
+            columns: ["teacher_course_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_questions: {
         Row: {
           answer: string | null
@@ -1613,6 +1885,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      teacher_students: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          instrument: string | null
+          invited_at: string
+          joined_at: string | null
+          level: string | null
+          notes: string | null
+          phone: string | null
+          status: Database["public"]["Enums"]["teacher_student_status"]
+          student_user_id: string | null
+          teacher_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          instrument?: string | null
+          invited_at?: string
+          joined_at?: string | null
+          level?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["teacher_student_status"]
+          student_user_id?: string | null
+          teacher_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          instrument?: string | null
+          invited_at?: string
+          joined_at?: string | null
+          level?: string | null
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["teacher_student_status"]
+          student_user_id?: string | null
+          teacher_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_students_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       testimonials: {
         Row: {
@@ -1820,6 +2151,15 @@ export type Database = {
       }
     }
     Functions: {
+      claim_studio_invite: {
+        Args: { _invite_code: string }
+        Returns: {
+          account_id: string
+          joined: boolean
+          message: string
+          studio_name: string
+        }[]
+      }
       get_user_instrument: { Args: { _user_id: string }; Returns: string }
       get_user_plan: {
         Args: { _user_id: string }
@@ -1841,7 +2181,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_student_of_account: { Args: { _account_id: string }; Returns: boolean }
+      my_studio_account_id: { Args: never; Returns: string }
+      my_teacher_account_id: { Args: never; Returns: string }
+      owns_teacher_account: { Args: { _account_id: string }; Returns: boolean }
       slugify: { Args: { input: string }; Returns: string }
+      teacher_seats_used: { Args: { _account_id: string }; Returns: number }
       verify_certificate: {
         Args: { _code: string }
         Returns: {
@@ -1863,6 +2208,9 @@ export type Database = {
       instrument_type: "guitar" | "piano" | "drums" | "banjo"
       lead_status: "new" | "contacted" | "qualified" | "closed" | "lost"
       subscription_plan: "basic" | "standard" | "pro" | "production"
+      teacher_account_status: "trial" | "active" | "suspended" | "canceled"
+      teacher_plan: "starter" | "pro" | "academy"
+      teacher_student_status: "invited" | "active" | "inactive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1999,6 +2347,9 @@ export const Constants = {
       instrument_type: ["guitar", "piano", "drums", "banjo"],
       lead_status: ["new", "contacted", "qualified", "closed", "lost"],
       subscription_plan: ["basic", "standard", "pro", "production"],
+      teacher_account_status: ["trial", "active", "suspended", "canceled"],
+      teacher_plan: ["starter", "pro", "academy"],
+      teacher_student_status: ["invited", "active", "inactive"],
     },
   },
 } as const
