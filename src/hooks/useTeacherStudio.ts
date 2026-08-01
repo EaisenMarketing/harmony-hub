@@ -1,0 +1,548 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import type { Tables } from '@/integrations/supabase/types';
+import type { TeacherPlanId } from '@/lib/teacher-plans';
+import { TEACHER_PLAN_MAP } from '@/lib/teacher-plans';
+
+export type TeacherAccount = Tables<'teacher_accounts'>;
+export type StudioStudent = Tables<'teacher_students'>;
+export type StudioCourse = Tables<'teacher_courses'>;
+export type StudioLesson = Tables<'teacher_lessons'>;
+export type StudioAssignment = Tables<'teacher_assignments'>;
+
+/* ------------------------------------------------------------------ */
+/* Cuenta del maestro                                                  */
+/* ------------------------------------------------------------------ */
+
+export const useMyTeacherAccount = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['teacher-account', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('teacher_accounts')
+        .select('*')
+        .eq('owner_user_id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data as TeacherAccount | null;
+    },
+    enabled: !!user?.id,
+  });
+};
+
+export const useCreateTeacherAccount = () => {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (input: {
+      studio_name: string;
+      primary_instrument?: string | null;
+      contact_email?: string | null;
+      phone?: string | null;
+      bio?: string | null;
+      plan?: TeacherPlanId;
+    }) => {
+      if (!user?.id) throw new Error('Necesitas iniciar sesión.');
+      const plan = input.plan ?? 'starter';
+      const { data, error } = await supabase
+        .from('teacher_accounts')
+        .insert({
+          owner_user_id: user.id,
+          studio_name: input.studio_name,
+          primary_instrument: input.primary_instrument ?? null,
+          contact_email: input.contact_email ?? user.email ?? null,
+          phone: input.phone ?? null,
+          bio: input.bio ?? null,
+          plan,
+          seat_limit: TEACHER_PLAN_MAP[plan].seats,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as TeacherAccount;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['teacher-account'] }),
+  });
+};
+
+export const useUpdateTeacherAccount = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: Partial<TeacherAccount> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('teacher_accounts')
+        .update(patch)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as TeacherAccount;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['teacher-account'] });
+      qc.invalidateQueries({ queryKey: ['admin-teacher-accounts'] });
+    },
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/* Alumnos del estudio                                                 */
+/* ------------------------------------------------------------------ */
+
+export const useStudioStudents = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-students', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_students')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as StudioStudent[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useSaveStudioStudent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: Partial<StudioStudent> & { teacher_account_id: string; full_name: string; email: string }) => {
+      const { id, ...rest } = input;
+      if (id) {
+        const { data, error } = await supabase
+          .from('teacher_students')
+          .update(rest)
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data;
+      }
+      const { data, error } = await supabase
+        .from('teacher_students')
+        .insert(rest)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio-students'] }),
+  });
+};
+
+export const useDeleteStudioStudent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('teacher_students').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio-students'] }),
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/* Cursos y lecciones propios del maestro                              */
+/* ------------------------------------------------------------------ */
+
+export const useStudioCourses = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-courses', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_courses')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as StudioCourse[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useSaveStudioCourse = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: Partial<StudioCourse> & { teacher_account_id: string; title: string }) => {
+      const { id, ...rest } = input;
+      if (id) {
+        const { data, error } = await supabase.from('teacher_courses').update(rest).eq('id', id).select().single();
+        if (error) throw error;
+        return data;
+      }
+      const { data, error } = await supabase.from('teacher_courses').insert(rest).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio-courses'] }),
+  });
+};
+
+export const useDeleteStudioCourse = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('teacher_courses').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studio-courses'] });
+      qc.invalidateQueries({ queryKey: ['studio-lessons'] });
+    },
+  });
+};
+
+export const useStudioLessons = (courseId?: string) =>
+  useQuery({
+    queryKey: ['studio-lessons', courseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_lessons')
+        .select('*')
+        .eq('teacher_course_id', courseId!)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data as StudioLesson[];
+    },
+    enabled: !!courseId,
+  });
+
+export const useSaveStudioLesson = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      input: Partial<StudioLesson> & { teacher_account_id: string; teacher_course_id: string; title: string },
+    ) => {
+      const { id, ...rest } = input;
+      if (id) {
+        const { data, error } = await supabase.from('teacher_lessons').update(rest).eq('id', id).select().single();
+        if (error) throw error;
+        return data;
+      }
+      const { data, error } = await supabase.from('teacher_lessons').insert(rest).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio-lessons'] }),
+  });
+};
+
+export const useDeleteStudioLesson = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('teacher_lessons').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio-lessons'] }),
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/* Tareas                                                              */
+/* ------------------------------------------------------------------ */
+
+export const useStudioAssignments = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-assignments', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_assignments')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as StudioAssignment[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useSaveStudioAssignment = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      input: Partial<StudioAssignment> & { teacher_account_id: string; teacher_student_id: string; title: string },
+    ) => {
+      const { id, ...rest } = input;
+      if (id) {
+        const { data, error } = await supabase.from('teacher_assignments').update(rest).eq('id', id).select().single();
+        if (error) throw error;
+        return data;
+      }
+      const { data, error } = await supabase.from('teacher_assignments').insert(rest).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studio-assignments'] });
+      qc.invalidateQueries({ queryKey: ['my-studio-assignments'] });
+    },
+  });
+};
+
+export const useDeleteStudioAssignment = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('teacher_assignments').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['studio-assignments'] }),
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/* Métricas del estudio                                                */
+/* ------------------------------------------------------------------ */
+
+export const useStudioStats = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-stats', accountId],
+    queryFn: async () => {
+      const [students, courses, lessons, progress, assignments] = await Promise.all([
+        supabase.from('teacher_students').select('id,status').eq('teacher_account_id', accountId!),
+        supabase.from('teacher_courses').select('id,is_published').eq('teacher_account_id', accountId!),
+        supabase.from('teacher_lessons').select('id').eq('teacher_account_id', accountId!),
+        supabase
+          .from('teacher_lesson_progress')
+          .select('id,completed,student_user_id,updated_at')
+          .eq('teacher_account_id', accountId!),
+        supabase.from('teacher_assignments').select('id,status').eq('teacher_account_id', accountId!),
+      ]);
+
+      const s = students.data ?? [];
+      const completed = (progress.data ?? []).filter((p) => p.completed);
+      const weekAgo = Date.now() - 7 * 864e5;
+
+      return {
+        totalStudents: s.length,
+        activeStudents: s.filter((x) => x.status === 'active').length,
+        invitedStudents: s.filter((x) => x.status === 'invited').length,
+        seatsUsed: s.filter((x) => x.status !== 'inactive').length,
+        totalCourses: (courses.data ?? []).length,
+        publishedCourses: (courses.data ?? []).filter((c) => c.is_published).length,
+        totalLessons: (lessons.data ?? []).length,
+        completedLessons: completed.length,
+        completedThisWeek: completed.filter((p) => new Date(p.updated_at).getTime() > weekAgo).length,
+        pendingAssignments: (assignments.data ?? []).filter((a) => a.status === 'pending').length,
+      };
+    },
+    enabled: !!accountId,
+  });
+
+export const useStudioStudentProgress = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-student-progress', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_lesson_progress')
+        .select('student_user_id,completed,updated_at')
+        .eq('teacher_account_id', accountId!);
+      if (error) throw error;
+      const map = new Map<string, { completed: number; last: string | null }>();
+      for (const row of data ?? []) {
+        const entry = map.get(row.student_user_id) ?? { completed: 0, last: null };
+        if (row.completed) entry.completed += 1;
+        if (!entry.last || row.updated_at > entry.last) entry.last = row.updated_at;
+        map.set(row.student_user_id, entry);
+      }
+      return map;
+    },
+    enabled: !!accountId,
+  });
+
+/* ------------------------------------------------------------------ */
+/* Lado alumno: su estudio                                             */
+/* ------------------------------------------------------------------ */
+
+export const useMyStudioMembership = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['my-studio-membership', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data, error } = await supabase
+        .from('teacher_students')
+        .select('*, studio:teacher_accounts(id,studio_name,primary_instrument,status)')
+        .eq('student_user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+      if (error) throw error;
+      return data as (StudioStudent & {
+        studio: { id: string; studio_name: string; primary_instrument: string | null; status: string } | null;
+      }) | null;
+    },
+    enabled: !!user?.id,
+  });
+};
+
+export const useMyStudioCourses = (accountId?: string) =>
+  useQuery({
+    queryKey: ['my-studio-courses', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_courses')
+        .select('*, teacher_lessons(*)')
+        .eq('teacher_account_id', accountId!)
+        .eq('is_published', true)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as (StudioCourse & { teacher_lessons: StudioLesson[] })[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useMyStudioProgress = (accountId?: string) => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['my-studio-progress', accountId, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_lesson_progress')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .eq('student_user_id', user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!accountId && !!user?.id,
+  });
+};
+
+export const useToggleStudioLesson = () => {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async ({
+      accountId,
+      lessonId,
+      completed,
+    }: { accountId: string; lessonId: string; completed: boolean }) => {
+      if (!user?.id) throw new Error('Necesitas iniciar sesión.');
+      const { error } = await supabase.from('teacher_lesson_progress').upsert(
+        {
+          teacher_account_id: accountId,
+          teacher_lesson_id: lessonId,
+          student_user_id: user.id,
+          completed,
+          completed_at: completed ? new Date().toISOString() : null,
+        },
+        { onConflict: 'teacher_lesson_id,student_user_id' },
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-studio-progress'] });
+      qc.invalidateQueries({ queryKey: ['studio-stats'] });
+    },
+  });
+};
+
+export const useMyStudioAssignments = () => {
+  const { data: membership } = useMyStudioMembership();
+  return useQuery({
+    queryKey: ['my-studio-assignments', membership?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_assignments')
+        .select('*')
+        .eq('teacher_student_id', membership!.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as StudioAssignment[];
+    },
+    enabled: !!membership?.id,
+  });
+};
+
+export const useUpdateMyAssignment = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status, student_notes }: { id: string; status: string; student_notes?: string }) => {
+      const { error } = await supabase
+        .from('teacher_assignments')
+        .update({
+          status,
+          student_notes,
+          completed_at: status === 'completed' ? new Date().toISOString() : null,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-studio-assignments'] }),
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/* Invitación                                                          */
+/* ------------------------------------------------------------------ */
+
+export const useStudioByInviteCode = (code?: string) =>
+  useQuery({
+    queryKey: ['studio-by-invite', code],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_accounts')
+        .select('id,studio_name,primary_instrument,bio,status')
+        .eq('invite_code', code!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!code,
+  });
+
+export const useClaimStudioInvite = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (code: string) => {
+      const { data, error } = await supabase.rpc('claim_studio_invite', { _invite_code: code });
+      if (error) throw error;
+      return (Array.isArray(data) ? data[0] : data) as {
+        account_id: string | null;
+        studio_name: string | null;
+        joined: boolean;
+        message: string;
+      };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-studio-membership'] });
+    },
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/* Admin                                                               */
+/* ------------------------------------------------------------------ */
+
+export const useAllTeacherAccounts = () =>
+  useQuery({
+    queryKey: ['admin-teacher-accounts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_accounts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const ids = (data ?? []).map((a) => a.id);
+      let counts = new Map<string, number>();
+      if (ids.length) {
+        const { data: studs } = await supabase
+          .from('teacher_students')
+          .select('teacher_account_id,status')
+          .in('teacher_account_id', ids);
+        counts = (studs ?? []).reduce((acc, s) => {
+          if (s.status !== 'inactive') acc.set(s.teacher_account_id, (acc.get(s.teacher_account_id) ?? 0) + 1);
+          return acc;
+        }, new Map<string, number>());
+      }
+
+      return (data as TeacherAccount[]).map((a) => ({ ...a, seats_used: counts.get(a.id) ?? 0 }));
+    },
+  });
