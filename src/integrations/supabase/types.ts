@@ -2151,6 +2151,15 @@ export type Database = {
       }
     }
     Functions: {
+      claim_studio_invite: {
+        Args: { _invite_code: string }
+        Returns: {
+          account_id: string
+          joined: boolean
+          message: string
+          studio_name: string
+        }[]
+      }
       get_user_instrument: { Args: { _user_id: string }; Returns: string }
       get_user_plan: {
         Args: { _user_id: string }
