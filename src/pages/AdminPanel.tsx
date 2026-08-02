@@ -16,6 +16,7 @@ import { VideoLibrary } from '@/components/admin/VideoLibrary';
 import { ProductionManagement } from '@/components/admin/ProductionManagement';
 import { FreeMaterialsManagement } from '@/components/admin/FreeMaterialsManagement';
 import { CrmDashboard } from '@/components/admin/CrmDashboard';
+import { TeacherAccountsManagement } from '@/components/admin/TeacherAccountsManagement';
 import { LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -77,6 +78,9 @@ const AdminPanel = () => {
     if (currentPath === '/admin/crm') {
       return <CrmDashboard />;
     }
+    if (currentPath === '/admin/maestros-b2b') {
+      return <TeacherAccountsManagement />;
+    }
     if (currentPath === '/admin/materiales') {
       return <FreeMaterialsManagement />;
     }
@@ -126,6 +130,8 @@ const AdminPanel = () => {
         return { title: 'Estudiantes', subtitle: 'Visualiza todos los estudiantes registrados' };
       case '/admin/materiales':
         return { title: 'Material Gratis / CRM', subtitle: 'Sube PDFs gratuitos y captura leads desde Instagram' };
+      case '/admin/maestros-b2b':
+        return { title: 'Maestros B2B', subtitle: 'Suscripciones, cupos de alumnos y estado de cada estudio' };
       case '/admin/crm':
         return { title: 'CRM de Leads', subtitle: 'Todos los leads de tus enlaces de material gratuito y del formulario de contacto' };
       case '/admin/estadisticas':
