@@ -14,6 +14,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { studioInviteUrl, TEACHER_PLAN_MAP, TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
 import { useStudioStats, type TeacherAccount } from '@/hooks/useTeacherStudio';
+import { StudioSetupWizard } from './StudioSetupWizard';
 
 export const StudioDashboard = ({ account }: { account: TeacherAccount }) => {
   const { data: stats } = useStudioStats(account.id);
@@ -41,6 +42,8 @@ export const StudioDashboard = ({ account }: { account: TeacherAccount }) => {
 
   return (
     <div className="space-y-5">
+      <StudioSetupWizard account={account} />
+
       <Card className="p-4 md:p-5 bg-gradient-to-br from-primary/15 to-transparent border-white/10 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
