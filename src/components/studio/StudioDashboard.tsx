@@ -14,6 +14,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { studioInviteUrl, TEACHER_PLAN_MAP, TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
 import { useStudioStats, type TeacherAccount } from '@/hooks/useTeacherStudio';
+import { StudioSetupWizard } from './StudioSetupWizard';
 
 export const StudioDashboard = ({ account }: { account: TeacherAccount }) => {
   const { data: stats } = useStudioStats(account.id);
