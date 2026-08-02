@@ -73,7 +73,7 @@ export const TeacherAccountsManagement = () => {
       },
     );
 
-  const setStatus = (id: string, status: string) =>
+  const setStatus = (id: string, status: (typeof STATUSES)[number]) =>
     update.mutate(
       { id, status },
       {
@@ -187,7 +187,7 @@ export const TeacherAccountsManagement = () => {
                     </SelectContent>
                   </Select>
 
-                  <Select value={a.status} onValueChange={(v) => setStatus(a.id, v)}>
+                  <Select value={a.status} onValueChange={(v) => setStatus(a.id, v as (typeof STATUSES)[number])}>
                     <SelectTrigger className="w-36 h-9 text-xs">
                       <SelectValue />
                     </SelectTrigger>
