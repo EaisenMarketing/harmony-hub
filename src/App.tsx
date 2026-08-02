@@ -12,6 +12,7 @@ const AdFlowDashboard = lazy(() => import("./pages/AdFlowDashboard"));
 const TeacherApplicationPage = lazy(() => import("./pages/TeacherApplicationPage"));
 const StudioPanel = lazy(() => import("./pages/StudioPanel"));
 const StudioInvitePage = lazy(() => import("./pages/public/StudioInvitePage"));
+const StudioPlansPage = lazy(() => import("./pages/public/StudioPlansPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthProvider = lazy(() => import("@/contexts/AuthContext").then(m => ({ default: m.AuthProvider })));
 const DataProvider = lazy(() => import("@/components/app/DataProvider"));
@@ -62,6 +63,7 @@ const App = () => (
         <Route path="/clases-en-vivo" element={<LiveClassesPublicPage />} />
         <Route path="/precios" element={<PricingPage />} />
         <Route path="/maestros" element={<TeachersPage />} />
+        <Route path="/maestros/planes" element={<StudioPlansPage />} />
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="/soporte" element={<WithAuth><SupportPage /></WithAuth>} />
         <Route path="/nosotros" element={S('AboutPage')} />

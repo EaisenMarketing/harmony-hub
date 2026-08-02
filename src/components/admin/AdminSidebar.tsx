@@ -11,7 +11,8 @@ import {
   Headphones,
   ClipboardList,
   Gift,
-  Contact
+  Contact,
+  GraduationCap
 } from 'lucide-react';
 import logo from '@/assets/logo.webp';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ const navigation = [
   { name: 'Estudiantes', href: '/admin/estudiantes', icon: Users },
   { name: 'Material Gratis / CRM', href: '/admin/materiales', icon: Gift },
   { name: 'CRM de Leads', href: '/admin/crm', icon: Contact },
+  { name: 'Maestros B2B', href: '/admin/maestros-b2b', icon: GraduationCap },
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ];
