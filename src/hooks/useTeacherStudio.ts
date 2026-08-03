@@ -546,3 +546,145 @@ export const useAllTeacherAccounts = () =>
       return (data as TeacherAccount[]).map((a) => ({ ...a, seats_used: counts.get(a.id) ?? 0 }));
     },
   });
+
+/* ------------------------------------------------------------------ */
+/* Admin: uso por maestro (métricas por rango de fechas)               */
+/* ------------------------------------------------------------------ */
+
+export interface TeacherUsageRow {
+  id: string;
+  studio_name: string;
+  contact_email: string | null;
+  primary_instrument: string | null;
+  plan: string;
+  status: string;
+  mrr: number;
+  seat_limit: number;
+  seats_used: number;
+  seats_pct: number;
+  invites_sent: number;
+  students_joined: number;
+  courses: number;
+  published_courses: number;
+  lessons: number;
+  lessons_completed: number;
+  assignments: number;
+  assignments_completed: number;
+  last_activity: string | null;
+  created_at: string;
+}
+
+export const useTeacherUsageMetrics = (from?: string, to?: string) =>
+  useQuery({
+    queryKey: ['admin-teacher-usage', from, to],
+    queryFn: async () => {
+      const inRange = (iso?: string | null) => {
+        if (!iso) return false;
+        const t = new Date(iso).getTime();
+        if (from && t < new Date(from).getTime()) return false;
+        if (to && t > new Date(to).getTime() + 864e5) return false;
+        return true;
+      };
+
+      const [accountsRes, studentsRes, coursesRes, lessonsRes, progressRes, assignmentsRes] = await Promise.all([
+        supabase.from('teacher_accounts').select('*').order('created_at', { ascending: false }),
+        supabase.from('teacher_students').select('teacher_account_id,status,invited_at,joined_at,created_at'),
+        supabase.from('teacher_courses').select('teacher_account_id,is_published,created_at'),
+        supabase.from('teacher_lessons').select('teacher_account_id,created_at'),
+        supabase.from('teacher_lesson_progress').select('teacher_account_id,completed,updated_at'),
+        supabase.from('teacher_assignments').select('teacher_account_id,status,created_at,completed_at'),
+      ]);
+
+      const accounts = (accountsRes.data ?? []) as TeacherAccount[];
+      const students = studentsRes.data ?? [];
+      const courses = coursesRes.data ?? [];
+      const lessons = lessonsRes.data ?? [];
+      const progress = progressRes.data ?? [];
+      const assignments = assignmentsRes.data ?? [];
+
+      const rows: TeacherUsageRow[] = accounts.map((a) => {
+        const mine = students.filter((s) => s.teacher_account_id === a.id);
+        const seatsUsed = mine.filter((s) => s.status !== 'inactive').length;
+        const myProgress = progress.filter((p) => p.teacher_account_id === a.id && inRange(p.updated_at));
+        const myAssignments = assignments.filter((x) => x.teacher_account_id === a.id && inRange(x.created_at));
+        const lastActivity = progress
+          .filter((p) => p.teacher_account_id === a.id)
+          .reduce<string | null>((acc, p) => (!acc || p.updated_at > acc ? p.updated_at : acc), null);
+        const plan = (a.plan as TeacherPlanId) ?? 'starter';
+
+        return {
+          id: a.id,
+          studio_name: a.studio_name,
+          contact_email: a.contact_email,
+          primary_instrument: a.primary_instrument,
+          plan,
+          status: a.status,
+          mrr: a.status === 'active' ? (TEACHER_PLAN_MAP[plan]?.price ?? 0) : 0,
+          seat_limit: a.seat_limit,
+          seats_used: seatsUsed,
+          seats_pct: a.seat_limit ? Math.round((seatsUsed / a.seat_limit) * 100) : 0,
+          invites_sent: mine.filter((s) => inRange(s.invited_at ?? s.created_at)).length,
+          students_joined: mine.filter((s) => inRange(s.joined_at)).length,
+          courses: courses.filter((c) => c.teacher_account_id === a.id).length,
+          published_courses: courses.filter((c) => c.teacher_account_id === a.id && c.is_published).length,
+          lessons: lessons.filter((l) => l.teacher_account_id === a.id).length,
+          lessons_completed: myProgress.filter((p) => p.completed).length,
+          assignments: myAssignments.length,
+          assignments_completed: myAssignments.filter((x) => x.status !== 'pending').length,
+          last_activity: lastActivity,
+          created_at: a.created_at,
+        };
+      });
+
+      const totals = {
+        accounts: rows.length,
+        active: rows.filter((r) => r.status === 'active').length,
+        trial: rows.filter((r) => r.status === 'trial').length,
+        mrr: rows.reduce((s, r) => s + r.mrr, 0),
+        trialMrr: rows
+          .filter((r) => r.status === 'trial')
+          .reduce((s, r) => s + (TEACHER_PLAN_MAP[(r.plan as TeacherPlanId) ?? 'starter']?.price ?? 0), 0),
+        seatsUsed: rows.reduce((s, r) => s + r.seats_used, 0),
+        seatsTotal: rows.reduce((s, r) => s + r.seat_limit, 0),
+        invites: rows.reduce((s, r) => s + r.invites_sent, 0),
+        joined: rows.reduce((s, r) => s + r.students_joined, 0),
+        lessonsCompleted: rows.reduce((s, r) => s + r.lessons_completed, 0),
+        assignments: rows.reduce((s, r) => s + r.assignments, 0),
+      };
+
+      return { rows, totals };
+    },
+  });
+
+/* ------------------------------------------------------------------ */
+/* Estudio: progreso detallado por alumno / curso                      */
+/* ------------------------------------------------------------------ */
+
+export const useStudioAllLessons = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-all-lessons', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_lessons')
+        .select('id,title,teacher_course_id,sort_order')
+        .eq('teacher_account_id', accountId!)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!accountId,
+  });
+
+export const useStudioProgressRows = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-progress-rows', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_lesson_progress')
+        .select('teacher_lesson_id,student_user_id,completed,updated_at')
+        .eq('teacher_account_id', accountId!);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!accountId,
+  });
