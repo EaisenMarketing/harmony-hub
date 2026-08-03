@@ -329,7 +329,11 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
                   <p>Lecciones completadas: {p?.completed ?? 0}</p>
                   {p?.last && <p>Última actividad: {new Date(p.last).toLocaleDateString('es-MX')}</p>}
                 </div>
-                <div className="flex gap-2 pt-1">
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button size="sm" onClick={() => setDetail(s)}>
+                    <BarChart3 className="w-3.5 h-3.5 mr-1" />
+                    Ver y asignar
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
                     <Pencil className="w-3.5 h-3.5 mr-1" />
                     Editar
@@ -350,6 +354,14 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
           })}
         </div>
       )}
+
+      <StudioStudentDetail
+        account={account}
+        student={detail}
+        open={!!detail}
+        onOpenChange={(v) => !v && setDetail(null)}
+      />
+
     </div>
   );
 };
