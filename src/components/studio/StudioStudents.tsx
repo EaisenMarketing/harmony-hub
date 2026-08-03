@@ -239,10 +239,63 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
         </div>
       </div>
 
-      <div className="relative">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input className="pl-9" placeholder="Buscar por nombre o email" value={q} onChange={(e) => setQ(e.target.value)} />
+      <div className="space-y-2">
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input className="pl-9" placeholder="Buscar por nombre o email" value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <select
+            className="h-9 rounded-md bg-background border border-input px-2 text-xs"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">Todos los estados</option>
+            <option value="active">Activos</option>
+            <option value="invited">Invitados</option>
+            <option value="inactive">Inactivos</option>
+          </select>
+          <select
+            className="h-9 rounded-md bg-background border border-input px-2 text-xs"
+            value={instrumentFilter}
+            onChange={(e) => setInstrumentFilter(e.target.value)}
+          >
+            <option value="all">Todos los instrumentos</option>
+            {INSTRUMENT_PLANS.map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.label}
+              </option>
+            ))}
+          </select>
+          <select
+            className="h-9 rounded-md bg-background border border-input px-2 text-xs"
+            value={levelFilter}
+            onChange={(e) => setLevelFilter(e.target.value)}
+          >
+            <option value="all">Todos los niveles</option>
+            <option value="beginner">Principiante</option>
+            <option value="intermediate">Intermedio</option>
+            <option value="advanced">Avanzado</option>
+          </select>
+          <select
+            className="h-9 rounded-md bg-background border border-input px-2 text-xs"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as 'recent' | 'name' | 'progress')}
+          >
+            <option value="recent">Más recientes</option>
+            <option value="name">Nombre (A-Z)</option>
+            <option value="progress">Mayor avance</option>
+          </select>
+          <Button size="sm" variant="outline" className="h-9 text-xs gap-1" onClick={exportStudents}>
+            <Download className="w-3.5 h-3.5" />
+            CSV
+          </Button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          {filtered.length} de {students.length} alumnos
+        </p>
       </div>
+
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Cargando alumnos…</p>
