@@ -12,10 +12,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { UserPlus, Search, Trash2, Pencil, Copy, Mail } from 'lucide-react';
+import { UserPlus, Search, Trash2, Pencil, Copy, Mail, BarChart3, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { INSTRUMENT_PLANS } from '@/lib/instrument-access';
 import { studioInviteUrl, TEACHER_STUDENT_STATUS_LABEL } from '@/lib/teacher-plans';
+import { downloadCsv } from '@/lib/csv';
+import { StudioStudentDetail } from './StudioStudentDetail';
 import {
   useStudioStudents,
   useSaveStudioStudent,
@@ -37,17 +39,56 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
   const [editing, setEditing] = useState<StudioStudent | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [q, setQ] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [instrumentFilter, setInstrumentFilter] = useState('all');
+  const [levelFilter, setLevelFilter] = useState('all');
+  const [sort, setSort] = useState<'recent' | 'name' | 'progress'>('recent');
+  const [detail, setDetail] = useState<StudioStudent | null>(null);
 
   const seatsUsed = students.filter((s) => s.status !== 'inactive').length;
   const seatsFull = seatsUsed >= account.seat_limit;
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
-    if (!t) return students;
-    return students.filter(
-      (s) => s.full_name.toLowerCase().includes(t) || s.email.toLowerCase().includes(t),
+    const list = students.filter((s) => {
+      const matchesText = !t || s.full_name.toLowerCase().includes(t) || s.email.toLowerCase().includes(t);
+      const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
+      const matchesInstrument = instrumentFilter === 'all' || s.instrument === instrumentFilter;
+      const matchesLevel = levelFilter === 'all' || s.level === levelFilter;
+      return matchesText && matchesStatus && matchesInstrument && matchesLevel;
+    });
+    const done = (s: StudioStudent) => (s.student_user_id ? progress?.get(s.student_user_id)?.completed ?? 0 : 0);
+    return [...list].sort((a, b) => {
+      if (sort === 'name') return a.full_name.localeCompare(b.full_name);
+      if (sort === 'progress') return done(b) - done(a);
+      return (b.created_at ?? '').localeCompare(a.created_at ?? '');
+    });
+  }, [students, q, statusFilter, instrumentFilter, levelFilter, sort, progress]);
+
+  const exportStudents = () => {
+    if (!filtered.length) {
+      toast({ title: 'No hay alumnos para exportar', variant: 'destructive' });
+      return;
+    }
+    downloadCsv(
+      `alumnos-${account.studio_name.toLowerCase().replace(/\s+/g, '-')}`,
+      filtered.map((s) => ({
+        Nombre: s.full_name,
+        Email: s.email,
+        Teléfono: s.phone ?? '',
+        Instrumento: INSTRUMENT_PLANS.find((i) => i.id === s.instrument)?.label ?? '',
+        Nivel: s.level ?? '',
+        Estado: TEACHER_STUDENT_STATUS_LABEL[s.status] ?? s.status,
+        'Lecciones completadas': s.student_user_id ? progress?.get(s.student_user_id)?.completed ?? 0 : 0,
+        'Última actividad': s.student_user_id
+          ? progress?.get(s.student_user_id)?.last
+            ? new Date(progress!.get(s.student_user_id!)!.last!).toLocaleDateString('es-MX')
+            : ''
+          : '',
+      })),
     );
-  }, [students, q]);
+  };
+
 
   const openNew = () => {
     setEditing(null);
