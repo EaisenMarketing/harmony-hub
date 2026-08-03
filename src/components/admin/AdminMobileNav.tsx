@@ -15,6 +15,8 @@ import {
   Gift,
   Contact,
   GraduationCap,
+  Activity,
+
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -42,6 +44,8 @@ const more = [
   { name: 'Material Gratis / CRM', href: '/admin/materiales', icon: Gift },
   { name: 'CRM de Leads', href: '/admin/crm', icon: Contact },
   { name: 'Maestros B2B', href: '/admin/maestros-b2b', icon: GraduationCap },
+  { name: 'Uso por Maestro', href: '/admin/uso-maestros', icon: Activity },
+
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ];
