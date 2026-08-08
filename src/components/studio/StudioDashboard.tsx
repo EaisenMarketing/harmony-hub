@@ -95,6 +95,40 @@ export const StudioDashboard = ({ account }: { account: TeacherAccount }) => {
 
       <div className="grid gap-3 md:grid-cols-3">
         <Card className="p-4 bg-card/70 border-white/10 space-y-2">
+          <Video className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground text-sm">Clases en vivo (Zoom)</h3>
+          <p className="text-xs text-muted-foreground">
+            Conecta tu Zoom y programa clases: tus alumnos entran con un botón.
+          </p>
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/estudio/clases">Programar clase</Link>
+          </Button>
+        </Card>
+        <Card className="p-4 bg-card/70 border-white/10 space-y-2">
+          <Bell className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground text-sm">Avisos y notificaciones</h3>
+          <p className="text-xs text-muted-foreground">
+            Manda avisos de horarios, tareas o recordatorios a tus alumnos.
+          </p>
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/estudio/avisos">Publicar aviso</Link>
+          </Button>
+        </Card>
+        <Card className="p-4 bg-card/70 border-white/10 space-y-2">
+          <Users className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-foreground text-sm">Vista del alumno</h3>
+          <p className="text-xs text-muted-foreground">
+            Así ven tus alumnos su estudio: clases, avisos y cursos.
+          </p>
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/mi-estudio">Ver como alumno</Link>
+          </Button>
+        </Card>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+
+        <Card className="p-4 bg-card/70 border-white/10 space-y-2">
           <BookOpen className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground text-sm">Sube tu contenido</h3>
           <p className="text-xs text-muted-foreground">
