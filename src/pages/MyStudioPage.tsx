@@ -18,7 +18,7 @@ import {
   type StudioLiveClass,
 } from '@/hooks/useTeacherStudio';
 import { StudioClassRoom } from '@/components/studio/StudioClassRoom';
-import { SEO } from '@/lib/seo';
+import { Seo } from '@/lib/seo';
 
 const MyStudioPage = () => {
   const { user, loading } = useAuth();
@@ -64,7 +64,7 @@ const MyStudioPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title="Mi estudio | Acorde Live" description="Clases en vivo, avisos y cursos de tu maestro." noindex />
+      <Seo title="Mi estudio | Acorde Live" description="Clases en vivo, avisos y cursos de tu maestro." noindex />
       <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>

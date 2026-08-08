@@ -9,6 +9,8 @@ import { StudioDashboard } from '@/components/studio/StudioDashboard';
 import { StudioStudents } from '@/components/studio/StudioStudents';
 import { StudioCourses } from '@/components/studio/StudioCourses';
 import { StudioAssignments } from '@/components/studio/StudioAssignments';
+import { StudioLiveClasses } from '@/components/studio/StudioLiveClasses';
+import { StudioAnnouncements } from '@/components/studio/StudioAnnouncements';
 import { StudioTools } from '@/components/studio/StudioTools';
 import { StudioSettings } from '@/components/studio/StudioSettings';
 import { Music } from 'lucide-react';
@@ -39,6 +41,8 @@ const StudioPanel = () => {
   const content = () => {
     if (pathname.startsWith('/estudio/alumnos')) return <StudioStudents account={account} />;
     if (pathname.startsWith('/estudio/cursos')) return <StudioCourses account={account} />;
+    if (pathname.startsWith('/estudio/clases')) return <StudioLiveClasses account={account} />;
+    if (pathname.startsWith('/estudio/avisos')) return <StudioAnnouncements account={account} />;
     if (pathname.startsWith('/estudio/tareas')) return <StudioAssignments account={account} />;
     if (pathname.startsWith('/estudio/herramientas')) return <StudioTools account={account} />;
     if (pathname.startsWith('/estudio/configuracion')) return <StudioSettings account={account} />;
