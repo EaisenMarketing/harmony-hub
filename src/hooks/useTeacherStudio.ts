@@ -688,3 +688,211 @@ export const useStudioProgressRows = (accountId?: string) =>
     },
     enabled: !!accountId,
   });
+
+/* ------------------------------------------------------------------ */
+/* Clases en vivo del estudio (Zoom)                                   */
+/* ------------------------------------------------------------------ */
+
+export type StudioLiveClass = Tables<'teacher_live_classes'>;
+export type StudioAnnouncement = Tables<'teacher_announcements'>;
+export type StudioClassRegistration = Tables<'teacher_class_registrations'>;
+
+export const useStudioLiveClasses = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-live-classes', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_live_classes')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .order('scheduled_at', { ascending: true });
+      if (error) throw error;
+      return data as StudioLiveClass[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useSaveStudioLiveClass = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      input: Partial<StudioLiveClass> & { teacher_account_id: string; title: string; scheduled_at: string },
+    ) => {
+      const { id, ...rest } = input;
+      if (id) {
+        const { data, error } = await supabase
+          .from('teacher_live_classes')
+          .update(rest)
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data as StudioLiveClass;
+      }
+      const { data, error } = await supabase.from('teacher_live_classes').insert(rest).select().single();
+      if (error) throw error;
+      return data as StudioLiveClass;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studio-live-classes'] });
+      qc.invalidateQueries({ queryKey: ['my-studio-live-classes'] });
+    },
+  });
+};
+
+export const useDeleteStudioLiveClass = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('teacher_live_classes').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studio-live-classes'] });
+      qc.invalidateQueries({ queryKey: ['my-studio-live-classes'] });
+    },
+  });
+};
+
+export const useStudioClassRegistrations = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-class-registrations', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_class_registrations')
+        .select('*')
+        .eq('teacher_account_id', accountId!);
+      if (error) throw error;
+      return data as StudioClassRegistration[];
+    },
+    enabled: !!accountId,
+  });
+
+/* ------------------------------------------------------------------ */
+/* Avisos / notificaciones del estudio                                 */
+/* ------------------------------------------------------------------ */
+
+export const useStudioAnnouncements = (accountId?: string) =>
+  useQuery({
+    queryKey: ['studio-announcements', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_announcements')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as StudioAnnouncement[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useSaveStudioAnnouncement = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      input: Partial<StudioAnnouncement> & { teacher_account_id: string; title: string; body: string },
+    ) => {
+      const { id, ...rest } = input;
+      if (id) {
+        const { data, error } = await supabase
+          .from('teacher_announcements')
+          .update(rest)
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) throw error;
+        return data as StudioAnnouncement;
+      }
+      const { data, error } = await supabase.from('teacher_announcements').insert(rest).select().single();
+      if (error) throw error;
+      return data as StudioAnnouncement;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studio-announcements'] });
+      qc.invalidateQueries({ queryKey: ['my-studio-announcements'] });
+    },
+  });
+};
+
+export const useDeleteStudioAnnouncement = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('teacher_announcements').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['studio-announcements'] });
+      qc.invalidateQueries({ queryKey: ['my-studio-announcements'] });
+    },
+  });
+};
+
+/* ------------------------------------------------------------------ */
+/* Lado alumno: clases en vivo y avisos                                */
+/* ------------------------------------------------------------------ */
+
+export const useMyStudioLiveClasses = (accountId?: string) =>
+  useQuery({
+    queryKey: ['my-studio-live-classes', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_live_classes')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .eq('is_published', true)
+        .order('scheduled_at', { ascending: true });
+      if (error) throw error;
+      return data as StudioLiveClass[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useMyStudioAnnouncements = (accountId?: string) =>
+  useQuery({
+    queryKey: ['my-studio-announcements', accountId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_announcements')
+        .select('*')
+        .eq('teacher_account_id', accountId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as StudioAnnouncement[];
+    },
+    enabled: !!accountId,
+  });
+
+export const useMyClassRegistrations = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['my-class-registrations', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teacher_class_registrations')
+        .select('*')
+        .eq('student_user_id', user!.id);
+      if (error) throw error;
+      return data as StudioClassRegistration[];
+    },
+    enabled: !!user?.id,
+  });
+};
+
+export const useRegisterToStudioClass = () => {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async ({ accountId, classId }: { accountId: string; classId: string }) => {
+      if (!user?.id) throw new Error('Necesitas iniciar sesión.');
+      const { error } = await supabase.from('teacher_class_registrations').insert({
+        teacher_account_id: accountId,
+        live_class_id: classId,
+        student_user_id: user.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['my-class-registrations'] }),
+  });
+};
