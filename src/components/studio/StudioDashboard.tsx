@@ -10,6 +10,9 @@ import {
   Copy,
   TrendingUp,
   Sparkles,
+  Video,
+  Bell,
+
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { studioInviteUrl, TEACHER_PLAN_MAP, TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
