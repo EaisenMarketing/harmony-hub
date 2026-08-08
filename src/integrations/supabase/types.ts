@@ -1573,6 +1573,9 @@ export type Database = {
           created_at: string
           id: string
           invite_code: string
+          notify_class_reminder: boolean
+          notify_new_assignment: boolean
+          notify_new_class: boolean
           owner_user_id: string
           phone: string | null
           plan: Database["public"]["Enums"]["teacher_plan"]
@@ -1583,6 +1586,8 @@ export type Database = {
           subscription_expires_at: string | null
           trial_ends_at: string
           updated_at: string
+          zoom_email: string | null
+          zoom_room_url: string | null
         }
         Insert: {
           bio?: string | null
@@ -1590,6 +1595,9 @@ export type Database = {
           created_at?: string
           id?: string
           invite_code?: string
+          notify_class_reminder?: boolean
+          notify_new_assignment?: boolean
+          notify_new_class?: boolean
           owner_user_id: string
           phone?: string | null
           plan?: Database["public"]["Enums"]["teacher_plan"]
@@ -1600,6 +1608,8 @@ export type Database = {
           subscription_expires_at?: string | null
           trial_ends_at?: string
           updated_at?: string
+          zoom_email?: string | null
+          zoom_room_url?: string | null
         }
         Update: {
           bio?: string | null
@@ -1607,6 +1617,9 @@ export type Database = {
           created_at?: string
           id?: string
           invite_code?: string
+          notify_class_reminder?: boolean
+          notify_new_assignment?: boolean
+          notify_new_class?: boolean
           owner_user_id?: string
           phone?: string | null
           plan?: Database["public"]["Enums"]["teacher_plan"]
@@ -1617,8 +1630,64 @@ export type Database = {
           subscription_expires_at?: string | null
           trial_ends_at?: string
           updated_at?: string
+          zoom_email?: string | null
+          zoom_room_url?: string | null
         }
         Relationships: []
+      }
+      teacher_announcements: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          link: string | null
+          send_email: boolean
+          teacher_account_id: string
+          teacher_student_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          send_email?: boolean
+          teacher_account_id: string
+          teacher_student_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          send_email?: boolean
+          teacher_account_id?: string
+          teacher_student_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_announcements_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_announcements_teacher_student_id_fkey"
+            columns: ["teacher_student_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_students"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teacher_assignments: {
         Row: {
@@ -1676,6 +1745,48 @@ export type Database = {
             columns: ["teacher_student_id"]
             isOneToOne: false
             referencedRelation: "teacher_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_class_registrations: {
+        Row: {
+          attended: boolean
+          id: string
+          live_class_id: string
+          registered_at: string
+          student_user_id: string
+          teacher_account_id: string
+        }
+        Insert: {
+          attended?: boolean
+          id?: string
+          live_class_id: string
+          registered_at?: string
+          student_user_id: string
+          teacher_account_id: string
+        }
+        Update: {
+          attended?: boolean
+          id?: string
+          live_class_id?: string
+          registered_at?: string
+          student_user_id?: string
+          teacher_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_class_registrations_live_class_id_fkey"
+            columns: ["live_class_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_live_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_class_registrations_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1834,6 +1945,74 @@ export type Database = {
             columns: ["teacher_course_id"]
             isOneToOne: false
             referencedRelation: "teacher_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_live_classes: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          instrument: string | null
+          is_published: boolean
+          join_url: string | null
+          level: string | null
+          max_attendees: number | null
+          meeting_id: string | null
+          passcode: string | null
+          recording_url: string | null
+          scheduled_at: string
+          status: string
+          teacher_account_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          instrument?: string | null
+          is_published?: boolean
+          join_url?: string | null
+          level?: string | null
+          max_attendees?: number | null
+          meeting_id?: string | null
+          passcode?: string | null
+          recording_url?: string | null
+          scheduled_at: string
+          status?: string
+          teacher_account_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          instrument?: string | null
+          is_published?: boolean
+          join_url?: string | null
+          level?: string | null
+          max_attendees?: number | null
+          meeting_id?: string | null
+          passcode?: string | null
+          recording_url?: string | null
+          scheduled_at?: string
+          status?: string
+          teacher_account_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_live_classes_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
             referencedColumns: ["id"]
           },
         ]

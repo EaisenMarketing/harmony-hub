@@ -10,6 +10,7 @@ const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const InstructorPanel = lazy(() => import("./pages/InstructorPanel"));
 const AdFlowDashboard = lazy(() => import("./pages/AdFlowDashboard"));
 const TeacherApplicationPage = lazy(() => import("./pages/TeacherApplicationPage"));
+const MyStudioPage = lazy(() => import("./pages/MyStudioPage"));
 const StudioPanel = lazy(() => import("./pages/StudioPanel"));
 const StudioInvitePage = lazy(() => import("./pages/public/StudioInvitePage"));
 const StudioPlansPage = lazy(() => import("./pages/public/StudioPlansPage"));
@@ -93,6 +94,7 @@ const App = () => (
         <Route path="/instructor/*" element={<WithAuth><InstructorPanel /></WithAuth>} />
         <Route path="/estudio" element={<WithAuth><StudioPanel /></WithAuth>} />
         <Route path="/estudio/*" element={<WithAuth><StudioPanel /></WithAuth>} />
+        <Route path="/mi-estudio" element={<WithAuth><MyStudioPage /></WithAuth>} />
         <Route path="/invitacion/:code" element={<WithAuth><StudioInvitePage /></WithAuth>} />
         <Route path="/adflow" element={<WithAuth><AdFlowDashboard /></WithAuth>} />
         <Route path="/aplicar-maestro" element={<WithData><TeacherApplicationPage /></WithData>} />

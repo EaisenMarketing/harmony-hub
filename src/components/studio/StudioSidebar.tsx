@@ -5,6 +5,8 @@ import {
   BookOpen,
   ClipboardList,
   Sparkles,
+  Video,
+  Bell,
   Settings,
   LogOut,
 } from 'lucide-react';
@@ -16,7 +18,9 @@ export const studioNav = [
   { name: 'Inicio', short: 'Inicio', href: '/estudio', icon: LayoutDashboard },
   { name: 'Mis alumnos', short: 'Alumnos', href: '/estudio/alumnos', icon: Users },
   { name: 'Mis cursos', short: 'Cursos', href: '/estudio/cursos', icon: BookOpen },
+  { name: 'Clases en vivo', short: 'En vivo', href: '/estudio/clases', icon: Video },
   { name: 'Tareas', short: 'Tareas', href: '/estudio/tareas', icon: ClipboardList },
+  { name: 'Avisos', short: 'Avisos', href: '/estudio/avisos', icon: Bell },
   { name: 'Herramientas IA', short: 'IA', href: '/estudio/herramientas', icon: Sparkles },
   { name: 'Configuración', short: 'Ajustes', href: '/estudio/configuracion', icon: Settings },
 ];
