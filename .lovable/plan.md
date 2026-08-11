@@ -1,76 +1,73 @@
-## Objetivo
+# Acorde Live — Suscripciones, prueba gratis de 3 días, instrumento único y accesos
 
-Cambiar el modelo de suscripción: en lugar de planes por tier (basic/standard/pro/production) con acceso a todos los instrumentos, cada plan da acceso a **UN solo instrumento**. Precio único **$75/mes** para instrumentos y **$99/mes** para Producción Musical. El estudiante ve solo su instrumento y sus herramientas IA; los demás quedan bloqueados. Nuevo dashboard dedicado a Producción.
+## Lo que ya existe y se reutiliza
+- Auth (email + Google), roles (`user_roles`, `has_role`), portal de alumno, panel admin, panel de maestro/estudio B2B.
+- `profiles.primary_instrument` como instrumento activo, `SelectInstrumentGate`, `has_course_access`, `AIToolGate`.
+- Cursos/módulos/lecciones, `lesson_progress`, `live_classes` + `live_class_registrations`, `subscriptions`, CRM de leads.
 
-## Instrumentos disponibles
+## Lo que cambia (decisión de negocio nueva)
+Hoy el modelo es "1 plan por instrumento" a $75/$99. El nuevo modelo separa **plan** (beneficios) de **instrumento** (contenido):
+- ESENCIAL $29.99 · PRO $49.99 (MÁS POPULAR) · PREMIUM $69.99 — todos con **1 instrumento**.
+- Diferencia entre planes: nº de herramientas Acorde AI (1 / 3 / todas), envío de prácticas, feedback del maestro, contenido avanzado, nivel de seguimiento.
+- "Producción Musical" pasa a ser un instrumento más (elegible bajo cualquier plan), no un plan aparte.
 
-Piano · Guitarra acústica · Guitarra eléctrica · Bajo · Batería · Trompeta · **Producción Musical** ($99).
+---
 
-## Cambios en base de datos
+## Fase 1 — Base de datos y reglas de negocio (backend primero)
+Nuevas tablas (todas con GRANTs + RLS):
+- `plans` (key, nombre, precio_cents, ai_tool_limit, allow_practice_submissions, allow_teacher_feedback, advanced_content, orden, activo)
+- `instruments` (slug, nombre, emoji, activo) y `levels` (never_played, beginner, intermediate, advanced, unsure)
+- `user_instruments` (user_id, instrument, level, status active/paused, índice único parcial que **garantiza 1 instrumento activo por usuario**)
+- `instrument_change_history` (+ regla de 1 cambio cada 30 días validada en función de BD)
+- `trials` (user_id, plan_key, started_at, ends_at, status trialing/converted/canceled) y `profiles.trial_used boolean`
+- `subscription_events` (auditoría: trial_started, converted, canceled, plan_changed, reactivated)
+- `groups` (instrumento, nivel, maestro, día/hora, timezone base, capacidad, `trial_slots_limit` configurable, default 3) y `group_students` (status active/trial)
+- `class_sessions` (grupo, fecha/hora UTC, join_url, estado) — reutiliza `live_classes` donde aplique
+- `ai_tools` (key, nombre, instrumentos soportados, activo) y `plan_ai_tools` (permisos por plan, editable por admin)
+- `private_lesson_orders` (1 sesión $39 / paquete 4 $139, ligado al instrumento activo)
+- `payment_methods` (referencia al proveedor, sin datos de tarjeta)
 
-- Añadir columna `primary_instrument` (text) a `profiles`. Este es el instrumento activo del usuario.
-- Reutilizar `enabled_instruments` (ya existe) sincronizándolo con `primary_instrument` (un solo elemento).
-- Nueva función `has_instrument_access(_user_id, _instrument)` (SECURITY DEFINER) que devuelve true si `profiles.primary_instrument = _instrument` o admin.
-- Actualizar `has_course_access` para exigir que `courses.instrument` coincida con el instrumento del usuario (además del plan).
-- Migrar usuarios existentes: `primary_instrument = NULL` → forzar selección al entrar.
-- Mantener `subscription_plan` para diferenciar precio (`instrument` = $75, `production` = $99), pero **ya no otorga acceso multi-instrumento**.
+Funciones security-definer para que el acceso **no dependa del frontend**:
+- `current_entitlement(user)` → plan, estado (trialing/active/canceled/inactive), instrumento activo, nivel, límite de herramientas IA, días restantes de trial.
+- `can_access_instrument(user, instrument)`, `can_use_ai_tool(user, tool_key)`, `can_start_trial(user)`, `switch_instrument(user, nuevo)` con la regla de 30 días.
+- RLS: alumno ve solo lo suyo; maestro solo sus grupos/alumnos; admin todo.
 
-## Frontend
+## Fase 2 — Onboarding por pasos (6 pasos, con barra de progreso)
+Ruta `/empezar`: 1) plan → 2) cuenta → 3) método de pago → 4) instrumento (tarjetas, solo uno, con pantalla de confirmación) → 5) nivel + grupo compatible → 6) bienvenida.
+- Confirmación explícita de la prueba: "$0 hoy. Tu membresía comenzará automáticamente después de 3 días…".
+- Los grupos se filtran por instrumento + nivel + cupo; se muestran ya convertidos a la zona horaria del alumno.
+- Se guarda `timezone` del alumno y toda hora se almacena en UTC.
 
-### 1. Selector de instrumento obligatorio
-- Nuevo modal/página `SelectInstrumentGate` que aparece en `/portal` si `primary_instrument` es null. Bloquea la app hasta elegir uno.
-- Reemplaza al selector actual multi-select en `InstrumentSettings` por un radio-select de 1 instrumento (cambiar requiere confirmación, misma UI).
+## Fase 3 — Control de acceso real
+- Guard en cada ruta privada (`/portal/*`, cursos, herramientas) que consulta `current_entitlement` y las funciones de BD; escribir la URL a mano no basta.
+- Pantalla "Este contenido pertenece a otro instrumento" + botón "Volver a mi instrumento".
+- Herramientas de IA: cada Edge Function valida plan/instrumento antes de responder, además del gate visual.
+- Admin conserva bypass total.
 
-### 2. Dashboard filtrado por instrumento
-- `StudentSidebar`: ocultar "Producción" salvo que el instrumento sea `production`. Los cursos/clases live/comunidad se filtran por `courses.instrument = primary_instrument`.
-- `CoursesSection`, `ActiveCourses`, `ClassCalendar`, `LiveClassCard`: aplicar filtro por instrumento.
-- Tarjetas de otros instrumentos → mostrar candado + CTA "Cambiar de plan".
+## Fase 4 — Dashboard "Mi Acorde Live"
+Saludo + instrumento, "Continuar aprendiendo", Próxima clase (maestro, fecha/hora en su zona, botón entrar), Mi progreso, Mis prácticas, Acorde AI (herramientas habilitadas/bloqueadas según plan), Mi membresía (plan, estado, precio, próximo cobro, días de trial restantes, cambiar plan, cancelar).
+Banner de trial: "Te quedan X días… Tu plan Pro comenzará el DD de MES por $49.99/mes".
 
-### 3. Herramientas IA bloqueadas por instrumento
-- Generador de acordes / diagramas / detector por foto:
-  - Piano → solo visible si `primary_instrument = piano`
-  - Guitarra (acústica/eléctrica/bajo) → solo visible para esos
-  - Otros instrumentos → herramientas ocultas o bloqueadas con mensaje
-- Analizador de canciones y asistente de teoría: disponibles para todos (no bloquear).
-- Ajustar `PracticeSection`, `ChordGeneratorModal`, `ChordPhotoDetector`, `ChordSheet`, `ChordProgressions`.
+## Fase 5 — Ciclo de vida de la suscripción
+Cambio de plan (mantiene instrumento, no vuelve a pedirlo), cambio de instrumento (1 cada 30 días, con advertencia y progreso guardado), cancelación en trial (sin cobro) o `cancel_at_period_end` tras pago, reactivación restaurando instrumento/progreso/grupo, y **una sola prueba por cuenta** (`trial_used`).
 
-### 4. Nuevo Dashboard de Producción
-- Nueva ruta `/portal/produccion` (reemplaza actual `ProductionClassesSection`) con secciones:
-  - **Cursos de Producción Musical** (courses con `instrument='production'`)
-  - **Herramientas DAW / Mezcla** (sección con recursos y plugins recomendados — contenido estático inicial)
-  - **Clases en vivo de Producción** (live_classes con `instrument='production'`)
-  - **Biblioteca de Samples / Presets** (lista desde nuevo bucket `production-assets` o placeholder si aún no hay contenido)
-- Sidebar del portal solo muestra "Producción" y oculta el resto de secciones de instrumento cuando `primary_instrument = production`.
-- Header propio "Producción Musical" con branding diferenciado.
+## Fase 6 — Panel del maestro y panel admin
+- Maestro: solo sus grupos, alumnos (distinguiendo ACTIVO vs TRIAL), horarios, próximas clases, prácticas y progreso. Sin pago extra por alumno en prueba (el pago es por clase/grupo).
+- Admin: estudiantes, maestros, planes, suscripciones, trials, conversiones, cancelaciones, instrumentos, grupos, clases, pagos, Acorde AI (editar permisos por plan), prácticas y progreso.
+- Métricas de trial: total, activos, cancelados, convertidos y tasa de conversión, segmentada por instrumento, plan, país, maestro y grupo. Exportable a CSV.
 
-### 5. Pricing público
-- `PricingSection` y `PricingPage`: rediseñar en 7 tarjetas (una por instrumento) todas a **$75/mes**, más **Producción $99/mes**. Eliminar los tiers actuales basic/standard/pro. Cada tarjeta muestra el instrumento, sus beneficios y CTA "Empezar con [instrumento]".
-- En Auth/registro, si viene de una tarjeta, prellenar `primary_instrument`.
+## Fase 7 — Cobros y recordatorios
+- Cobro real con el proveedor de pagos (checkout con trial de 3 días, tarjeta requerida) + webhook que reconcilia estado, plan y fechas en la BD.
+- Emails automáticos: bienvenida al trial, aviso 24 h antes del cobro, confirmación de cancelación. Requiere dominio verificado para envíos propios.
 
-### 6. Migración de usuarios actuales
-- Al iniciar sesión, si `primary_instrument` es null, se muestra el `SelectInstrumentGate`.
-- El instrumento elegido se guarda; el `subscription_plan` se remapea (standard/pro → `instrument`, production sigue `production`).
+---
 
-## Detalles técnicos
+## Notas técnicas
+- Todo el estado de acceso vive en BD; el frontend solo refleja `current_entitlement`.
+- Migraciones incrementales, sin borrar tablas ni datos actuales; los usuarios con `primary_instrument` se migran a `user_instruments` y se les asigna un plan equivalente.
+- Horas siempre en UTC en BD, formateadas con la zona del alumno.
 
-- `src/lib/plans.ts`: reemplazar por `src/lib/instrument-access.ts` con helpers `hasInstrumentAccess(user, instrument)`, `getUserInstrument(profile)`, `isAiToolEnabled(profile, tool)`.
-- `src/lib/instruments.ts`: ya existe; añadir `price` por instrumento.
-- Hook nuevo `useUserInstrument()` reemplaza uso multi de `useEnabledInstruments`.
-- RLS: actualizar policies de `courses`, `live_classes` con la nueva función.
-- **Pagos y Stripe se dejan para el final** (no se tocan en esta iteración, según lo pediste).
-
-## Orden de implementación
-
-1. Migración DB (`primary_instrument`, función, backfill NULL, actualizar `has_course_access`).
-2. Hook + helpers + gate de selección de instrumento.
-3. Filtrado en sidebar, cursos, clases live, comunidad.
-4. Bloqueo de herramientas IA por instrumento.
-5. Nuevo dashboard `/portal/produccion` con las 4 secciones.
-6. Rediseño de `PricingSection` / `PricingPage`.
-7. Actualizar `InstrumentSettings` a selección única.
-
-## Fuera de alcance (para más tarde)
-
-- Integración de pagos Stripe/Paddle (queda pendiente como pediste).
-- Contenido real de samples/presets del dashboard de Producción (se deja sección con placeholder para subir después).
-- Posibilidad de suscribirse a múltiples instrumentos simultáneamente.
+## Preguntas antes de empezar
+1. Los alumnos actuales con planes de $75/$99: ¿los migro a PRO ($49.99) y PREMIUM ($69.99) respectivamente?
+2. ¿Cuál herramienta de Acorde AI es la incluida en ESENCIAL (1 sola)?
+3. Para los cobros, ¿arranco ya con la integración de pagos o dejo el paso de "método de pago" simulado hasta el final, como veníamos haciendo?
