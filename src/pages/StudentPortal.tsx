@@ -12,7 +12,7 @@ import { CertificatesSection } from '@/components/student/CertificatesSection';
 import { CoursesSection } from '@/components/student/CoursesSection';
 import { CalendarSection } from '@/components/student/CalendarSection';
 import { CertificatesPage } from '@/components/student/CertificatesPage';
-import { PaymentsSection } from '@/components/student/PaymentsSection';
+import { MembershipSection } from '@/components/student/MembershipSection';
 import { SettingsSection } from '@/components/student/SettingsSection';
 import { ProductionDashboard } from '@/components/student/ProductionDashboard';
 import { ProgressPanel } from '@/components/student/ProgressPanel';
@@ -105,7 +105,7 @@ const StudentPortal = () => {
       case '/portal/certificados':
         return <CertificatesPage />;
       case '/portal/pagos':
-        return <PaymentsSection />;
+        return <MembershipSection />;
       case '/portal/configuracion':
         return <SettingsSection />;
       case '/portal/produccion':

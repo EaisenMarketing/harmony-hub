@@ -14,6 +14,7 @@ const MyStudioPage = lazy(() => import("./pages/MyStudioPage"));
 const StudioPanel = lazy(() => import("./pages/StudioPanel"));
 const StudioInvitePage = lazy(() => import("./pages/public/StudioInvitePage"));
 const StudioPlansPage = lazy(() => import("./pages/public/StudioPlansPage"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthProvider = lazy(() => import("@/contexts/AuthContext").then(m => ({ default: m.AuthProvider })));
 const DataProvider = lazy(() => import("@/components/app/DataProvider"));
@@ -82,6 +83,7 @@ const App = () => (
         <Route path="/ser-maestro" element={S('TeacherAlias')} />
 
         {/* Rutas privadas existentes */}
+        <Route path="/empezar" element={<WithAuth><Onboarding /></WithAuth>} />
         <Route path="/auth" element={<WithAuth><Auth /></WithAuth>} />
         <Route path="/reset-password" element={<WithAuth><ResetPassword /></WithAuth>} />
         <Route path="/portal" element={<WithAuth><StudentPortal /></WithAuth>} />
