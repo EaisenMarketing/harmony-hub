@@ -18,6 +18,7 @@ import { FreeMaterialsManagement } from '@/components/admin/FreeMaterialsManagem
 import { CrmDashboard } from '@/components/admin/CrmDashboard';
 import { TeacherAccountsManagement } from '@/components/admin/TeacherAccountsManagement';
 import { TeacherUsageDashboard } from '@/components/admin/TeacherUsageDashboard';
+import { SubscriptionsDashboard } from '@/components/admin/SubscriptionsDashboard';
 
 import { LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -141,6 +142,8 @@ const AdminPanel = () => {
       case '/admin/uso-maestros':
         return { title: 'Uso por Maestro', subtitle: 'MRR real, asientos, invitaciones y actividad con exportación a CSV' };
 
+      case '/admin/suscripciones':
+        return { title: 'Suscripciones y trials', subtitle: 'Pruebas gratis, conversiones y cancelaciones' };
       case '/admin/crm':
         return { title: 'CRM de Leads', subtitle: 'Todos los leads de tus enlaces de material gratuito y del formulario de contacto' };
       case '/admin/estadisticas':
