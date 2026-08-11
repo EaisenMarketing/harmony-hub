@@ -102,6 +102,45 @@ export type Database = {
           },
         ]
       }
+      ai_tools: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          instrument_slugs: string[]
+          is_active: boolean
+          key: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instrument_slugs?: string[]
+          is_active?: boolean
+          key: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instrument_slugs?: string[]
+          is_active?: boolean
+          key?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
@@ -356,6 +395,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      class_sessions: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          group_id: string
+          id: string
+          join_url: string | null
+          recording_url: string | null
+          scheduled_at: string
+          status: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          group_id: string
+          id?: string
+          join_url?: string | null
+          recording_url?: string | null
+          scheduled_at: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          group_id?: string
+          id?: string
+          join_url?: string | null
+          recording_url?: string | null
+          scheduled_at?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       community_comments: {
         Row: {
@@ -781,6 +867,113 @@ export type Database = {
         }
         Relationships: []
       }
+      group_students: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          instrument_slug: string
+          joined_at: string
+          left_at: string | null
+          level_key: string | null
+          membership_status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          instrument_slug: string
+          joined_at?: string
+          left_at?: string | null
+          level_key?: string | null
+          membership_status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          instrument_slug?: string
+          joined_at?: string
+          left_at?: string | null
+          level_key?: string | null
+          membership_status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_students_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          base_timezone: string
+          capacity: number
+          code: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          instrument_slug: string
+          is_active: boolean
+          join_url: string | null
+          level_key: string
+          name: string
+          start_time_utc: string
+          teacher_name: string | null
+          teacher_user_id: string | null
+          trial_slots_limit: number
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          base_timezone?: string
+          capacity?: number
+          code: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          instrument_slug: string
+          is_active?: boolean
+          join_url?: string | null
+          level_key: string
+          name: string
+          start_time_utc: string
+          teacher_name?: string | null
+          teacher_user_id?: string | null
+          trial_slots_limit?: number
+          updated_at?: string
+          weekday?: number
+        }
+        Update: {
+          base_timezone?: string
+          capacity?: number
+          code?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          instrument_slug?: string
+          is_active?: boolean
+          join_url?: string | null
+          level_key?: string
+          name?: string
+          start_time_utc?: string
+          teacher_name?: string | null
+          teacher_user_id?: string | null
+          trial_slots_limit?: number
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
       instructor_activity_logs: {
         Row: {
           action_type: string
@@ -958,6 +1151,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      instrument_change_history: {
+        Row: {
+          changed_at: string
+          from_instrument: string | null
+          id: string
+          to_instrument: string
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          from_instrument?: string | null
+          id?: string
+          to_instrument: string
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          from_instrument?: string | null
+          id?: string
+          to_instrument?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      instruments: {
+        Row: {
+          created_at: string
+          emoji: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       leads: {
         Row: {
@@ -1158,6 +1408,30 @@ export type Database = {
           },
         ]
       }
+      levels: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       live_class_registrations: {
         Row: {
           attended: boolean | null
@@ -1335,6 +1609,129 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_methods: {
+        Row: {
+          brand: string | null
+          created_at: string
+          exp_month: number | null
+          exp_year: number | null
+          id: string
+          is_default: boolean
+          last4: string | null
+          provider: string
+          provider_customer_id: string | null
+          provider_method_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          is_default?: boolean
+          last4?: string | null
+          provider?: string
+          provider_customer_id?: string | null
+          provider_method_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          exp_month?: number | null
+          exp_year?: number | null
+          id?: string
+          is_default?: boolean
+          last4?: string | null
+          provider?: string
+          provider_customer_id?: string | null
+          provider_method_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      plan_ai_tools: {
+        Row: {
+          ai_tool_key: string
+          created_at: string
+          enabled: boolean
+          id: string
+          plan_key: string
+        }
+        Insert: {
+          ai_tool_key: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          plan_key: string
+        }
+        Update: {
+          ai_tool_key?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          plan_key?: string
+        }
+        Relationships: []
+      }
+      plans: {
+        Row: {
+          advanced_content: boolean
+          ai_tool_limit: number | null
+          allow_practice_submissions: boolean
+          allow_teacher_feedback: boolean
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          is_popular: boolean
+          key: string
+          name: string
+          price_cents: number
+          progress_tier: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          advanced_content?: boolean
+          ai_tool_limit?: number | null
+          allow_practice_submissions?: boolean
+          allow_teacher_feedback?: boolean
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          key: string
+          name: string
+          price_cents: number
+          progress_tier?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          advanced_content?: boolean
+          ai_tool_limit?: number | null
+          allow_practice_submissions?: boolean
+          allow_teacher_feedback?: boolean
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          key?: string
+          name?: string
+          price_cents?: number
+          progress_tier?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       practice_sessions: {
         Row: {
           created_at: string
@@ -1368,9 +1765,52 @@ export type Database = {
         }
         Relationships: []
       }
+      private_lesson_orders: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          instrument_slug: string
+          package_type: string
+          provider_reference: string | null
+          sessions_total: number
+          sessions_used: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          instrument_slug: string
+          package_type?: string
+          provider_reference?: string | null
+          sessions_total?: number
+          sessions_used?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          instrument_slug?: string
+          package_type?: string
+          provider_reference?: string | null
+          sessions_total?: number
+          sessions_used?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          country: string | null
           created_at: string
           enabled_instruments: string[]
           full_name: string | null
@@ -1385,11 +1825,13 @@ export type Database = {
             | null
           subscription_status: string | null
           timezone: string | null
+          trial_used: boolean
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           enabled_instruments?: string[]
           full_name?: string | null
@@ -1404,11 +1846,13 @@ export type Database = {
             | null
           subscription_status?: string | null
           timezone?: string | null
+          trial_used?: boolean
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           enabled_instruments?: string[]
           full_name?: string | null
@@ -1423,6 +1867,7 @@ export type Database = {
             | null
           subscription_status?: string | null
           timezone?: string | null
+          trial_used?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -1515,6 +1960,36 @@ export type Database = {
           user_id?: string
           video_id?: string
           youtube_url?: string | null
+        }
+        Relationships: []
+      }
+      subscription_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          instrument_slug: string | null
+          metadata: Json
+          plan_key: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          instrument_slug?: string | null
+          metadata?: Json
+          plan_key?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          instrument_slug?: string | null
+          metadata?: Json
+          plan_key?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2163,6 +2638,84 @@ export type Database = {
         }
         Relationships: []
       }
+      trials: {
+        Row: {
+          canceled_at: string | null
+          converted_at: string | null
+          created_at: string
+          ends_at: string
+          id: string
+          instrument_slug: string | null
+          plan_key: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canceled_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          ends_at: string
+          id?: string
+          instrument_slug?: string | null
+          plan_key: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canceled_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          ends_at?: string
+          id?: string
+          instrument_slug?: string | null
+          plan_key?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_instruments: {
+        Row: {
+          activated_at: string
+          created_at: string
+          id: string
+          instrument_slug: string
+          level_key: string | null
+          paused_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string
+          created_at?: string
+          id?: string
+          instrument_slug: string
+          level_key?: string | null
+          paused_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string
+          created_at?: string
+          id?: string
+          instrument_slug?: string
+          level_key?: string | null
+          paused_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed: boolean | null
@@ -2330,6 +2883,16 @@ export type Database = {
       }
     }
     Functions: {
+      active_instrument: { Args: { _user_id: string }; Returns: string }
+      can_access_instrument: {
+        Args: { _instrument: string; _user_id: string }
+        Returns: boolean
+      }
+      can_start_trial: { Args: { _user_id: string }; Returns: boolean }
+      can_use_ai_tool: {
+        Args: { _tool_key: string; _user_id: string }
+        Returns: boolean
+      }
       claim_studio_invite: {
         Args: { _invite_code: string }
         Returns: {
@@ -2339,10 +2902,34 @@ export type Database = {
           studio_name: string
         }[]
       }
+      current_entitlement: {
+        Args: { _user_id: string }
+        Returns: {
+          advanced_content: boolean
+          ai_tool_limit: number
+          allow_practice_submissions: boolean
+          allow_teacher_feedback: boolean
+          current_period_end: string
+          instrument_slug: string
+          is_admin: boolean
+          level_key: string
+          plan_key: string
+          status: string
+          trial_days_left: number
+          trial_ends_at: string
+        }[]
+      }
       get_user_instrument: { Args: { _user_id: string }; Returns: string }
       get_user_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["subscription_plan"]
+      }
+      group_seat_counts: {
+        Args: { _group_id: string }
+        Returns: {
+          total: number
+          trials: number
+        }[]
       }
       has_course_access: {
         Args: { _course_id: string; _user_id: string }
@@ -2361,10 +2948,32 @@ export type Database = {
         Returns: boolean
       }
       is_student_of_account: { Args: { _account_id: string }; Returns: boolean }
+      join_group: {
+        Args: { _group_id: string }
+        Returns: {
+          message: string
+          ok: boolean
+        }[]
+      }
       my_studio_account_id: { Args: never; Returns: string }
       my_teacher_account_id: { Args: never; Returns: string }
       owns_teacher_account: { Args: { _account_id: string }; Returns: boolean }
+      set_active_instrument: {
+        Args: { _instrument: string; _level?: string }
+        Returns: {
+          message: string
+          ok: boolean
+        }[]
+      }
       slugify: { Args: { input: string }; Returns: string }
+      start_trial: {
+        Args: { _instrument?: string; _plan_key: string }
+        Returns: {
+          message: string
+          ok: boolean
+          trial_ends_at: string
+        }[]
+      }
       teacher_seats_used: { Args: { _account_id: string }; Returns: number }
       verify_certificate: {
         Args: { _code: string }
