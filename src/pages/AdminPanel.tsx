@@ -143,7 +143,7 @@ const AdminPanel = () => {
         return { title: 'Uso por Maestro', subtitle: 'MRR real, asientos, invitaciones y actividad con exportación a CSV' };
 
       case '/admin/suscripciones':
-        return <SubscriptionsDashboard />;
+        return { title: 'Suscripciones y trials', subtitle: 'Pruebas gratis, conversiones y cancelaciones' };
       case '/admin/crm':
         return { title: 'CRM de Leads', subtitle: 'Todos los leads de tus enlaces de material gratuito y del formulario de contacto' };
       case '/admin/estadisticas':
