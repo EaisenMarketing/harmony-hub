@@ -134,6 +134,14 @@ const StudentPortal = () => {
               <div className="flex gap-2 flex-wrap">
                 <MetronomeTunerModal />
                 <AIToolGate
+                  toolKey="theory_assistant"
+                  toolName="Asistente de teoría musical"
+                  buttonLabel="Teoría"
+                >
+                  <MusicTheoryAssistant userPlan={userPlan} />
+                </AIToolGate>
+                <AIToolGate
+                  toolKey="chord_generator"
                   toolName="Generador de acordes"
                   allowedInstruments={AI_TOOL_INSTRUMENTS.chord_generator}
                   buttonLabel="Acordes"
@@ -141,6 +149,7 @@ const StudentPortal = () => {
                   <ChordGeneratorModal userPlan={userPlan} />
                 </AIToolGate>
                 <AIToolGate
+                  toolKey="chord_photo"
                   toolName="Detector de acordes por foto"
                   allowedInstruments={AI_TOOL_INSTRUMENTS.chord_photo}
                   buttonLabel="Foto acordes"
@@ -150,14 +159,24 @@ const StudentPortal = () => {
                 {['guitar', 'electric_guitar', 'bass'].includes(userIns?.instrument || '') && (
                   <ChordCreatorModal userInstrument={userIns?.instrument} />
                 )}
-                <MusicTheoryAssistant userPlan={userPlan} />
-                <PracticeCoachModal />
-                <EarTrainerModal />
-                <PracticeFeedbackModal />
-                <SongAnalyzerModal userPlan={userPlan} />
+                <AIToolGate toolKey="practice_coach" toolName="Coach de práctica IA" buttonLabel="Coach IA">
+                  <PracticeCoachModal />
+                </AIToolGate>
+                <AIToolGate toolKey="ear_trainer" toolName="Entrenador de oído IA" buttonLabel="Oído IA">
+                  <EarTrainerModal />
+                </AIToolGate>
+                <AIToolGate toolKey="practice_feedback" toolName="Feedback de práctica IA" buttonLabel="Feedback IA">
+                  <PracticeFeedbackModal />
+                </AIToolGate>
+                <AIToolGate toolKey="song_analyzer" toolName="Analizador de canciones IA" buttonLabel="Canciones">
+                  <SongAnalyzerModal userPlan={userPlan} />
+                </AIToolGate>
                 <SongLibraryModal userPlan={userPlan} />
               </div>
             </header>
+
+            <TrialBanner />
+
 
 
             {/* Continuar donde lo dejé */}
