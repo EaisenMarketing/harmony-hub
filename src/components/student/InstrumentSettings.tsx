@@ -51,7 +51,7 @@ export const InstrumentSettings = () => {
                     )}
                     <div className="text-2xl mb-2">{p.emoji}</div>
                     <div className="font-medium text-sm">{p.label}</div>
-                    <div className="text-xs text-muted-foreground">${p.price}/mes</div>
+                    <div className="text-xs text-muted-foreground">Incluido en tu plan</div>
                   </button>
                 );
               })}

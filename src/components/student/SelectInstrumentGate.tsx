@@ -52,7 +52,7 @@ export const SelectInstrumentGate = ({ open }: Props) => {
                 )}
                 <div className="text-3xl mb-2">{p.emoji}</div>
                 <div className="font-semibold text-foreground">{p.label}</div>
-                <div className="text-xs text-muted-foreground mt-1">${p.price}/mes</div>
+                <div className="text-xs text-muted-foreground mt-1">Incluido en tu plan</div>
               </button>
             );
           })}

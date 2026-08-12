@@ -53,8 +53,7 @@ export const ProductionClassesSection = () => {
             <Lock className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Acceso exclusivo</h3>
             <p className="text-muted-foreground mb-4 max-w-md">
-              Las clases de producción musical están disponibles con el plan Producción Musical ($99/mes).
-              Incluye todo lo del plan Pro más contenido especializado.
+              Las clases de producción musical están disponibles si tu instrumento activo es Producción Musical.
             </p>
             <Button variant="gradient">Actualizar Plan</Button>
           </CardContent>

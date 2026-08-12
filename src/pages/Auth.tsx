@@ -268,7 +268,7 @@ const Auth = () => {
                   <Music className="w-3.5 h-3.5" /> Plan seleccionado: {selectedPlan.label}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  ${selectedPlan.price}/mes · se activará al crear tu cuenta.
+                  Se activará al crear tu cuenta.
                 </div>
               </div>
             </div>
