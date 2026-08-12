@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { INSTRUMENT_PLAN_MAP, type InstrumentSlug } from '@/lib/instrument-access';
-import { buildCheckoutIntent, savePendingCheckout } from '@/lib/checkout';
+import { savePendingCheckout } from '@/lib/checkout';
 import { useEntitlement } from '@/hooks/useMembership';
 import { MEMBERSHIP_PLAN_MAP, formatMoney, isMembershipPlan } from '@/lib/membership';
 
@@ -33,7 +33,6 @@ export const CheckoutSummaryDialog = ({
   onConfirm,
 }: Props) => {
   const info = INSTRUMENT_PLAN_MAP[instrument];
-  const intent = buildCheckoutIntent(instrument);
   const { data: ent } = useEntitlement();
   const plan = isMembershipPlan(ent?.plan_key) ? MEMBERSHIP_PLAN_MAP[ent.plan_key] : null;
   const planPrice = plan ? `${formatMoney(plan.priceUsd)}/mes` : null;
