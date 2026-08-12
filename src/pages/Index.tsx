@@ -5,8 +5,8 @@ import { resolveDestination } from '@/lib/auth-redirect';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 
-const InstrumentsSection = lazy(() => import('@/components/InstrumentsSection').then(m => ({ default: m.InstrumentsSection })));
-const MusicProductionSection = lazy(() => import('@/components/MusicProductionSection').then(m => ({ default: m.MusicProductionSection })));
+const LiveExperienceSection = lazy(() => import('@/components/LiveExperienceSection').then(m => ({ default: m.LiveExperienceSection })));
+
 const CalendarSection = lazy(() => import('@/components/CalendarSection').then(m => ({ default: m.CalendarSection })));
 const PricingSection = lazy(() => import('@/components/PricingSection').then(m => ({ default: m.PricingSection })));
 const TestimonialsSection = lazy(() => import('@/components/TestimonialsSection').then(m => ({ default: m.TestimonialsSection })));
@@ -74,9 +74,8 @@ const DeferredLandingSections = () => {
   return (
     <Suspense fallback={<SectionFallback />}>
       <Divider />
-      <InstrumentsSection />
-      <Divider />
-      <MusicProductionSection />
+      <LiveExperienceSection />
+
       <Divider />
       <CalendarSection />
       <Divider />
