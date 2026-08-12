@@ -74,9 +74,8 @@ const DeferredLandingSections = () => {
   return (
     <Suspense fallback={<SectionFallback />}>
       <Divider />
-      <InstrumentsSection />
-      <Divider />
-      <MusicProductionSection />
+      <LiveExperienceSection />
+
       <Divider />
       <CalendarSection />
       <Divider />
