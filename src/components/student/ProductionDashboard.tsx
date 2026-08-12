@@ -76,14 +76,14 @@ export const ProductionDashboard = () => {
             <Badge variant="secondary" className="gap-1 mb-3">
               <Lock className="w-3 h-3" /> Solo plan Producción Musical
             </Badge>
-            <h3 className="text-xl font-bold mb-2">Producción Musical — $99/mes</h3>
+            <h3 className="text-xl font-bold mb-2">Producción Musical</h3>
             <p className="text-muted-foreground mb-5 max-w-md">
               Este dashboard está reservado para estudiantes del plan de Producción Musical.
-              Cambia de plan para acceder a los cursos de DAW, mezcla, mastering y la biblioteca
+              Cambia tu instrumento activo a Producción Musical para acceder a los cursos de DAW, mezcla, mastering y la biblioteca
               de samples.
             </p>
             <Button variant="gradient" onClick={() => navigate('/precios')}>
-              Ver plan de producción
+              Ver planes
             </Button>
           </CardContent>
         </Card>

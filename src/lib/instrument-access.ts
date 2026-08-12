@@ -12,19 +12,18 @@ export interface InstrumentPlanInfo {
   id: InstrumentSlug;
   label: string;
   emoji: string;
-  price: number; // USD per month
   description: string;
   color: string; // tailwind gradient
 }
 
 export const INSTRUMENT_PLANS: InstrumentPlanInfo[] = [
-  { id: 'piano',           label: 'Piano',               emoji: '🎹', price: 75, description: 'Acceso completo a cursos, clases en vivo y herramientas de piano.', color: 'from-indigo-500 to-purple-600' },
-  { id: 'guitar',          label: 'Guitarra Acústica',   emoji: '🎸', price: 75, description: 'Todo el contenido y herramientas de guitarra acústica.',              color: 'from-amber-500 to-orange-600' },
-  { id: 'electric_guitar', label: 'Guitarra Eléctrica',  emoji: '🎸', price: 75, description: 'Cursos, técnica y herramientas de guitarra eléctrica.',              color: 'from-rose-500 to-red-600' },
-  { id: 'bass',            label: 'Bajo',                emoji: '🎸', price: 75, description: 'Curso completo de bajo, groove y técnica.',                          color: 'from-emerald-500 to-teal-600' },
-  { id: 'drums',           label: 'Batería',             emoji: '🥁', price: 75, description: 'Ritmo, coordinación y clases especializadas de batería.',            color: 'from-sky-500 to-blue-600' },
-  { id: 'trumpet',         label: 'Trompeta',            emoji: '🎺', price: 75, description: 'Técnica, embocadura y repertorio de trompeta.',                     color: 'from-yellow-500 to-amber-600' },
-  { id: 'production',      label: 'Producción Musical',  emoji: '🎛️', price: 99, description: 'DAWs, mezcla, mastering, samples y clases en vivo de producción.',  color: 'from-violet-600 to-fuchsia-600' },
+  { id: 'piano',           label: 'Piano',               emoji: '🎹', description: 'Acceso completo a cursos, clases en vivo y herramientas de piano.', color: 'from-indigo-500 to-purple-600' },
+  { id: 'guitar',          label: 'Guitarra Acústica',   emoji: '🎸', description: 'Todo el contenido y herramientas de guitarra acústica.',              color: 'from-amber-500 to-orange-600' },
+  { id: 'electric_guitar', label: 'Guitarra Eléctrica',  emoji: '🎸', description: 'Cursos, técnica y herramientas de guitarra eléctrica.',              color: 'from-rose-500 to-red-600' },
+  { id: 'bass',            label: 'Bajo',                emoji: '🎸', description: 'Curso completo de bajo, groove y técnica.',                          color: 'from-emerald-500 to-teal-600' },
+  { id: 'drums',           label: 'Batería',             emoji: '🥁', description: 'Ritmo, coordinación y clases especializadas de batería.',            color: 'from-sky-500 to-blue-600' },
+  { id: 'trumpet',         label: 'Trompeta',            emoji: '🎺', description: 'Técnica, embocadura y repertorio de trompeta.',                     color: 'from-yellow-500 to-amber-600' },
+  { id: 'production',      label: 'Producción Musical',  emoji: '🎛️', description: 'DAWs, mezcla, mastering, samples y clases en vivo de producción.',  color: 'from-violet-600 to-fuchsia-600' },
 ];
 
 export const INSTRUMENT_PLAN_MAP: Record<InstrumentSlug, InstrumentPlanInfo> =

@@ -11,7 +11,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { INSTRUMENT_PLAN_MAP, type InstrumentSlug } from '@/lib/instrument-access';
-import { buildCheckoutIntent, savePendingCheckout } from '@/lib/checkout';
+import { savePendingCheckout } from '@/lib/checkout';
+import { useEntitlement } from '@/hooks/useMembership';
+import { MEMBERSHIP_PLAN_MAP, formatMoney, isMembershipPlan } from '@/lib/membership';
 
 interface Props {
   open: boolean;
@@ -31,7 +33,9 @@ export const CheckoutSummaryDialog = ({
   onConfirm,
 }: Props) => {
   const info = INSTRUMENT_PLAN_MAP[instrument];
-  const intent = buildCheckoutIntent(instrument);
+  const { data: ent } = useEntitlement();
+  const plan = isMembershipPlan(ent?.plan_key) ? MEMBERSHIP_PLAN_MAP[ent.plan_key] : null;
+  const planPrice = plan ? `${formatMoney(plan.priceUsd)}/mes` : null;
 
   const handleConfirm = () => {
     savePendingCheckout(instrument);
@@ -44,7 +48,7 @@ export const CheckoutSummaryDialog = ({
         <DialogHeader>
           <DialogTitle>Confirma tu suscripción</DialogTitle>
           <DialogDescription>
-            Revisa lo que se facturará antes de continuar al pago.
+            $0 hoy. Revisa tu instrumento y tu plan antes de continuar.
           </DialogDescription>
         </DialogHeader>
 
@@ -65,7 +69,7 @@ export const CheckoutSummaryDialog = ({
           <dl className="space-y-2 text-sm border-t border-border/60 pt-3">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Plan</dt>
-              <dd className="font-medium text-foreground">{intent.label}</dd>
+              <dd className="font-medium text-foreground">{plan?.name ?? 'Prueba gratis de 3 días'}</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Instrumento</dt>
@@ -75,9 +79,15 @@ export const CheckoutSummaryDialog = ({
               <dt className="text-muted-foreground">Facturación</dt>
               <dd className="font-medium text-foreground">Cada mes · cancela cuando quieras</dd>
             </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Membresía</dt>
+              <dd className="font-medium text-foreground">
+                {planPrice ? `${planPrice} después de la prueba` : 'Según el plan que elijas'}
+              </dd>
+            </div>
             <div className="flex justify-between text-base pt-2 border-t border-border/60">
               <dt className="font-semibold text-foreground">Total hoy</dt>
-              <dd className="font-bold text-foreground">${intent.priceUsd} USD</dd>
+              <dd className="font-bold text-foreground">$0.00 USD</dd>
             </div>
           </dl>
         </div>

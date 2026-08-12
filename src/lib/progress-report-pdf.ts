@@ -81,7 +81,7 @@ export const generateProgressReportPdf = (input: ReportInput) => {
   title('Historial de progreso');
   paragraph(`Estudiante: ${input.studentName}`);
   paragraph(`Email: ${input.studentEmail}`);
-  paragraph(`Plan: ${input.plan ? `${input.plan.label} ($${input.plan.price}/mes)` : 'Sin instrumento seleccionado'}`);
+  paragraph(`Plan: ${input.plan ? input.plan.label : 'Sin instrumento seleccionado'}`);
   paragraph(`Generado el ${format(new Date(), "d 'de' MMMM yyyy, HH:mm", { locale: es })}`);
   y += 2;
   divider();

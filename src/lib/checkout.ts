@@ -5,7 +5,6 @@ import { INSTRUMENT_PLAN_MAP, isValidInstrument, type InstrumentSlug } from '@/l
 export interface CheckoutIntent {
   instrument: InstrumentSlug;
   plan: InstrumentSlug; // one plan per instrument → same slug
-  priceUsd: number;
   label: string;
   billingInterval: 'month';
 }
@@ -17,7 +16,6 @@ export const buildCheckoutIntent = (instrument: InstrumentSlug): CheckoutIntent 
   return {
     instrument,
     plan: instrument,
-    priceUsd: info.price,
     label: info.label,
     billingInterval: 'month',
   };
