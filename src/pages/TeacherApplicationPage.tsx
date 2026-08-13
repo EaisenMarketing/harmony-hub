@@ -30,7 +30,7 @@ const TeacherApplicationPage = () => {
     presentation_video_url: '',
     sample_class_url: '',
     availability: '',
-    timezone: 'America/Mexico_City',
+    timezone: 'America/New_York',
     accepted: false,
   });
 
