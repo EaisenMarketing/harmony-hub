@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import liveClassImage from '@/assets/acorde-live-clase-en-vivo.png.asset.json';
+import liveClassImage from '@/assets/acorde-live-clase-en-vivo-2.png.asset.json';
 
 const points = [
   'Clases en vivo por Zoom con maestros profesionales',
