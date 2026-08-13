@@ -4,6 +4,7 @@
  import { Button } from '@/components/ui/button';
  import { Badge } from '@/components/ui/badge';
  import { UpcomingClass } from '@/hooks/useStudentData';
+import { formatLocalTime, formatSchoolTime } from '@/lib/schedule';
  
  interface LiveClassListItemProps {
    liveClass: UpcomingClass;
@@ -40,8 +41,9 @@
            {liveClass.title}
          </h4>
          <p className="text-sm text-muted-foreground">
-           {format(new Date(liveClass.scheduled_at), "HH:mm 'hrs'")}
-           {liveClass.duration_minutes && ` • ${liveClass.duration_minutes} min`}
+           {formatLocalTime(liveClass.scheduled_at)}
+           {` • ${formatSchoolTime(liveClass.scheduled_at)} ET`}
+           {liveClass.duration_minutes ? ` • ${liveClass.duration_minutes} min` : ''}
          </p>
          {liveClass.max_attendees && (
            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">

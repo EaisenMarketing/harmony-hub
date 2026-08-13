@@ -28,8 +28,8 @@ const faqs = [
     answer: 'Sí, los suscriptores del Plan Pro reciben certificados oficiales de finalización por cada curso completado. Estos certificados son digitales y puedes compartirlos en redes sociales.',
   },
   {
-    question: '¿Qué incluye el curso de Producción Musical?',
-    answer: 'El curso de producción musical cubre mezcla, mastering, diseño sonoro, uso de DAWs profesionales, grabación y post-producción. Incluye proyectos prácticos y feedback de productores de la industria.',
+    question: '¿En qué horario son las clases en vivo?',
+    answer: 'La escuela opera desde Estados Unidos, así que los horarios se publican en hora del Este (ET). En tu panel y en el calendario cada clase se convierte automáticamente a la zona horaria de tu país o estado (Ciudad de México, Bogotá, Los Ángeles, etc.).',
   },
 ];
 

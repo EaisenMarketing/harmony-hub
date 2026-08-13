@@ -57,7 +57,7 @@ export function Footer() {
               <span className="text-xl font-bold">Acorde Live</span>
             </Link>
             <p className="text-white/60 mb-6 max-w-sm">
-              Escuela de música 100% online. Guitarra, bajo, batería, piano, trompeta y producción musical
+              Escuela de música 100% online. Guitarra, bajo, batería, piano y trompeta
               con maestros reales.
             </p>
 

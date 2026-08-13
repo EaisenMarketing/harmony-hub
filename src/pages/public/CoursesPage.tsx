@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { PublicLayout } from '@/components/public/PublicLayout';
 import { Seo } from '@/lib/seo';
 import { supabase } from '@/integrations/supabase/client';
-import { INSTRUMENTS, instrumentLabel } from '@/lib/instruments';
+import { PUBLIC_INSTRUMENTS, instrumentLabel } from '@/lib/instruments';
 
 interface Course {
   id: string;
@@ -52,7 +52,7 @@ export default function CoursesPage() {
     <PublicLayout>
       <Seo
         title="Cursos de música online"
-        description="Explora todos los cursos de Acorde Live: guitarra acústica y eléctrica, bajo, batería, piano, trompeta y producción musical."
+        description="Explora todos los cursos de Acorde Live: guitarra acústica y eléctrica, bajo, batería, piano y trompeta."
         path="/cursos"
         jsonLd={itemListJsonLd}
       />
@@ -60,7 +60,7 @@ export default function CoursesPage() {
         <header className="mb-10">
           <h1 className="text-4xl md:text-5xl font-black text-white mb-3">Cursos</h1>
           <p className="text-white/60 max-w-2xl">
-            Cursos guiados por maestros profesionales. Elige tu instrumento y empieza hoy.
+            Cursos guiados por maestros profesionales. Tu plan incluye un instrumento activo: elige el tuyo y empieza hoy.
           </p>
         </header>
 
@@ -71,7 +71,7 @@ export default function CoursesPage() {
           >
             Todos
           </button>
-          {INSTRUMENTS.map(i => (
+          {PUBLIC_INSTRUMENTS.map(i => (
             <button
               key={i.id}
               onClick={() => setFilter(i.id)}

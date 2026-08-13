@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { formatLocalTime, formatSchoolTime } from '@/lib/schedule';
 
 interface ClassCalendarProps {
   classes: UpcomingClass[];
@@ -171,11 +172,12 @@ export const ClassCalendar = ({ classes, isLoading }: ClassCalendarProps) => {
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
-                        {format(new Date(cls.scheduled_at), 'HH:mm')}
+                        {formatLocalTime(cls.scheduled_at)}
                       </span>
-                      {cls.duration_minutes && (
+                      {cls.duration_minutes ? (
                         <span>{cls.duration_minutes} min</span>
-                      )}
+                      ) : null}
+                      <span className="text-xs">({formatSchoolTime(cls.scheduled_at)} ET)</span>
                     </div>
                   </div>
                   {cls.isRegistered ? (

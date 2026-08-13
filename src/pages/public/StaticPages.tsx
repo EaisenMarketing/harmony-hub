@@ -25,7 +25,7 @@ export function AboutPage() {
       </p>
       <p>
         Ofrecemos formación en guitarra acústica y eléctrica, bajo, batería,
-        piano, trompeta y producción musical, combinando clases en vivo por Zoom
+        piano y trompeta, combinando clases en vivo por Zoom
         con contenido on-demand.
       </p>
       <p>
@@ -40,7 +40,7 @@ export function AboutPage() {
 export function FaqPage() {
   const faqs: [string, string][] = [
     ['¿Cómo funcionan las clases?', 'Combinamos clases en vivo por Zoom (semanales según el plan) con lecciones on-demand que puedes ver a tu ritmo.'],
-    ['¿Necesito tener un instrumento?', 'Sí. Necesitas tu instrumento y auriculares/altavoces. Para producción musical, una computadora con un DAW.'],
+    ['¿Necesito tener un instrumento?', 'Sí. Necesitas tu instrumento y auriculares/altavoces, además de una conexión estable para las clases en vivo por Zoom.'],
     ['¿Los pagos son seguros?', 'Sí, los pagos se procesan por un proveedor de pagos certificado. No almacenamos datos de tarjeta en nuestros servidores.'],
     ['¿Puedo cancelar cuando quiera?', 'Sí. Cancelas desde tu portal y conservas acceso hasta el final del periodo pagado. Ver Política de Cancelación.'],
     ['¿Los certificados son oficiales?', 'Emitimos un Certificado digital de finalización de Acorde Live. No es un título con validez oficial estatal.'],

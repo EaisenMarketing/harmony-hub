@@ -13,6 +13,10 @@ export const INSTRUMENTS = [
 
 export type InstrumentId = typeof INSTRUMENTS[number]['id'];
 
+// Instrumentos ofrecidos públicamente hoy (Producción Musical está pausada,
+// solo sigue disponible dentro del dashboard para cuentas existentes).
+export const PUBLIC_INSTRUMENTS = INSTRUMENTS.filter(i => i.id !== 'production');
+
 export const INSTRUMENT_LABEL: Record<string, string> = Object.fromEntries(
   INSTRUMENTS.map(i => [i.id, i.label])
 );

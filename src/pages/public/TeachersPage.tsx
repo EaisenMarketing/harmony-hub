@@ -33,7 +33,7 @@ export default function TeachersPage() {
     <PublicLayout>
       <Seo
         title="Maestros"
-        description="Conoce a los maestros profesionales de Acorde Live: guitarra, bajo, batería, piano, trompeta y producción musical."
+        description="Conoce a los maestros profesionales de Acorde Live: guitarra, bajo, batería, piano y trompeta."
         path="/maestros"
       />
       <div className="container mx-auto px-4 py-12">

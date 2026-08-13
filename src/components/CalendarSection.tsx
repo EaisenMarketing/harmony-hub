@@ -1,49 +1,44 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, Video, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollReveal } from '@/components/landing/ScrollReveal';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { instrumentLabel } from '@/lib/instruments';
+import { formatClassSchedule, SCHOOL_TIMEZONE_LABEL, userTimeZone } from '@/lib/schedule';
 
-const upcomingClasses = [
-  {
-    title: 'Guitarra: Acordes de Jazz',
-    instructor: 'Carlos Martínez',
-    date: 'Lun 15 Ene',
-    time: '7:00 PM',
-    timezone: 'CDMX',
-    level: 'Intermedio',
-    spots: 12,
-  },
-  {
-    title: 'Piano: Técnicas de Improvisación',
-    instructor: 'María González',
-    date: 'Mar 16 Ene',
-    time: '6:00 PM',
-    timezone: 'CDMX',
-    level: 'Avanzado',
-    spots: 8,
-  },
-  {
-    title: 'Guitarra: Blues para Principiantes',
-    instructor: 'Carlos Martínez',
-    date: 'Mié 17 Ene',
-    time: '8:00 PM',
-    timezone: 'CDMX',
-    level: 'Básico',
-    spots: 15,
-  },
-  {
-    title: 'Producción: Mezcla y Mastering',
-    instructor: 'Diego Ruiz',
-    date: 'Jue 18 Ene',
-    time: '5:00 PM',
-    timezone: 'CDMX',
-    level: 'Intermedio',
-    spots: 10,
-  },
-];
+interface PublicClass {
+  id: string;
+  title: string;
+  instrument: string | null;
+  scheduled_at: string;
+  duration_minutes: number | null;
+  max_attendees: number | null;
+}
 
 export function CalendarSection() {
+  const [classes, setClasses] = useState<PublicClass[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase
+      .from('live_classes')
+      .select('id,title,instrument,scheduled_at,duration_minutes,max_attendees')
+      .gte('scheduled_at', new Date().toISOString())
+      .order('scheduled_at', { ascending: true })
+      .limit(4)
+      .then(({ data }) => {
+        if (!mounted) return;
+        setClasses((data ?? []) as PublicClass[]);
+        setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <section id="calendario" className="py-24 bg-[hsl(222,47%,8%)] relative overflow-hidden">
       {/* Background effects */}
@@ -61,7 +56,8 @@ export function CalendarSection() {
               <span className="gradient-text">por Zoom</span>
             </h2>
             <p className="text-lg text-white/50">
-              Interactúa en tiempo real con instructores profesionales. Las grabaciones quedan disponibles después de cada sesión.
+              Los horarios se publican en hora de Estados Unidos ({SCHOOL_TIMEZONE_LABEL}) y se
+              convierten automáticamente a tu zona horaria.
             </p>
           </div>
         </ScrollReveal>
@@ -70,7 +66,7 @@ export function CalendarSection() {
         <div className="flex flex-wrap justify-center gap-6 mb-12">
           {[
             { icon: Video, text: 'Zoom integrado' },
-            { icon: Globe, text: 'Conversión de zona horaria' },
+            { icon: Globe, text: `Tu zona: ${userTimeZone()}` },
             { icon: Clock, text: 'Recordatorios automáticos' },
           ].map((item, i) => (
             <motion.div
@@ -84,61 +80,75 @@ export function CalendarSection() {
           ))}
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {upcomingClasses.map((classItem, index) => (
-            <ScrollReveal key={index} delay={index * 0.1}>
-              <motion.div
-                whileHover={{ y: -4 }}
-                className="group bg-white/[0.03] rounded-2xl border border-white/[0.06] p-6 hover:border-primary/30 hover:bg-white/[0.05] transition-all duration-300"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <span className="inline-block px-2 py-1 text-xs font-medium rounded-md bg-primary/10 text-primary mb-2">
-                      {classItem.level}
-                    </span>
-                    <h3 className="text-lg font-bold text-white">
-                      {classItem.title}
-                    </h3>
-                    <p className="text-sm text-white/40">
-                      con {classItem.instructor}
-                    </p>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {[0, 1].map(i => (
+              <div key={i} className="h-32 rounded-2xl bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+            ))}
+          </div>
+        ) : classes.length === 0 ? (
+          <ScrollReveal>
+            <div className="max-w-2xl mx-auto text-center rounded-2xl border border-white/[0.08] bg-white/[0.03] p-10">
+              <Calendar className="w-10 h-10 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-bold text-white mb-2">Muy pronto</h3>
+              <p className="text-white/50">
+                Estamos organizando el calendario de clases en vivo. En cuanto los maestros publiquen
+                sus horarios (hora de Estados Unidos), aparecerán aquí convertidos a tu hora local.
+              </p>
+            </div>
+          </ScrollReveal>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {classes.map((classItem, index) => (
+              <ScrollReveal key={classItem.id} delay={index * 0.1}>
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="group bg-white/[0.03] rounded-2xl border border-white/[0.06] p-6 hover:border-primary/30 hover:bg-white/[0.05] transition-all duration-300"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      {classItem.instrument && (
+                        <span className="inline-block px-2 py-1 text-xs font-medium rounded-md bg-primary/10 text-primary mb-2">
+                          {instrumentLabel(classItem.instrument)}
+                        </span>
+                      )}
+                      <h3 className="text-lg font-bold text-white">{classItem.title}</h3>
+                    </div>
+                    {classItem.max_attendees && (
+                      <div className="flex items-center gap-1 text-secondary">
+                        <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                        <span className="text-xs font-medium">{classItem.max_attendees} lugares</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1 text-secondary">
-                    <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                    <span className="text-xs font-medium">{classItem.spots} lugares</span>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2 text-white/40">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-sm">{classItem.date}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-white/40">
+                  <div className="flex items-center gap-2 mb-4 text-white/40">
                     <Clock className="w-4 h-4" />
-                    <span className="text-sm">{classItem.time} ({classItem.timezone})</span>
+                    <span className="text-sm">
+                      {formatClassSchedule(classItem.scheduled_at)}
+                      {classItem.duration_minutes ? ` · ${classItem.duration_minutes} min` : ''}
+                    </span>
                   </div>
-                </div>
 
-                <Link to="/auth">
-                  <Button variant="outline" size="sm" className="w-full opacity-0 group-hover:opacity-100 transition-opacity border-white/10 text-white/70 hover:text-white hover:bg-white/5">
-                    Reservar lugar
-                  </Button>
-                </Link>
-              </motion.div>
-            </ScrollReveal>
-          ))}
-        </div>
+                  <Link to="/empezar">
+                    <Button variant="outline" size="sm" className="w-full opacity-0 group-hover:opacity-100 transition-opacity border-white/10 text-white/70 hover:text-white hover:bg-white/5">
+                      Reservar lugar
+                    </Button>
+                  </Link>
+                </motion.div>
+              </ScrollReveal>
+            ))}
+          </div>
+        )}
 
         <div className="text-center mt-12">
-          <Link to="/auth">
+          <Link to="/clases-en-vivo">
             <Button variant="gradient" size="lg" className="group">
               Ver calendario completo
             </Button>
           </Link>
           <p className="text-sm text-white/40 mt-3">
-            Inicia sesión para ver todas las clases disponibles
+            Horarios en hora de Estados Unidos, convertidos a tu zona automáticamente
           </p>
         </div>
       </div>
