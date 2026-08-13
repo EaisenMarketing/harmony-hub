@@ -9,6 +9,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { GraduationCap, Send, CheckCircle2, Loader2, ArrowLeft } from 'lucide-react';
+import { PUBLIC_INSTRUMENTS } from '@/lib/instruments';
+import { TIMEZONES } from '@/lib/schedule';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import logo from '@/assets/logo.webp';
@@ -140,9 +142,9 @@ const TeacherApplicationPage = () => {
                     <Select value={form.instrument} onValueChange={(v) => update('instrument', v)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="guitar">Guitarra</SelectItem>
-                        <SelectItem value="piano">Piano</SelectItem>
-                        <SelectItem value="production">Producción Musical</SelectItem>
+                        {PUBLIC_INSTRUMENTS.map(i => (
+                          <SelectItem key={i.id} value={i.id}>{i.emoji} {i.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -159,12 +161,9 @@ const TeacherApplicationPage = () => {
                     <Select value={form.timezone} onValueChange={(v) => update('timezone', v)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="America/Mexico_City">CDMX (GMT-6)</SelectItem>
-                        <SelectItem value="America/Bogota">Bogotá (GMT-5)</SelectItem>
-                        <SelectItem value="America/Lima">Lima (GMT-5)</SelectItem>
-                        <SelectItem value="America/Santiago">Santiago (GMT-3)</SelectItem>
-                        <SelectItem value="America/Buenos_Aires">Buenos Aires (GMT-3)</SelectItem>
-                        <SelectItem value="Europe/Madrid">Madrid (GMT+1)</SelectItem>
+                        {TIMEZONES.map(tz => (
+                          <SelectItem key={tz.value} value={tz.value}>{tz.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

@@ -63,7 +63,7 @@ export function HeroSection() {
           <p 
             className="hero-fade hero-delay-3 text-lg md:text-xl text-white/60 mb-10 max-w-2xl leading-relaxed"
           >
-            Guitarra acústica y eléctrica, bajo, batería, piano, trompeta y producción musical.
+            Guitarra acústica y eléctrica, bajo, batería, piano y trompeta.
             Clases en vivo por Zoom, contenido on-demand y maestros profesionales.
           </p>
 
