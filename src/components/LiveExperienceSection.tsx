@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import liveClassImage from '@/assets/acorde-live-clase-en-vivo-2.png.asset.json';
 
 const points = [
   'Clases en vivo por Zoom con maestros profesionales',
@@ -20,9 +19,11 @@ export function LiveExperienceSection() {
           <div className="relative">
             <div className="absolute -inset-4 rounded-3xl gradient-bg opacity-20 blur-2xl" aria-hidden="true" />
             <img
-              src={liveClassImage.url}
+              src="https://res.cloudinary.com/dihmx5tvo/image/upload/f_auto,q_auto,w_1200/v1786599360/ChatGPT_Image_Aug_12_2026_10_34_46_PM.png"
               alt="Alumno de Acorde Live tomando una clase de guitarra en vivo por videollamada"
-              loading="lazy"
+              width={1200}
+              height={1200}
+              loading="eager"
               decoding="async"
               className="relative w-full rounded-2xl border border-white/10 shadow-2xl"
             />
