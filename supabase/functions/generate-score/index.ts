@@ -17,7 +17,7 @@ const CLEF_HINT: Record<string, string> = {
   guitar: 'Clave de sol. Rango cómodo E2–E5 (midi 40–76).',
   electric_guitar: 'Clave de sol. Rango cómodo E2–A5 (midi 40–81).',
   bass: 'Clave de fa. Rango E1–C4 (midi 28–60). Escribe líneas de bajo con groove.',
-  piano: 'Clave de sol. Rango C2–C6 (midi 36–84). Puedes usar acordes de 2 a 4 notas.',
+  piano: 'Gran pentagrama: clave de sol (mano derecha) y clave de fa (mano izquierda). Rango C2–C6 (midi 36–84). Escribe la melodía/acordes de la mano derecha con notas de c/4 en adelante y el acompañamiento de la mano izquierda con notas por debajo de c/4 (c/2–b/3) dentro de la MISMA nota, combinando ambas manos en el array "keys" (ej: ["c/3","e/4","g/4"]). Incluye siempre notas de mano izquierda.',
   trumpet: 'Clave de sol. Rango G3–A5 (midi 55–82). Frases respirables, no más de 4 compases seguidos.',
   drums: 'Notación percusiva: usa el campo "drums" con las piezas, nunca "keys".',
 };
