@@ -51,6 +51,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
   const [playingRef, setPlayingRef] = useState<NoteRef | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
+  const [aiYoutube, setAiYoutube] = useState('');
   const [aiMeasures, setAiMeasures] = useState(8);
   const [aiLevel, setAiLevel] = useState('principiante');
   const playRef = useRef<PlayHandle | null>(null);
