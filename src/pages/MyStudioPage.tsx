@@ -79,6 +79,18 @@ const MyStudioPage = () => {
           </div>
         </div>
 
+        <Card className="p-4 bg-gradient-to-br from-primary/15 to-transparent border-white/10 space-y-2">
+          <h2 className="text-sm font-semibold text-foreground">Tu acceso está activo</h2>
+          <p className="text-xs text-muted-foreground">
+            Tu maestro cubre tu acceso a Acorde Live: cursos, herramientas de Acorde AI, metrónomo,
+            entrenador de oído y seguimiento de tu progreso.
+          </p>
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/portal">Abrir mis herramientas</Link>
+          </Button>
+        </Card>
+
+
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <CalendarClock className="w-4 h-4 text-primary" />
