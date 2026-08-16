@@ -9,6 +9,7 @@ const footerLinks = {
     { label: 'Clases en Vivo', to: '/clases-en-vivo' },
     { label: 'Precios', to: '/precios' },
     { label: 'Maestros', to: '/maestros' },
+    { label: 'Software para maestros', to: '/maestros/planes' },
   ],
   support: [
     { label: 'Preguntas frecuentes', to: '/preguntas-frecuentes' },
