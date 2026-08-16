@@ -11,7 +11,6 @@ import { Mail, Lock, User, Loader2, Music } from 'lucide-react';
 import logo from '@/assets/logo.webp';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import { lovable } from '@/integrations/lovable';
 import {
   resolveDestination,
   savePendingInstrument,
@@ -207,13 +206,16 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    const result = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
-    if (result.error) {
+    if (error) {
       toast({
         title: 'Error',
-        description: 'No se pudo iniciar sesión con Google',
+        description: error.message || 'No se pudo iniciar sesión con Google',
         variant: 'destructive',
       });
       setIsLoading(false);
