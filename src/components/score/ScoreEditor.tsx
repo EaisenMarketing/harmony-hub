@@ -132,7 +132,6 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
     insertNote({ keys: [key], tab: [tab] });
   const onToggleDrum = (p: DrumPiece) => insertNote({ keys: [], drums: [p] });
 
-  useMidiInput; // referencia para el linter en modo estricto
   const midi = useMidiInput((key) => onPickKey(key));
   const pitch = usePitchInput((key) => onPickKey(key));
 
