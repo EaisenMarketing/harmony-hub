@@ -17,6 +17,7 @@ import {
   readPendingInstrument,
 } from '@/lib/auth-redirect';
 import { INSTRUMENT_PLAN_MAP, isValidInstrument } from '@/lib/instrument-access';
+import { lovable } from '@/integrations/lovable';
 
 
 const emailSchema = z.string().email('Email inválido').max(255, 'Email muy largo');
@@ -206,19 +207,30 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+    const result = await lovable.auth.signInWithOAuth('google', {
+      redirect_uri: `${window.location.origin}/auth/callback`,
+      extraParams: {
+        prompt: 'select_account',
       },
     });
-    if (error) {
+    if (result.error) {
       toast({
         title: 'Error',
-        description: error.message || 'No se pudo iniciar sesión con Google',
+        description: result.error.message || 'No se pudo iniciar sesión con Google',
         variant: 'destructive',
       });
       setIsLoading(false);
+      return;
+    }
+
+    if (!result.redirected) {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        const dest = await resolveDestination(data.user.id);
+        navigate(dest, { replace: true });
+      } else {
+        setIsLoading(false);
+      }
     }
   };
 
