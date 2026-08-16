@@ -163,7 +163,10 @@ Reglas estrictas:
     if (!cleanMeasures.length) return json({ error: 'La IA no devolvió compases válidos.' }, 502);
 
     const doc = {
-      title: typeof parsed.title === 'string' && parsed.title ? String(parsed.title).slice(0, 120) : prompt.slice(0, 60),
+      title: typeof parsed.title === 'string' && parsed.title
+        ? String(parsed.title).slice(0, 120)
+        : (ytTitle ? ytTitle.slice(0, 120) : prompt.slice(0, 60)),
+
       instrument,
       key_signature: keySig,
       time_signature: timeSig,
