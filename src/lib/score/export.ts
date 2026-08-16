@@ -136,7 +136,7 @@ export async function exportPng(svg: SVGSVGElement, doc: ScoreDoc) {
 
 export async function exportPdf(svg: SVGSVGElement, doc: ScoreDoc) {
   const { dataUrl, width, height } = await svgToPng(svg, 2);
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter', compress: true });
   const pageW = pdf.internal.pageSize.getWidth();
   const margin = 40;
   const maxW = pageW - margin * 2;
@@ -151,7 +151,7 @@ export async function exportPdf(svg: SVGSVGElement, doc: ScoreDoc) {
     margin, 68,
   );
   pdf.setTextColor(0);
-  pdf.addImage(dataUrl, 'PNG', margin, 86, maxW, maxW * ratio);
+  pdf.addImage(dataUrl, 'PNG', margin, 86, maxW, maxW * ratio, undefined, 'FAST');
   if (doc.description) {
     pdf.setFontSize(10);
     pdf.text(pdf.splitTextToSize(doc.description, maxW), margin, 86 + maxW * ratio + 26);
