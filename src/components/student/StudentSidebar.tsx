@@ -13,7 +13,8 @@ import {
   Music,
   MessageCircleQuestion,
   Users,
-  TrendingUp
+  TrendingUp,
+  FileMusic
 } from 'lucide-react';
 import logo from '@/assets/logo.webp';
 import { cn } from '@/lib/utils';
