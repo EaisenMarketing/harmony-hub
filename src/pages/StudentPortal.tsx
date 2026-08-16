@@ -18,6 +18,7 @@ import { ProductionDashboard } from '@/components/student/ProductionDashboard';
 import { ProgressPanel } from '@/components/student/ProgressPanel';
 import { ContinueWatchingButton } from '@/components/student/ContinueWatchingButton';
 import { PracticeSection } from '@/components/student/PracticeSection';
+import { ScoresSection } from '@/components/student/ScoresSection';
 import { TeacherConsultSection } from '@/components/student/TeacherConsultSection';
 import { CommunitySection } from '@/components/student/CommunitySection';
 import { ChordGeneratorModal } from '@/components/student/ChordGeneratorModal';
@@ -98,6 +99,8 @@ const StudentPortal = () => {
         return <CoursesSection />;
       case '/portal/practica':
         return <PracticeSection />;
+      case '/portal/partituras':
+        return <ScoresSection />;
       case '/portal/consultas':
         return <TeacherConsultSection />;
       case '/portal/comunidad':

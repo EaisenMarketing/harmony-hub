@@ -4,6 +4,10 @@
 
 @layer base {
   :root {
+    /* Partituras (papel claro siempre, para legibilidad musical) */
+    --score-paper: 40 30% 97%;
+    --score-ink: 222 47% 11%;
+
     /* Primary - Indigo */
     --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
