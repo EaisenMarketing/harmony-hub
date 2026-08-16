@@ -63,6 +63,16 @@ export const resolveDestination = async (userId: string): Promise<string> => {
   if (list.includes('admin')) return '/admin';
   if (list.includes('instructor')) return '/instructor';
 
+  // Sin membresía real (prueba/suscripción/estudio) el alumno NO entra al portal.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: entData, error: entError } = await (supabase as any).rpc(
+    'current_entitlement',
+    { _user_id: userId },
+  );
+  const ent = Array.isArray(entData) ? entData[0] : entData;
+  const status = ent?.status as string | undefined;
+  if (entError || !status || status === 'inactive') return '/empezar';
+
   // Try to apply any pending instrument selection from the auth flow
   const instrument = await applyPendingInstrument(userId);
   if (instrument === 'production') return '/portal/produccion';
