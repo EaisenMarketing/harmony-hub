@@ -14,6 +14,7 @@ import { StudioAnnouncements } from '@/components/studio/StudioAnnouncements';
 import { StudioTools } from '@/components/studio/StudioTools';
 import { StudioSettings } from '@/components/studio/StudioSettings';
 import { StudioBillingBanner } from '@/components/studio/StudioBillingBanner';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -88,17 +89,21 @@ const StudioPanel = () => {
             <div className="p-2 rounded-lg bg-primary/15">
               <Music className="w-5 h-5 text-primary" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1 className="text-base font-bold text-white truncate">{title}</h1>
               <p className="text-[11px] text-white/60 truncate">{account.studio_name}</p>
             </div>
+            <NotificationBell className="text-white shrink-0" />
           </div>
         </header>
 
         <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-6">
-          <header className="hidden md:block">
-            <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-            <p className="text-muted-foreground text-sm">{account.studio_name}</p>
+          <header className="hidden md:flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+              <p className="text-muted-foreground text-sm">{account.studio_name}</p>
+            </div>
+            <NotificationBell />
           </header>
           <StudioBillingBanner account={account} />
           {content()}
