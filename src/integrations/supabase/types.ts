@@ -1933,6 +1933,124 @@ export type Database = {
         }
         Relationships: []
       }
+      score_assignments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          due_at: string | null
+          id: string
+          instructions: string | null
+          score_id: string
+          status: string
+          student_notes: string | null
+          student_user_id: string | null
+          teacher_account_id: string
+          teacher_student_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          score_id: string
+          status?: string
+          student_notes?: string | null
+          student_user_id?: string | null
+          teacher_account_id: string
+          teacher_student_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          instructions?: string | null
+          score_id?: string
+          status?: string
+          student_notes?: string | null
+          student_user_id?: string | null
+          teacher_account_id?: string
+          teacher_student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "score_assignments_score_id_fkey"
+            columns: ["score_id"]
+            isOneToOne: false
+            referencedRelation: "scores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "score_assignments_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "score_assignments_teacher_student_id_fkey"
+            columns: ["teacher_student_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scores: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          id: string
+          instrument: string
+          is_public: boolean
+          key_signature: string
+          level: string | null
+          share_code: string
+          tempo: number
+          time_signature: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string
+          is_public?: boolean
+          key_signature?: string
+          level?: string | null
+          share_code?: string
+          tempo?: number
+          time_signature?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          instrument?: string
+          is_public?: boolean
+          key_signature?: string
+          level?: string | null
+          share_code?: string
+          tempo?: number
+          time_signature?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       song_corrections: {
         Row: {
           corrected_analysis: Json
