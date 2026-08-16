@@ -17,7 +17,7 @@ const CLEF_HINT: Record<string, string> = {
   guitar: 'Clave de sol. Rango cómodo E2–E5 (midi 40–76).',
   electric_guitar: 'Clave de sol. Rango cómodo E2–A5 (midi 40–81).',
   bass: 'Clave de fa. Rango E1–C4 (midi 28–60). Escribe líneas de bajo con groove.',
-  piano: 'Clave de sol. Rango C2–C6 (midi 36–84). Puedes usar acordes de 2 a 4 notas.',
+  piano: 'Gran pentagrama: clave de sol (mano derecha) y clave de fa (mano izquierda). Rango C2–C6 (midi 36–84). Escribe la melodía/acordes de la mano derecha con notas de c/4 en adelante y el acompañamiento de la mano izquierda con notas por debajo de c/4 (c/2–b/3) dentro de la MISMA nota, combinando ambas manos en el array "keys" (ej: ["c/3","e/4","g/4"]). Incluye siempre notas de mano izquierda.',
   trumpet: 'Clave de sol. Rango G3–A5 (midi 55–82). Frases respirables, no más de 4 compases seguidos.',
   drums: 'Notación percusiva: usa el campo "drums" con las piezas, nunca "keys".',
 };
@@ -38,7 +38,8 @@ serve(async (req) => {
     if (!user) return json({ error: 'Unauthorized' }, 401);
 
     const body = await req.json().catch(() => ({}));
-    const prompt = typeof body.prompt === 'string' ? body.prompt.trim().slice(0, 1200) : '';
+    let prompt = typeof body.prompt === 'string' ? body.prompt.trim().slice(0, 1200) : '';
+    const youtubeUrl = typeof body.youtubeUrl === 'string' ? body.youtubeUrl.trim().slice(0, 300) : '';
     const instrument = INSTRUMENTS.includes(body.instrument) ? body.instrument : 'guitar';
     const level = typeof body.level === 'string' ? body.level.slice(0, 40) : 'principiante';
     const measures = Math.min(16, Math.max(2, Number(body.measures) || 8));
@@ -46,7 +47,31 @@ serve(async (req) => {
     const timeSig = typeof body.time === 'string' ? body.time.slice(0, 5) : '4/4';
     const tempo = Math.min(240, Math.max(40, Number(body.tempo) || 90));
 
+    // --------- YouTube: obtener título/autor del video para arreglar la canción
+    let ytTitle = '';
+    if (youtubeUrl) {
+      const idMatch = youtubeUrl.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);
+      if (!idMatch) return json({ error: 'El link de YouTube no es válido.' }, 400);
+      const videoId = idMatch[1];
+      try {
+        const oe = await fetch(
+          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
+        );
+        if (oe.ok) {
+          const meta = await oe.json();
+          ytTitle = `${meta?.title ?? ''} — ${meta?.author_name ?? ''}`.trim();
+        }
+      } catch (e) {
+        console.error('oembed error', e);
+      }
+      if (!ytTitle) return json({ error: 'No se pudo leer el video de YouTube. Verifica el link.' }, 400);
+      prompt = `Transcribe y arregla la canción del video de YouTube "${ytTitle}" para ${instrument}. ` +
+        `Usa la progresión y melodía principal reconocibles del tema (estribillo o riff principal). ` +
+        (prompt ? `Indicaciones extra del alumno: ${prompt}` : '');
+    }
+
     if (!prompt) return json({ error: 'Describe qué partitura quieres generar.' }, 400);
+
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) return json({ error: 'AI no configurada' }, 500);
@@ -138,7 +163,10 @@ Reglas estrictas:
     if (!cleanMeasures.length) return json({ error: 'La IA no devolvió compases válidos.' }, 502);
 
     const doc = {
-      title: typeof parsed.title === 'string' && parsed.title ? String(parsed.title).slice(0, 120) : prompt.slice(0, 60),
+      title: typeof parsed.title === 'string' && parsed.title
+        ? String(parsed.title).slice(0, 120)
+        : (ytTitle ? ytTitle.slice(0, 120) : prompt.slice(0, 60)),
+
       instrument,
       key_signature: keySig,
       time_signature: timeSig,

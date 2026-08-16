@@ -51,6 +51,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
   const [playingRef, setPlayingRef] = useState<NoteRef | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
+  const [aiYoutube, setAiYoutube] = useState('');
   const [aiMeasures, setAiMeasures] = useState(8);
   const [aiLevel, setAiLevel] = useState('principiante');
   const playRef = useRef<PlayHandle | null>(null);
@@ -207,6 +208,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
   const runAi = async () => {
     const res = await generate.mutateAsync({
       prompt: aiPrompt,
+      youtubeUrl: aiYoutube.trim() || undefined,
       instrument: doc.instrument,
       level: aiLevel,
       measures: aiMeasures,
@@ -320,16 +322,30 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
               <DialogHeader>
                 <DialogTitle>Generar partitura con IA</DialogTitle>
                 <DialogDescription>
-                  Describe lo que necesitas: acordes, estilo, ejercicio o una canción.
+                  Pega un link de YouTube o describe lo que necesitas: acordes, estilo, ejercicio o una canción.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3">
-                <Textarea
-                  rows={4}
-                  placeholder="Ej: progresión C–G–Am–F con arpegios sencillos, o un groove de rock lento"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                />
+                <div>
+                  <Label className="text-xs">Link de YouTube (opcional)</Label>
+                  <Input
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={aiYoutube}
+                    onChange={(e) => setAiYoutube(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">
+                    {aiYoutube.trim() ? 'Indicaciones extra (opcional)' : 'Descripción'}
+                  </Label>
+                  <Textarea
+                    rows={4}
+                    placeholder="Ej: progresión C–G–Am–F con arpegios sencillos, o un groove de rock lento"
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs">Compases</Label>
@@ -350,7 +366,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={runAi} disabled={generate.isPending || !aiPrompt.trim()} className="gap-2">
+                <Button onClick={runAi} disabled={generate.isPending || (!aiPrompt.trim() && !aiYoutube.trim())} className="gap-2">
                   {generate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   Generar
                 </Button>
