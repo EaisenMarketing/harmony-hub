@@ -85,6 +85,19 @@ const App = () => (
         <Route path="/recuperar-password" element={S('RecoverAlias')} />
         <Route path="/ser-maestro" element={S('TeacherAlias')} />
 
+        {/* Alias de acceso/registro con email (evitan 404) */}
+        <Route path="/auth/callback" element={<WithAuth><AuthCallback /></WithAuth>} />
+        {["/signin","/sign-in","/log-in","/acceso","/entrar","/ingresar","/iniciar-sesion","/sesion","/auth/login","/auth/sign-in"].map((p) => (
+          <Route key={p} path={p} element={S('LoginAlias')} />
+        ))}
+        {["/signup","/sign-up","/register","/registrarse","/crear-cuenta","/registro-email","/auth/signup","/auth/register","/auth/sign-up"].map((p) => (
+          <Route key={p} path={p} element={S('RegisterAlias')} />
+        ))}
+        <Route path="/forgot-password" element={S('RecoverAlias')} />
+        <Route path="/recuperar" element={S('RecoverAlias')} />
+        <Route path="/auth/*" element={<WithAuth><Auth /></WithAuth>} />
+
+
         {/* Rutas privadas existentes */}
         <Route path="/empezar" element={<WithAuth><Onboarding /></WithAuth>} />
         <Route path="/auth" element={<WithAuth><Auth /></WithAuth>} />
