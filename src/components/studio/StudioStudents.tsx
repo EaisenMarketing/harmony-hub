@@ -25,7 +25,8 @@ import {
   useStudioStudentProgress,
   type TeacherAccount,
   type StudioStudent,
-, studioErrorMessage } from '@/hooks/useTeacherStudio';
+  studioErrorMessage,
+} from '@/hooks/useTeacherStudio';
 
 const emptyForm = { full_name: '', email: '', phone: '', instrument: '', level: 'beginner', notes: '' };
 
