@@ -8,10 +8,13 @@ import { Copy } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { INSTRUMENT_PLANS } from '@/lib/instrument-access';
 import { TEACHER_PLANS, TEACHER_PLAN_MAP, studioInviteUrl } from '@/lib/teacher-plans';
-import { useUpdateTeacherAccount, type TeacherAccount } from '@/hooks/useTeacherStudio';
+import { useUpdateTeacherAccount, useStudioStatus, type TeacherAccount } from '@/hooks/useTeacherStudio';
+import { TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
+import { Badge } from '@/components/ui/badge';
 
 export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
   const update = useUpdateTeacherAccount();
+  const { data: status } = useStudioStatus(account.id);
   const [form, setForm] = useState({
     studio_name: account.studio_name,
     primary_instrument: account.primary_instrument ?? '',
@@ -104,7 +107,20 @@ export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
       </Card>
 
       <Card className="p-4 bg-card/70 border-white/10 space-y-3">
-        <h3 className="font-semibold text-foreground text-sm">Plan de suscripción</h3>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <h3 className="font-semibold text-foreground text-sm">Plan de suscripción</h3>
+          {status && (
+            <div className="flex items-center gap-2">
+              <Badge variant={status.is_active ? 'secondary' : 'destructive'}>
+                {TEACHER_STATUS_LABEL[status.status] ?? status.status}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {status.seats_used}/{status.seat_limit} cupos
+                {status.days_left !== null ? ` · ${status.days_left} día(s)` : ''}
+              </span>
+            </div>
+          )}
+        </div>
         <div className="grid gap-2 sm:grid-cols-3">
           {TEACHER_PLANS.map((p) => (
             <button
