@@ -38,7 +38,8 @@ serve(async (req) => {
     if (!user) return json({ error: 'Unauthorized' }, 401);
 
     const body = await req.json().catch(() => ({}));
-    const prompt = typeof body.prompt === 'string' ? body.prompt.trim().slice(0, 1200) : '';
+    let prompt = typeof body.prompt === 'string' ? body.prompt.trim().slice(0, 1200) : '';
+    const youtubeUrl = typeof body.youtubeUrl === 'string' ? body.youtubeUrl.trim().slice(0, 300) : '';
     const instrument = INSTRUMENTS.includes(body.instrument) ? body.instrument : 'guitar';
     const level = typeof body.level === 'string' ? body.level.slice(0, 40) : 'principiante';
     const measures = Math.min(16, Math.max(2, Number(body.measures) || 8));
@@ -46,7 +47,31 @@ serve(async (req) => {
     const timeSig = typeof body.time === 'string' ? body.time.slice(0, 5) : '4/4';
     const tempo = Math.min(240, Math.max(40, Number(body.tempo) || 90));
 
+    // --------- YouTube: obtener título/autor del video para arreglar la canción
+    let ytTitle = '';
+    if (youtubeUrl) {
+      const idMatch = youtubeUrl.match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);
+      if (!idMatch) return json({ error: 'El link de YouTube no es válido.' }, 400);
+      const videoId = idMatch[1];
+      try {
+        const oe = await fetch(
+          `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
+        );
+        if (oe.ok) {
+          const meta = await oe.json();
+          ytTitle = `${meta?.title ?? ''} — ${meta?.author_name ?? ''}`.trim();
+        }
+      } catch (e) {
+        console.error('oembed error', e);
+      }
+      if (!ytTitle) return json({ error: 'No se pudo leer el video de YouTube. Verifica el link.' }, 400);
+      prompt = `Transcribe y arregla la canción del video de YouTube "${ytTitle}" para ${instrument}. ` +
+        `Usa la progresión y melodía principal reconocibles del tema (estribillo o riff principal). ` +
+        (prompt ? `Indicaciones extra del alumno: ${prompt}` : '');
+    }
+
     if (!prompt) return json({ error: 'Describe qué partitura quieres generar.' }, 400);
+
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) return json({ error: 'AI no configurada' }, 500);
