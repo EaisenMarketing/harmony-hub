@@ -15,6 +15,7 @@ const StudioPanel = lazy(() => import("./pages/StudioPanel"));
 const StudioInvitePage = lazy(() => import("./pages/public/StudioInvitePage"));
 const StudioPlansPage = lazy(() => import("./pages/public/StudioPlansPage"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthProvider = lazy(() => import("@/contexts/AuthContext").then(m => ({ default: m.AuthProvider })));
 const DataProvider = lazy(() => import("@/components/app/DataProvider"));
