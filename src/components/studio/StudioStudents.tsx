@@ -25,7 +25,7 @@ import {
   useStudioStudentProgress,
   type TeacherAccount,
   type StudioStudent,
-} from '@/hooks/useTeacherStudio';
+, studioErrorMessage } from '@/hooks/useTeacherStudio';
 
 const emptyForm = { full_name: '', email: '', phone: '', instrument: '', level: 'beginner', notes: '' };
 
@@ -141,7 +141,7 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
     } catch (e) {
       toast({
         title: 'No se pudo guardar',
-        description: e instanceof Error ? e.message : 'Intenta de nuevo.',
+        description: studioErrorMessage(e),
         variant: 'destructive',
       });
     }
