@@ -131,7 +131,7 @@ export async function exportPng(svg: SVGSVGElement, doc: ScoreDoc) {
   const bin = atob(dataUrl.split(',')[1]);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  download(new Blob([bytes], { type: 'image/png' }), `${safeName(doc.title)}.png`);
+  download(new Blob([bytes.buffer as ArrayBuffer], { type: 'image/png' }), `${safeName(doc.title)}.png`);
 }
 
 export async function exportPdf(svg: SVGSVGElement, doc: ScoreDoc) {
