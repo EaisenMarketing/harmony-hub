@@ -366,7 +366,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={runAi} disabled={generate.isPending || !aiPrompt.trim()} className="gap-2">
+                <Button onClick={runAi} disabled={generate.isPending || (!aiPrompt.trim() && !aiYoutube.trim())} className="gap-2">
                   {generate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                   Generar
                 </Button>
