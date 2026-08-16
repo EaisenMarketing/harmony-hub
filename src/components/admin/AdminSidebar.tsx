@@ -35,6 +35,7 @@ const navigation = [
   { name: 'Maestros B2B', href: '/admin/maestros-b2b', icon: GraduationCap },
   { name: 'Uso por Maestro', href: '/admin/uso-maestros', icon: Activity },
   { name: 'Suscripciones', href: '/admin/suscripciones', icon: Activity },
+  { name: 'Notificaciones', href: '/admin/notificaciones', icon: Bell },
 
   { name: 'Estadísticas', href: '/admin/estadisticas', icon: BarChart3 },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },

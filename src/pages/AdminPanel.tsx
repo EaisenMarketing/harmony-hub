@@ -19,6 +19,7 @@ import { CrmDashboard } from '@/components/admin/CrmDashboard';
 import { TeacherAccountsManagement } from '@/components/admin/TeacherAccountsManagement';
 import { TeacherUsageDashboard } from '@/components/admin/TeacherUsageDashboard';
 import { SubscriptionsDashboard } from '@/components/admin/SubscriptionsDashboard';
+import { NotificationBroadcast } from '@/components/admin/NotificationBroadcast';
 
 import { LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -90,6 +91,9 @@ const AdminPanel = () => {
 
     if (currentPath === '/admin/materiales') {
       return <FreeMaterialsManagement />;
+    }
+    if (currentPath === '/admin/notificaciones') {
+      return <NotificationBroadcast />;
     }
     if (currentPath === '/admin/estadisticas') {
       return (
