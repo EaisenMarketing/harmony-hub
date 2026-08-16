@@ -11,6 +11,7 @@ import { InstructorClasses } from '@/components/instructor/InstructorClasses';
 import { InstructorPendingApproval } from '@/components/instructor/InstructorPendingApproval';
 import { InstructorQuestionsInbox } from '@/components/instructor/InstructorQuestionsInbox';
 import { Music } from 'lucide-react';
+import { instrumentLabel } from '@/lib/instruments';
 
 const InstructorPanel = () => {
   const { user, loading: authLoading } = useAuth();
@@ -91,9 +92,7 @@ const InstructorPanel = () => {
                 {getPageTitle()}
               </h1>
               <p className="text-[11px] text-white/60 truncate">
-                Instructor de {profile.instrument === 'guitar' ? 'Guitarra' :
-                  profile.instrument === 'piano' ? 'Piano' :
-                  profile.instrument === 'drums' ? 'Batería' : profile.instrument}
+                Instructor de {instrumentLabel(profile.instrument)}
               </p>
             </div>
           </div>
@@ -110,9 +109,7 @@ const InstructorPanel = () => {
                 {getPageTitle()}
               </h1>
               <p className="text-muted-foreground text-sm">
-                Instructor de {profile.instrument === 'guitar' ? 'Guitarra' :
-                  profile.instrument === 'piano' ? 'Piano' :
-                  profile.instrument === 'drums' ? 'Batería' : profile.instrument}
+                Instructor de {instrumentLabel(profile.instrument)}
               </p>
             </div>
           </header>
