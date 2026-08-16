@@ -2974,6 +2974,17 @@ export type Database = {
           trial_ends_at: string
         }[]
       }
+      studio_status: {
+        Args: { _account_id: string }
+        Returns: {
+          days_left: number
+          is_active: boolean
+          plan: string
+          seat_limit: number
+          seats_used: number
+          status: string
+        }[]
+      }
       teacher_seats_used: { Args: { _account_id: string }; Returns: number }
       verify_certificate: {
         Args: { _code: string }
