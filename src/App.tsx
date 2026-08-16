@@ -15,6 +15,7 @@ const StudioPanel = lazy(() => import("./pages/StudioPanel"));
 const StudioInvitePage = lazy(() => import("./pages/public/StudioInvitePage"));
 const StudioPlansPage = lazy(() => import("./pages/public/StudioPlansPage"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthProvider = lazy(() => import("@/contexts/AuthContext").then(m => ({ default: m.AuthProvider })));
 const DataProvider = lazy(() => import("@/components/app/DataProvider"));
@@ -83,6 +84,19 @@ const App = () => (
         <Route path="/registro" element={S('RegisterAlias')} />
         <Route path="/recuperar-password" element={S('RecoverAlias')} />
         <Route path="/ser-maestro" element={S('TeacherAlias')} />
+
+        {/* Alias de acceso/registro con email (evitan 404) */}
+        <Route path="/auth/callback" element={<WithAuth><AuthCallback /></WithAuth>} />
+        {["/signin","/sign-in","/log-in","/acceso","/entrar","/ingresar","/iniciar-sesion","/sesion","/auth/login","/auth/sign-in"].map((p) => (
+          <Route key={p} path={p} element={S('LoginAlias')} />
+        ))}
+        {["/signup","/sign-up","/register","/registrarse","/crear-cuenta","/registro-email","/auth/signup","/auth/register","/auth/sign-up"].map((p) => (
+          <Route key={p} path={p} element={S('RegisterAlias')} />
+        ))}
+        <Route path="/forgot-password" element={S('RecoverAlias')} />
+        <Route path="/recuperar" element={S('RecoverAlias')} />
+        <Route path="/auth/*" element={<WithAuth><Auth /></WithAuth>} />
+
 
         {/* Rutas privadas existentes */}
         <Route path="/empezar" element={<WithAuth><Onboarding /></WithAuth>} />
