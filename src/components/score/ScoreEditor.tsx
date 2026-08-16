@@ -322,16 +322,30 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
               <DialogHeader>
                 <DialogTitle>Generar partitura con IA</DialogTitle>
                 <DialogDescription>
-                  Describe lo que necesitas: acordes, estilo, ejercicio o una canción.
+                  Pega un link de YouTube o describe lo que necesitas: acordes, estilo, ejercicio o una canción.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3">
-                <Textarea
-                  rows={4}
-                  placeholder="Ej: progresión C–G–Am–F con arpegios sencillos, o un groove de rock lento"
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                />
+                <div>
+                  <Label className="text-xs">Link de YouTube (opcional)</Label>
+                  <Input
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={aiYoutube}
+                    onChange={(e) => setAiYoutube(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">
+                    {aiYoutube.trim() ? 'Indicaciones extra (opcional)' : 'Descripción'}
+                  </Label>
+                  <Textarea
+                    rows={4}
+                    placeholder="Ej: progresión C–G–Am–F con arpegios sencillos, o un groove de rock lento"
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs">Compases</Label>
