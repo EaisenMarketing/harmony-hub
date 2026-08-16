@@ -89,6 +89,14 @@ export default function OnboardingPage() {
     if (ent?.level_key && !level) setLevel(ent.level_key);
   }, [ent, instrument, level]);
 
+  // Candado: no se puede llegar a los pasos posteriores al pago sin sesión
+  // y sin una membresía real (prueba activa / suscripción / estudio).
+  useEffect(() => {
+    if (step >= 3 && !user) setStep(2);
+    const hasMembership = !!ent && (ent.status === 'trialing' || ent.status === 'active' || ent.is_admin);
+    if (step >= 4 && !hasMembership) setStep(3);
+  }, [step, user, ent]);
+
   const progress = useMemo(() => (step / TOTAL_STEPS) * 100, [step]);
 
   const handleAccount = async () => {
@@ -134,6 +142,10 @@ export default function OnboardingPage() {
       }
     }
     setBusy(false);
+    // Nunca conservamos los datos completos de la tarjeta en memoria.
+    setCardNumber('');
+    setCardCvc('');
+    setCardExp('');
     setStep(4);
   };
 

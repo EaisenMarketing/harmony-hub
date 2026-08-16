@@ -19,6 +19,7 @@ const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const AuthProvider = lazy(() => import("@/contexts/AuthContext").then(m => ({ default: m.AuthProvider })));
 const DataProvider = lazy(() => import("@/components/app/DataProvider"));
+const RequireMembership = lazy(() => import("@/components/auth/RequireMembership"));
 
 // Public pages
 const CoursesPage = lazy(() => import("./pages/public/CoursesPage"));
@@ -102,10 +103,10 @@ const App = () => (
         <Route path="/empezar" element={<WithAuth><Onboarding /></WithAuth>} />
         <Route path="/auth" element={<WithAuth><Auth /></WithAuth>} />
         <Route path="/reset-password" element={<WithAuth><ResetPassword /></WithAuth>} />
-        <Route path="/portal" element={<WithAuth><StudentPortal /></WithAuth>} />
-        <Route path="/portal/curso/:courseId" element={<WithAuth><CourseViewer /></WithAuth>} />
-        <Route path="/portal/curso/:courseId/leccion/:lessonId" element={<WithAuth><CourseViewer /></WithAuth>} />
-        <Route path="/portal/*" element={<WithAuth><StudentPortal /></WithAuth>} />
+        <Route path="/portal" element={<WithAuth><RequireMembership><StudentPortal /></RequireMembership></WithAuth>} />
+        <Route path="/portal/curso/:courseId" element={<WithAuth><RequireMembership><CourseViewer /></RequireMembership></WithAuth>} />
+        <Route path="/portal/curso/:courseId/leccion/:lessonId" element={<WithAuth><RequireMembership><CourseViewer /></RequireMembership></WithAuth>} />
+        <Route path="/portal/*" element={<WithAuth><RequireMembership><StudentPortal /></RequireMembership></WithAuth>} />
         <Route path="/admin" element={<WithAuth><AdminPanel /></WithAuth>} />
         <Route path="/admin/*" element={<WithAuth><AdminPanel /></WithAuth>} />
         <Route path="/instructor" element={<WithAuth><InstructorPanel /></WithAuth>} />
