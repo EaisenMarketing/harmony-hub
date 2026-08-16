@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { FileMusic } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { PracticeCoachModal } from '@/components/student/PracticeCoachModal';
 import { EarTrainerModal } from '@/components/student/EarTrainerModal';
