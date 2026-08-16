@@ -2884,6 +2884,15 @@ export type Database = {
     }
     Functions: {
       active_instrument: { Args: { _user_id: string }; Returns: string }
+      broadcast_notification: {
+        Args: {
+          _body?: string
+          _instrument?: string
+          _link?: string
+          _title: string
+        }
+        Returns: number
+      }
       can_access_instrument: {
         Args: { _instrument: string; _user_id: string }
         Returns: boolean
@@ -2955,9 +2964,20 @@ export type Database = {
           ok: boolean
         }[]
       }
+      mark_notifications_read: { Args: { _ids?: string[] }; Returns: number }
       my_studio_account_id: { Args: never; Returns: string }
       my_teacher_account_id: { Args: never; Returns: string }
       owns_teacher_account: { Args: { _account_id: string }; Returns: boolean }
+      push_notification: {
+        Args: {
+          _body?: string
+          _link?: string
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: string
+      }
       set_active_instrument: {
         Args: { _instrument: string; _level?: string }
         Returns: {
