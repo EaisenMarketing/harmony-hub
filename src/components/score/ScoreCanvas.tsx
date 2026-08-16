@@ -87,6 +87,20 @@ export const ScoreCanvas = ({
       }
       stave.setContext(ctx).draw();
 
+      // Piano: segundo pentagrama en clave de fa para la mano izquierda
+      let bassStave: Stave | null = null;
+      if (cfg.grandStaff) {
+        bassStave = new Stave(x, y + 100, w);
+        if (isFirstOfRow) {
+          bassStave.addClef('bass');
+          if (mi === 0) {
+            bassStave.addTimeSignature(doc.time_signature);
+            bassStave.addKeySignature(doc.key_signature.replace(/m$/, 'm'));
+          }
+        }
+        bassStave.setContext(ctx).draw();
+      }
+
       let tabStave: TabStave | null = null;
       if (cfg.tuning) {
         tabStave = new TabStave(x, y + 96, w, { numLines: cfg.tuning.length });
@@ -99,28 +113,52 @@ export const ScoreCanvas = ({
       // ---- construir notas
       const source: ScoreMeasure = m.notes.length ? m : { notes: [{ keys: [restKey(cfg.clef)], duration: 'w', rest: true }] };
       const staveNotes: StaveNote[] = [];
+      const bassNotes: StaveNote[] = [];
       const tabNotes: TabNote[] = [];
 
+      const addAccidentals = (sn: StaveNote, keys: string[]) => {
+        keys.forEach((k, ki) => {
+          if (k.includes('#')) sn.addModifier(new Accidental('#'), ki);
+          else if (/^[a-g]b/i.test(k)) sn.addModifier(new Accidental('b'), ki);
+        });
+      };
+
       source.notes.forEach((n) => {
-        const keys = n.rest
+        const allKeys = n.rest
           ? [restKey(cfg.clef)]
           : cfg.isDrums
             ? (n.drums?.length ? n.drums.map((d) => DRUM_MAP[d].key) : ['c/5'])
             : n.keys;
 
+        // reparto de manos para piano: C4 (midi 60) hacia arriba = mano derecha
+        const rightKeys = cfg.grandStaff && !n.rest
+          ? allKeys.filter((k) => keyToMidi(k) >= 60)
+          : allKeys;
+        const leftKeys = cfg.grandStaff && !n.rest
+          ? allKeys.filter((k) => keyToMidi(k) < 60)
+          : [];
+
+        const trebleIsRest = n.rest || (cfg.grandStaff ? rightKeys.length === 0 : false);
         const sn = new StaveNote({
-          keys,
-          duration: toVfDuration(n),
+          keys: trebleIsRest ? [restKey(cfg.clef)] : rightKeys,
+          duration: `${n.duration}${trebleIsRest ? 'r' : ''}`,
           clef: cfg.clef === 'percussion' ? 'treble' : cfg.clef,
         });
         if (n.dotted) Dot.buildAndAttach([sn], { all: true });
-        if (!n.rest && !cfg.isDrums) {
-          keys.forEach((k, ki) => {
-            if (k.includes('#')) sn.addModifier(new Accidental('#'), ki);
-            else if (/^[a-g]b/i.test(k)) sn.addModifier(new Accidental('b'), ki);
-          });
-        }
+        if (!trebleIsRest && !cfg.isDrums) addAccidentals(sn, rightKeys);
         staveNotes.push(sn);
+
+        if (bassStave) {
+          const leftIsRest = n.rest || leftKeys.length === 0;
+          const bn = new StaveNote({
+            keys: leftIsRest ? ['d/3'] : leftKeys,
+            duration: `${n.duration}${leftIsRest ? 'r' : ''}`,
+            clef: 'bass',
+          });
+          if (n.dotted) Dot.buildAndAttach([bn], { all: true });
+          if (!leftIsRest) addAccidentals(bn, leftKeys);
+          bassNotes.push(bn);
+        }
 
         if (tabStave) {
           const positions = n.rest
@@ -153,12 +191,22 @@ export const ScoreCanvas = ({
         tabVoice.addTickables(tabNotes);
         voices.push(tabVoice);
       }
+      let bassVoice: Voice | null = null;
+      if (bassStave && bassNotes.length) {
+        bassVoice = new Voice({ numBeats: numBeats || 4, beatValue: beatValue || 4 });
+        bassVoice.setMode(Voice.Mode.SOFT);
+        bassVoice.addTickables(bassNotes);
+        voices.push(bassVoice);
+      }
 
       const fmt = new Formatter();
       voices.forEach((v) => fmt.joinVoices([v]));
       fmt.format(voices, w - (isFirstOfRow ? 90 : 30));
 
       const beams = Beam.generateBeams(staveNotes.filter((sn) => !sn.isRest()));
+      const bassBeams = bassNotes.length
+        ? Beam.generateBeams(bassNotes.filter((bn) => !bn.isRest()))
+        : [];
 
       // resaltar nota seleccionada / en reproducción
       source.notes.forEach((_, ni) => {
@@ -168,12 +216,17 @@ export const ScoreCanvas = ({
           const style = { fillStyle: accent, strokeStyle: accent };
           staveNotes[ni]?.setStyle(style);
           tabNotes[ni]?.setStyle(style);
+          bassNotes[ni]?.setStyle(style);
         }
       });
 
       voice.draw(ctx, stave);
       beams.forEach((b) => b.setContext(ctx).draw());
       if (tabVoice && tabStave) tabVoice.draw(ctx, tabStave);
+      if (bassVoice && bassStave) {
+        bassVoice.draw(ctx, bassStave);
+        bassBeams.forEach((b) => b.setContext(ctx).draw());
+      }
 
       // número de compás
       ctx.save();
@@ -204,6 +257,7 @@ export const ScoreCanvas = ({
           hitsRef.current.push({ x: nx - 12, y, w: 26, h: rowH - 26, ref: { measure: mi, index: ni } });
         });
       }
+
     });
 
     const svg = host.querySelector('svg');
