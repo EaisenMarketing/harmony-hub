@@ -98,6 +98,39 @@ ${measures}
 
 // -------------------------------------------------------------- PNG / PDF
 
+/**
+ * VexFlow dibuja las notas con la fuente Bravura (glifos como <text>).
+ * Al serializar el SVG hacia una imagen, la fuente del documento no viaja,
+ * y las notas salen como cuadros. Por eso incrustamos las fuentes en base64.
+ */
+let fontCss: string | null = null;
+
+async function musicFontCss(): Promise<string> {
+  if (fontCss !== null) return fontCss;
+  const load = async (file: string) => {
+    const res = await fetch(`/fonts/${file}`);
+    const buf = new Uint8Array(await res.arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < buf.length; i += 8192) {
+      bin += String.fromCharCode(...buf.subarray(i, i + 8192));
+    }
+    return btoa(bin);
+  };
+  try {
+    const [bravura, academico, academicoBold] = await Promise.all([
+      load('bravura.woff2'), load('academico.woff2'), load('academicobold.woff2'),
+    ]);
+    fontCss = `
+@font-face{font-family:'Bravura';src:url(data:font/woff2;base64,${bravura}) format('woff2');}
+@font-face{font-family:'Academico';src:url(data:font/woff2;base64,${academico}) format('woff2');font-weight:normal;}
+@font-face{font-family:'Academico';src:url(data:font/woff2;base64,${academicoBold}) format('woff2');font-weight:bold;}
+`;
+  } catch {
+    fontCss = '';
+  }
+  return fontCss;
+}
+
 async function svgToPng(svg: SVGSVGElement, scale = 2): Promise<{ dataUrl: string; width: number; height: number }> {
   const clone = svg.cloneNode(true) as SVGSVGElement;
   const rect = svg.getBoundingClientRect();
@@ -107,15 +140,22 @@ async function svgToPng(svg: SVGSVGElement, scale = 2): Promise<{ dataUrl: strin
   clone.setAttribute('height', String(height));
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
+  const css = await musicFontCss();
+  if (css) {
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = css;
+    clone.insertBefore(style, clone.firstChild);
+  }
+
   const source = new XMLSerializer().serializeToString(clone);
-  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(source)}`;
+  const blobUrl = URL.createObjectURL(new Blob([source], { type: 'image/svg+xml;charset=utf-8' }));
   const img = new Image();
-  img.crossOrigin = 'anonymous';
   await new Promise<void>((res, rej) => {
     img.onload = () => res();
     img.onerror = () => rej(new Error('svg'));
-    img.src = url;
+    img.src = blobUrl;
   });
+  await new Promise((r) => requestAnimationFrame(r));
   const canvas = document.createElement('canvas');
   canvas.width = width * scale;
   canvas.height = height * scale;
@@ -123,8 +163,10 @@ async function svgToPng(svg: SVGSVGElement, scale = 2): Promise<{ dataUrl: strin
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  URL.revokeObjectURL(blobUrl);
   return { dataUrl: canvas.toDataURL('image/png'), width, height };
 }
+
 
 export async function exportPng(svg: SVGSVGElement, doc: ScoreDoc) {
   const { dataUrl } = await svgToPng(svg, 2);
@@ -135,9 +177,10 @@ export async function exportPng(svg: SVGSVGElement, doc: ScoreDoc) {
 }
 
 export async function exportPdf(svg: SVGSVGElement, doc: ScoreDoc) {
-  const { dataUrl, width, height } = await svgToPng(svg, 2);
+  const { dataUrl, width, height } = await svgToPng(svg, 3);
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter', compress: true });
   const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
   const margin = 40;
   const maxW = pageW - margin * 2;
   const ratio = height / width;
@@ -151,13 +194,49 @@ export async function exportPdf(svg: SVGSVGElement, doc: ScoreDoc) {
     margin, 68,
   );
   pdf.setTextColor(0);
-  pdf.addImage(dataUrl, 'PNG', margin, 86, maxW, maxW * ratio, undefined, 'FAST');
-  if (doc.description) {
-    pdf.setFontSize(10);
-    pdf.text(pdf.splitTextToSize(doc.description, maxW), margin, 86 + maxW * ratio + 26);
+
+  const top = 86;
+  const bottomPad = 46;
+  const avail = pageH - top - bottomPad;
+  const fullH = maxW * ratio;
+
+  if (fullH <= avail) {
+    pdf.addImage(dataUrl, 'PNG', margin, top, maxW, fullH, undefined, 'FAST');
+    if (doc.description) {
+      pdf.setFontSize(10);
+      pdf.text(pdf.splitTextToSize(doc.description, maxW), margin, top + fullH + 26);
+    }
+  } else {
+    // Cortar la imagen en páginas manteniendo la proporción (sin deformar)
+    const img = new Image();
+    await new Promise<void>((res, rej) => {
+      img.onload = () => res();
+      img.onerror = () => rej(new Error('png'));
+      img.src = dataUrl;
+    });
+    const pxPerPt = img.width / maxW;
+    const sliceH = Math.floor(avail * pxPerPt);
+    let sy = 0;
+    let page = 0;
+    while (sy < img.height) {
+      const h = Math.min(sliceH, img.height - sy);
+      const c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = h;
+      const cctx = c.getContext('2d')!;
+      cctx.fillStyle = '#ffffff';
+      cctx.fillRect(0, 0, c.width, c.height);
+      cctx.drawImage(img, 0, sy, img.width, h, 0, 0, img.width, h);
+      if (page > 0) pdf.addPage();
+      pdf.addImage(c.toDataURL('image/png'), 'PNG', margin, page === 0 ? top : margin, maxW, h / pxPerPt, undefined, 'FAST');
+      sy += h;
+      page++;
+    }
   }
+
   pdf.setFontSize(8);
   pdf.setTextColor(140);
-  pdf.text('Creado con Acorde Live', margin, pdf.internal.pageSize.getHeight() - 24);
+  pdf.text('Creado con Acorde Live', margin, pageH - 24);
   pdf.save(`${safeName(doc.title)}.pdf`);
 }
+
