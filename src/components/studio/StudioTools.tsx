@@ -27,6 +27,12 @@ export const StudioTools = ({ account }: { account: TeacherAccount }) => {
           <EarTrainerModal />
           <MetronomeTunerModal />
           <ChordCreatorModal userInstrument={instrument} />
+          <Button asChild variant="outline" size="sm" className="gap-2">
+            <Link to="/portal/partituras">
+              <FileMusic className="w-4 h-4" />
+              Creador de Partituras
+            </Link>
+          </Button>
         </div>
       </Card>
     </div>
