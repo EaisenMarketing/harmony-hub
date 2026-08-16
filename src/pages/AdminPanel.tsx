@@ -19,6 +19,7 @@ import { CrmDashboard } from '@/components/admin/CrmDashboard';
 import { TeacherAccountsManagement } from '@/components/admin/TeacherAccountsManagement';
 import { TeacherUsageDashboard } from '@/components/admin/TeacherUsageDashboard';
 import { SubscriptionsDashboard } from '@/components/admin/SubscriptionsDashboard';
+import { NotificationBroadcast } from '@/components/admin/NotificationBroadcast';
 
 import { LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -91,6 +92,9 @@ const AdminPanel = () => {
     if (currentPath === '/admin/materiales') {
       return <FreeMaterialsManagement />;
     }
+    if (currentPath === '/admin/notificaciones') {
+      return <NotificationBroadcast />;
+    }
     if (currentPath === '/admin/estadisticas') {
       return (
         <div className="space-y-6">
@@ -148,6 +152,8 @@ const AdminPanel = () => {
         return { title: 'CRM de Leads', subtitle: 'Todos los leads de tus enlaces de material gratuito y del formulario de contacto' };
       case '/admin/estadisticas':
         return { title: 'Estadísticas', subtitle: 'Métricas y gráficas de la plataforma' };
+      case '/admin/notificaciones':
+        return { title: 'Notificaciones', subtitle: 'Envía avisos que llegan al portal de tus alumnos' };
       case '/admin/configuracion':
         return { title: 'Configuración', subtitle: 'Configuración general de la plataforma' };
       default:
