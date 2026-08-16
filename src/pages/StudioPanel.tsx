@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMyTeacherAccount } from '@/hooks/useTeacherStudio';
+import { useMyTeacherAccount, useStudioStatus } from '@/hooks/useTeacherStudio';
 import { StudioSidebar, studioNav, isStudioActive } from '@/components/studio/StudioSidebar';
 import { StudioMobileNav } from '@/components/studio/StudioMobileNav';
 import { StudioOnboarding } from '@/components/studio/StudioOnboarding';
@@ -13,11 +13,16 @@ import { StudioLiveClasses } from '@/components/studio/StudioLiveClasses';
 import { StudioAnnouncements } from '@/components/studio/StudioAnnouncements';
 import { StudioTools } from '@/components/studio/StudioTools';
 import { StudioSettings } from '@/components/studio/StudioSettings';
-import { Music } from 'lucide-react';
+import { StudioBillingBanner } from '@/components/studio/StudioBillingBanner';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Music, Lock } from 'lucide-react';
 
 const StudioPanel = () => {
   const { user, loading } = useAuth();
   const { data: account, isLoading } = useMyTeacherAccount();
+  const { data: studioStatus } = useStudioStatus(account?.id);
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -38,7 +43,29 @@ const StudioPanel = () => {
 
   const title = studioNav.find((i) => isStudioActive(pathname, i.href))?.name ?? 'Mi Estudio';
 
+  const locked = studioStatus ? !studioStatus.is_active : false;
+  const alwaysAllowed = pathname === '/estudio' || pathname.startsWith('/estudio/configuracion');
+
   const content = () => {
+    if (locked && !alwaysAllowed) {
+      return (
+        <Card className="p-6 bg-card/70 border-white/10 text-center space-y-3">
+          <Lock className="w-8 h-8 text-primary mx-auto" />
+          <h2 className="text-lg font-bold text-foreground">Sección bloqueada</h2>
+          <p className="text-sm text-muted-foreground">
+            Activa o renueva tu plan de maestro para volver a usar cursos, clases, tareas y herramientas.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <Button asChild>
+              <Link to="/maestros/planes">Ver planes</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/estudio/configuracion">Elegir plan en configuración</Link>
+            </Button>
+          </div>
+        </Card>
+      );
+    }
     if (pathname.startsWith('/estudio/alumnos')) return <StudioStudents account={account} />;
     if (pathname.startsWith('/estudio/cursos')) return <StudioCourses account={account} />;
     if (pathname.startsWith('/estudio/clases')) return <StudioLiveClasses account={account} />;
@@ -73,6 +100,7 @@ const StudioPanel = () => {
             <h1 className="text-2xl font-bold text-foreground">{title}</h1>
             <p className="text-muted-foreground text-sm">{account.studio_name}</p>
           </header>
+          <StudioBillingBanner account={account} />
           {content()}
         </div>
       </main>
