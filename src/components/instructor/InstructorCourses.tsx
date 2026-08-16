@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Clock, Users, Layers } from 'lucide-react';
+import { BookOpen, Plus, Edit, Trash2, Eye, EyeOff, Clock, Layers, Video } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useInstructorProfile } from '@/hooks/useInstructorData';
 import { useInstructorCourses, useDeleteInstructorCourse, type InstructorCourse } from '@/hooks/useInstructorCourses';
 import { InstructorCourseForm } from './InstructorCourseForm';
+import { InstructorCourseContent } from './InstructorCourseContent';
+import { instrumentLabel } from '@/lib/instruments';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -17,12 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-const instrumentLabels: Record<string, string> = {
-  guitar: 'Guitarra',
-  piano: 'Piano',
-  drums: 'Batería',
-};
 
 const levelLabels: Record<string, string> = {
   beginner: 'Principiante',
@@ -46,6 +42,7 @@ export const InstructorCourses = () => {
   const [selectedCourse, setSelectedCourse] = useState<InstructorCourse | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<InstructorCourse | null>(null);
+  const [contentCourse, setContentCourse] = useState<InstructorCourse | null>(null);
 
   const handleEdit = (course: InstructorCourse) => {
     setSelectedCourse(course);
@@ -89,7 +86,7 @@ export const InstructorCourses = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold">Cursos de {instrumentLabels[profile?.instrument || 'guitar']}</h2>
+          <h2 className="text-xl font-bold">Cursos de {instrumentLabel(profile?.instrument) || 'tu instrumento'}</h2>
           <p className="text-muted-foreground">Gestiona tus cursos y contenido</p>
         </div>
         <Button className="gap-2" onClick={handleCreate}>
@@ -166,6 +163,15 @@ export const InstructorCourses = () => {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => setContentCourse(course)}
+                    >
+                      <Video className="w-4 h-4" />
+                      <span className="hidden sm:inline">Contenido</span>
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
@@ -194,7 +200,7 @@ export const InstructorCourses = () => {
             <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="text-lg font-medium mb-2">No tienes cursos aún</h3>
             <p className="text-muted-foreground mb-4">
-              Crea tu primer curso de {instrumentLabels[profile?.instrument || 'guitar']} para empezar a enseñar
+              Crea tu primer curso de {instrumentLabel(profile?.instrument) || 'tu instrumento'} para empezar a enseñar
             </p>
             <Button onClick={handleCreate}>
               <Plus className="w-4 h-4 mr-2" />
@@ -213,6 +219,16 @@ export const InstructorCourses = () => {
         }}
         course={selectedCourse}
       />
+
+      {/* Course Content Manager */}
+      {contentCourse && (
+        <InstructorCourseContent
+          open={!!contentCourse}
+          onClose={() => setContentCourse(null)}
+          courseId={contentCourse.id}
+          courseTitle={contentCourse.title}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
