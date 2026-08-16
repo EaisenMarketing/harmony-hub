@@ -33,6 +33,7 @@ import { ChordCreatorModal } from '@/components/student/ChordCreatorModal';
 import { SelectInstrumentGate } from '@/components/student/SelectInstrumentGate';
 import { AIToolGate } from '@/components/student/AIToolGate';
 import { TrialBanner } from '@/components/student/TrialBanner';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useUserInstrument } from '@/hooks/useUserInstrument';
 import { useIsAdmin } from '@/hooks/useAdminData';
 import { AI_TOOL_INSTRUMENTS, INSTRUMENT_PLAN_MAP } from '@/lib/instrument-access';
@@ -132,7 +133,10 @@ const StudentPortal = () => {
                     : 'Continúa donde lo dejaste y alcanza tus metas musicales.'}
                 </p>
               </div>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap items-center">
+                <span className="hidden md:inline-flex">
+                  <NotificationBell />
+                </span>
                 <MetronomeTunerModal />
                 <AIToolGate
                   toolKey="theory_assistant"
@@ -215,15 +219,18 @@ const StudentPortal = () => {
             <img loading="lazy" decoding="async" src={logo} alt="Acorde Live" className="w-8 h-8 rounded-lg object-cover" />
             <span className="font-bold text-foreground">Acorde Live</span>
           </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground gap-2"
-            onClick={signOut}
-          >
-            <LogOut className="w-4 h-4" />
-            Salir
-          </Button>
+          <div className="flex items-center gap-1">
+            <NotificationBell className="text-muted-foreground" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground gap-2"
+              onClick={signOut}
+            >
+              <LogOut className="w-4 h-4" />
+              Salir
+            </Button>
+          </div>
         </div>
 
         <div className="max-w-6xl mx-auto p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 pb-24 md:pb-8">
