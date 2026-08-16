@@ -30,6 +30,7 @@ const baseNavigation = [
   { name: 'Mis Cursos', href: '/portal/cursos', icon: BookOpen },
   { name: 'Mi Progreso', href: '/portal/progreso', icon: TrendingUp },
   { name: 'Sala de Práctica', href: '/portal/practica', icon: Music },
+  { name: 'Creador de Partituras', href: '/portal/partituras', icon: FileMusic },
   { name: 'Pregunta al Maestro', href: '/portal/consultas', icon: MessageCircleQuestion },
   { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
   { name: 'Calendario', href: '/portal/calendario', icon: Calendar },
