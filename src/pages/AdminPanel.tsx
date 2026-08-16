@@ -152,6 +152,8 @@ const AdminPanel = () => {
         return { title: 'CRM de Leads', subtitle: 'Todos los leads de tus enlaces de material gratuito y del formulario de contacto' };
       case '/admin/estadisticas':
         return { title: 'Estadísticas', subtitle: 'Métricas y gráficas de la plataforma' };
+      case '/admin/notificaciones':
+        return { title: 'Notificaciones', subtitle: 'Envía avisos que llegan al portal de tus alumnos' };
       case '/admin/configuracion':
         return { title: 'Configuración', subtitle: 'Configuración general de la plataforma' };
       default:

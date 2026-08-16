@@ -13,7 +13,8 @@ import {
   Gift,
   Contact,
   GraduationCap,
-  Activity
+  Activity,
+  Bell
 
 } from 'lucide-react';
 import logo from '@/assets/logo.webp';
