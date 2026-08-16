@@ -151,7 +151,7 @@ export async function exportPdf(svg: SVGSVGElement, doc: ScoreDoc) {
     margin, 68,
   );
   pdf.setTextColor(0);
-  pdf.addImage(dataUrl, 'PNG', margin, 86, maxW, maxW * ratio);
+  pdf.addImage(dataUrl, 'PNG', margin, 86, maxW, maxW * ratio, undefined, 'FAST');
   if (doc.description) {
     pdf.setFontSize(10);
     pdf.text(pdf.splitTextToSize(doc.description, maxW), margin, 86 + maxW * ratio + 26);
