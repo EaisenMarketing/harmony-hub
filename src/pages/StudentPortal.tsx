@@ -98,6 +98,8 @@ const StudentPortal = () => {
         return <CoursesSection />;
       case '/portal/practica':
         return <PracticeSection />;
+      case '/portal/partituras':
+        return <ScoresSection />;
       case '/portal/consultas':
         return <TeacherConsultSection />;
       case '/portal/comunidad':
