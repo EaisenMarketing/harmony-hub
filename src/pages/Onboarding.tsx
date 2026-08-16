@@ -142,6 +142,10 @@ export default function OnboardingPage() {
       }
     }
     setBusy(false);
+    // Nunca conservamos los datos completos de la tarjeta en memoria.
+    setCardNumber('');
+    setCardCvc('');
+    setCardExp('');
     setStep(4);
   };
 
