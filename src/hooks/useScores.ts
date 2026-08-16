@@ -126,6 +126,7 @@ export const useGenerateScore = () => {
   return useMutation({
     mutationFn: async (input: {
       prompt: string;
+      youtubeUrl?: string;
       instrument: ScoreInstrument;
       level?: string;
       measures?: number;
