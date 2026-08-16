@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send, Megaphone } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useBroadcastNotification } from '@/hooks/useNotifications';
-import { INSTRUMENTS } from '@/lib/instruments';
+import { PUBLIC_INSTRUMENTS } from '@/lib/instruments';
 
 export const NotificationBroadcast = () => {
   const broadcast = useBroadcastNotification();
@@ -84,9 +84,9 @@ export const NotificationBroadcast = () => {
             onChange={(e) => setForm({ ...form, instrument: e.target.value })}
           >
             <option value="">Todos los alumnos</option>
-            {INSTRUMENTS.map((i) => (
-              <option key={i.slug} value={i.slug}>
-                {i.name}
+            {PUBLIC_INSTRUMENTS.map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.label}
               </option>
             ))}
           </select>
