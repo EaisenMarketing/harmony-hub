@@ -208,6 +208,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
   const runAi = async () => {
     const res = await generate.mutateAsync({
       prompt: aiPrompt,
+      youtubeUrl: aiYoutube.trim() || undefined,
       instrument: doc.instrument,
       level: aiLevel,
       measures: aiMeasures,
