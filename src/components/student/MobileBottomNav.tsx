@@ -21,7 +21,7 @@ export const MobileBottomNav = () => {
     ...(isProduction
       ? [{ name: 'Producción', href: '/portal/produccion', icon: Headphones }]
       : [{ name: 'Práctica', href: '/portal/practica', icon: Music }]),
-    { name: 'Comunidad', href: '/portal/comunidad', icon: Users },
+    { name: 'Partituras', href: '/portal/partituras', icon: FileMusic },
     { name: 'Maestros', href: '/portal/consultas', icon: MessageCircleQuestion },
   ];
 
