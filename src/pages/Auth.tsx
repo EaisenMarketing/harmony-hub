@@ -47,6 +47,12 @@ const Auth = () => {
     : readPendingInstrument();
   const selectedPlan = selectedInstrument ? INSTRUMENT_PLAN_MAP[selectedInstrument] : null;
 
+  const modeParam = searchParams.get('mode');
+
+  useEffect(() => {
+    if (modeParam === 'register' || modeParam === 'signup') setDefaultTab('signup');
+  }, [modeParam]);
+
   useEffect(() => {
     if (planParam) {
       savePendingInstrument(planParam);
