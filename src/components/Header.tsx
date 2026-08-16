@@ -7,6 +7,7 @@ const navItems = [
   { label: 'Clases en Vivo', to: '/clases-en-vivo' },
   { label: 'Precios', to: '/precios' },
   { label: 'Maestros', to: '/maestros' },
+  { label: 'Para Maestros', to: '/maestros/planes' },
   { label: 'FAQ', to: '/preguntas-frecuentes' },
 ];
 
