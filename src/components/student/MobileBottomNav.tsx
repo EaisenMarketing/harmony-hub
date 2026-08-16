@@ -3,7 +3,7 @@ import {
   LayoutDashboard,
   BookOpen,
   Music,
-  Users,
+  FileMusic,
   MessageCircleQuestion,
   Headphones,
 } from 'lucide-react';
