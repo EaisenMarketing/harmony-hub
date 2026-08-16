@@ -1,20 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Bell, Check, Trash2 } from 'lucide-react';
+import { Bell, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  useNotifications,
-  useMarkNotificationsRead,
-  useDeleteNotification,
-} from '@/hooks/useNotifications';
+import { useNotifications, useMarkNotificationsRead } from '@/hooks/useNotifications';
 
 export const NotificationBell = ({ className }: { className?: string }) => {
   const { data: items = [], isLoading } = useNotifications();
   const markRead = useMarkNotificationsRead();
-  const remove = useDeleteNotification();
   const navigate = useNavigate();
 
   const unread = items.filter((n) => !n.read_at).length;
@@ -76,15 +71,6 @@ export const NotificationBell = ({ className }: { className?: string }) => {
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: es })}
                     </p>
                   </button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7 text-muted-foreground shrink-0"
-                    onClick={() => remove.mutate(n.id)}
-                    aria-label="Eliminar notificación"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
                 </li>
               ))}
             </ul>

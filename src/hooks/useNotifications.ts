@@ -44,6 +44,7 @@ export const useNotifications = (limit = 30) => {
       if (error) throw error;
       return (data ?? []) as AppNotification[];
     },
+    refetchInterval: 60_000,
   });
 };
 
@@ -54,17 +55,6 @@ export const useMarkNotificationsRead = () => {
       const { error } = await supabase.rpc('mark_notifications_read', {
         _ids: ids && ids.length ? ids : null,
       });
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
-  });
-};
-
-export const useDeleteNotification = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('notifications').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
