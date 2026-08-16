@@ -136,7 +136,7 @@ export async function exportPng(svg: SVGSVGElement, doc: ScoreDoc) {
 
 export async function exportPdf(svg: SVGSVGElement, doc: ScoreDoc) {
   const { dataUrl, width, height } = await svgToPng(svg, 2);
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter', compress: true });
   const pageW = pdf.internal.pageSize.getWidth();
   const margin = 40;
   const maxW = pageW - margin * 2;
