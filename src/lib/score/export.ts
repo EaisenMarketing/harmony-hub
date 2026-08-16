@@ -40,7 +40,7 @@ export function exportMidi(doc: ScoreDoc) {
     });
   });
 
-  download(new Blob([midi.toArray()], { type: 'audio/midi' }), `${safeName(doc.title)}.mid`);
+  download(new Blob([midi.toArray().slice().buffer as ArrayBuffer], { type: 'audio/midi' }), `${safeName(doc.title)}.mid`);
 }
 
 // --------------------------------------------------------------- MusicXML
