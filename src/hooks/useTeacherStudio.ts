@@ -896,3 +896,42 @@ export const useRegisterToStudioClass = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['my-class-registrations'] }),
   });
 };
+
+/* ------------------------------------------------------------------ */
+/* Estado de suscripción del estudio                                   */
+/* ------------------------------------------------------------------ */
+
+export interface StudioStatus {
+  status: string;
+  plan: string;
+  seat_limit: number;
+  seats_used: number;
+  days_left: number | null;
+  is_active: boolean;
+}
+
+export const useStudioStatus = (accountId?: string) =>
+  useQuery<StudioStatus | null>({
+    queryKey: ['studio-status', accountId],
+    queryFn: async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any).rpc('studio_status', { _account_id: accountId });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row ?? null) as StudioStatus | null;
+    },
+    enabled: !!accountId,
+    staleTime: 60_000,
+  });
+
+/** Traduce errores de la base de datos del estudio a mensajes claros. */
+export const studioErrorMessage = (e: unknown) => {
+  const msg = e instanceof Error ? e.message : String(e ?? '');
+  if (msg.includes('seat_limit_reached'))
+    return 'Ya usaste todos los cupos de tu plan. Sube de plan para agregar más alumnos.';
+  if (msg.includes('studio_inactive'))
+    return 'Tu suscripción de estudio no está activa. Renueva tu plan para seguir agregando alumnos.';
+  if (msg.includes('duplicate key'))
+    return 'Ese alumno ya está en tu estudio.';
+  return msg || 'Intenta de nuevo.';
+};
