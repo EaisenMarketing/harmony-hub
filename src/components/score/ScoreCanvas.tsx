@@ -248,6 +248,18 @@ export const ScoreCanvas = ({
         bassBeams.forEach((b) => b.setContext(ctx).draw());
       }
 
+      // ligaduras de prolongación dentro del compás
+      source.notes.forEach((n, ni) => {
+        if (!n.tie) return;
+        const first = staveNotes[ni];
+        const next = staveNotes[ni + 1];
+        if (!first || !next || first.isRest() || next.isRest()) return;
+        try {
+          new StaveTie({ firstNote: first, lastNote: next }).setContext(ctx).draw();
+        } catch { /* ligadura no dibujable */ }
+      });
+
+
       // número de compás
       ctx.save();
       ctx.setFillStyle(ink);
