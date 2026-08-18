@@ -575,6 +575,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
         doc={doc}
         selected={selected}
         playing={playingRef}
+        measuresPerRow={measuresPerRow}
         onSelectNote={(r) => { setSelected(r); setActiveMeasure(r.measure); }}
         onSelectMeasure={(m) => { setSelected(null); setActiveMeasure(m); }}
         svgRef={(svg) => { svgRef.current = svg; }}
@@ -588,13 +589,15 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
             <Button
               key={d}
               size="sm"
+              title={`${DURATION_LABEL[d]} (${{ w: '2', h: '3', q: '4', '8': '5', '16': '6', '32': '7' }[d]})`}
               variant={duration === d ? 'default' : 'outline'}
-              onClick={() => setDuration(d)}
+              onClick={() => setSelectedDuration(d)}
             >
-              {DURATION_LABEL[d]}
+              <span className="text-base leading-none mr-1">{DURATION_GLYPH[d]}</span>
+              <span className="hidden sm:inline">{DURATION_LABEL[d]}</span>
             </Button>
           ))}
-          <Button size="sm" variant={dotted ? 'default' : 'outline'} onClick={() => setDotted(!dotted)}>
+          <Button size="sm" variant={dotted ? 'default' : 'outline'} onClick={toggleDot} title="Puntillo (.)">
             Puntillo
           </Button>
           {!cfg.isDrums && (
@@ -609,7 +612,10 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
           <Button size="sm" variant={chordMode ? 'default' : 'outline'} onClick={() => setChordMode(!chordMode)} className="gap-1.5">
             <Music2 className="w-3.5 h-3.5" /> Acorde
           </Button>
-          <Button size="sm" variant="outline" onClick={addRest}>Silencio</Button>
+          <Button size="sm" variant="outline" onClick={addRest} title="Silencio (R)">Silencio</Button>
+          <Button size="sm" variant={selectedNote?.tie ? 'default' : 'outline'} onClick={toggleTie} disabled={!selected} title="Ligadura (T)">
+            Ligadura
+          </Button>
           <Button size="sm" variant="outline" onClick={deleteSelected} disabled={!selected} className="gap-1.5">
             <Trash2 className="w-3.5 h-3.5" /> Borrar nota
           </Button>
@@ -618,18 +624,83 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
           </Button>
         </div>
 
+        {/* Articulaciones, dinámicas y transporte de altura */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">Articulación:</span>
+          {ARTICULATIONS.map((a) => (
+            <Button
+              key={a} size="sm" disabled={!selected}
+              variant={selectedNote?.articulation === a ? 'default' : 'outline'}
+              onClick={() => toggleArticulation(a)}
+            >
+              {ARTICULATION_LABEL[a]}
+            </Button>
+          ))}
+          <span className="text-xs text-muted-foreground ml-2">Dinámica:</span>
+          {DYNAMICS.map((d) => (
+            <Button
+              key={d} size="sm" disabled={!selected}
+              variant={selectedNote?.dynamic === d ? 'default' : 'outline'}
+              onClick={() => setDynamic(selectedNote?.dynamic === d ? '' : d)}
+              className="italic font-serif"
+            >
+              {d}
+            </Button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {selected ? 'Transponer nota:' : 'Transponer compás:'}
+          </span>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(1)} className="gap-1"><ArrowUp className="w-3.5 h-3.5" />½</Button>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(-1)} className="gap-1"><ArrowDown className="w-3.5 h-3.5" />½</Button>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(12)}>+8va</Button>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(-12)}>−8va</Button>
+          <Button size="sm" variant="outline" onClick={copyMeasure} className="gap-1.5">
+            <Copy className="w-3.5 h-3.5" /> Copiar compás
+          </Button>
+          <Button size="sm" variant="outline" onClick={pasteMeasure} disabled={!clipboard} className="gap-1.5">
+            <ClipboardPaste className="w-3.5 h-3.5" /> Pegar
+          </Button>
+          <Button size="sm" variant="outline" onClick={fillRests}>Completar con silencios</Button>
+          <div className="flex items-center gap-2 ml-auto">
+            <Label className="text-xs">Compases por línea</Label>
+            <Select value={String(measuresPerRow)} onValueChange={(v) => setMeasuresPerRow(Number(v))}>
+              <SelectTrigger className="w-16 h-8"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Badge variant="secondary">Compás activo: {targetMeasure + 1}</Badge>
+          {selected && <Badge variant="secondary">Nota {selected.index + 1}</Badge>}
           <Badge variant="outline">{doc.content.measures.length} compases</Badge>
           <Badge variant="outline">{totalBeats} tiempos escritos</Badge>
+          <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/40">
+            <Switch id="shortcuts" checked={shortcutsOn} onCheckedChange={setShortcutsOn} />
+            <Label htmlFor="shortcuts" className="text-xs cursor-pointer">Atajos de teclado</Label>
+          </div>
           <Button size="sm" variant="outline" onClick={addMeasure} className="gap-1.5 ml-auto">
             <Plus className="w-3.5 h-3.5" /> Compás
           </Button>
           <Button size="sm" variant="outline" onClick={removeMeasure}>Quitar último</Button>
         </div>
 
+        {shortcutsOn && (
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            <strong>Atajos:</strong> A–G escriben notas · 2–7 eligen la figura · <kbd>.</kbd> puntillo ·
+            <kbd> R</kbd> silencio · <kbd>T</kbd> ligadura · ←/→ mueven el cursor · ↑/↓ transponen
+            (con Shift, una octava) · <kbd>Espacio</kbd> reproduce · <kbd>⌘/Ctrl+Z</kbd> deshacer ·
+            <kbd> ⌘/Ctrl+C/V</kbd> copiar/pegar compás.
+          </p>
+        )}
+
         {selectedNote && !cfg.isDrums && (
-          <div className="flex items-end gap-2">
+          <div className="flex flex-wrap items-end gap-2">
             <div className="w-40">
               <Label className="text-xs">Acorde sobre la nota</Label>
               <Input
@@ -638,8 +709,17 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
                 onChange={(e) => setChordLabel(e.target.value)}
               />
             </div>
+            <div className="w-40">
+              <Label className="text-xs">Letra (sílaba)</Label>
+              <Input
+                value={selectedNote.lyric ?? ''}
+                placeholder="ven-"
+                onChange={(e) => setLyric(e.target.value)}
+              />
+            </div>
           </div>
         )}
+
       </Card>
 
       {/* Entrada de notas */}
