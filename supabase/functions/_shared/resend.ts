@@ -27,12 +27,66 @@ export const userClient = (authHeader: string): SupabaseClient =>
     { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } },
   );
 
-/** Remitente por defecto (dominio verificado en Resend). */
+/* =========================================================================
+   DOS IDENTIDADES DE CORREO, SEPARADAS A PROPÓSITO
+   -------------------------------------------------------------------------
+   1) PLATAFORMA (Acorde Live): registros, prueba gratis, suscripciones,
+      clases de la academia, avisos del admin. Sale como "Acorde Live".
+   2) ESTUDIO (maestro que renta el software): sus invitaciones, su CRM y sus
+      campañas. Sale como "<Su Estudio> vía Acorde Live", con respuestas
+      directas al correo del maestro. Nunca se mezcla con la marca principal.
+   ========================================================================= */
+
+/** Remitente de la plataforma (dominio verificado en Resend). */
 export const defaultFrom = () =>
   Deno.env.get("ACORDE_FROM_EMAIL") ?? "Acorde Live <hola@acordelive.com>";
 
-/** Dirección de respuesta por defecto. */
+/** Dirección de respuesta por defecto de la plataforma. */
 export const defaultReplyTo = () => Deno.env.get("ACORDE_REPLY_TO") ?? undefined;
+
+/** Extrae solo la dirección de un remitente tipo `Nombre <correo@dom>`. */
+const addressOf = (value: string) => value.match(/<([^>]+)>/)?.[1] ?? value.trim();
+
+/** Dirección técnica desde la que salen los correos de los estudios. */
+export const studioFromAddress = () =>
+  Deno.env.get("ACORDE_STUDIO_FROM_EMAIL") ??
+  `estudios@${addressOf(defaultFrom()).split("@")[1] ?? "acordelive.com"}`;
+
+const sanitizeName = (name: string) =>
+  name.replace(/["<>\r\n]/g, "").trim().slice(0, 60) || "Estudio de música";
+
+export interface StudioIdentity {
+  from: string;
+  replyTo?: string;
+  brand: string;
+  footerNote: string;
+}
+
+/**
+ * Identidad de correo de un estudio de maestro.
+ * El maestro no necesita verificar dominio: enviamos por la infraestructura de
+ * Acorde Live, pero con su nombre visible y sus respuestas a su propio correo.
+ */
+export const studioIdentity = (account: {
+  studio_name: string;
+  contact_email?: string | null;
+}): StudioIdentity => {
+  const brand = sanitizeName(account.studio_name ?? "");
+  return {
+    from: `${brand} vía Acorde Live <${studioFromAddress()}>`,
+    replyTo: account.contact_email?.trim() || defaultReplyTo(),
+    brand,
+    footerNote: `${brand} · Enviado con Acorde Live`,
+  };
+};
+
+/** Identidad de correo de la plataforma principal (Acorde Live). */
+export const platformIdentity = () => ({
+  from: defaultFrom(),
+  replyTo: defaultReplyTo(),
+  brand: "Acorde Live",
+  footerNote: "Acorde Live · Clases de música en vivo",
+});
 
 export interface SendEmailInput {
   to: string;
