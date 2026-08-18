@@ -70,15 +70,44 @@ export interface StudioIdentity {
 export const studioIdentity = (account: {
   studio_name: string;
   contact_email?: string | null;
+  /** Overrides configurados por el maestro en /estudio/configuracion. */
+  from_name?: string | null;
+  reply_to_email?: string | null;
 }): StudioIdentity => {
-  const brand = sanitizeName(account.studio_name ?? "");
+  const brand = sanitizeName(account.from_name?.trim() || account.studio_name || "");
   return {
-    from: `${brand} vía Acorde Live <${studioFromAddress()}>`,
-    replyTo: account.contact_email?.trim() || defaultReplyTo(),
+    from: `${brand} <${studioFromAddress()}>`,
+    replyTo:
+      account.reply_to_email?.trim() || account.contact_email?.trim() || defaultReplyTo(),
     brand,
-    footerNote: `${brand} · Enviado con Acorde Live`,
+    footerNote: `${brand} · Powered by Acorde Live`,
   };
 };
+
+/**
+ * Identidad del estudio leyendo la configuración de correo del maestro
+ * (public.teacher_email_settings). Úsala siempre que tengas el account id.
+ */
+export const resolveStudioIdentity = async (
+  db: SupabaseClient,
+  accountId: string,
+  fallback?: { studio_name?: string | null; contact_email?: string | null },
+): Promise<StudioIdentity> => {
+  const { data } = await db.rpc("studio_email_identity", { _account_id: accountId });
+  const row = (data as Array<{
+    studio_name: string | null;
+    from_name: string | null;
+    reply_to_email: string | null;
+  }> | null)?.[0];
+
+  return studioIdentity({
+    studio_name: row?.studio_name ?? fallback?.studio_name ?? "Estudio de música",
+    contact_email: fallback?.contact_email ?? null,
+    from_name: row?.from_name ?? null,
+    reply_to_email: row?.reply_to_email ?? null,
+  });
+};
+
 
 /** Identidad de correo de la plataforma principal (Acorde Live). */
 export const platformIdentity = () => ({

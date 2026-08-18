@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { adminClient, corsHeaders, json, sendEmail, studioIdentity, userClient } from "../_shared/resend.ts";
+import { adminClient, corsHeaders, json, sendEmail, resolveStudioIdentity, userClient } from "../_shared/resend.ts";
 import { emailLayout, textToHtml } from "../_shared/email-layout.ts";
 
 const appUrl = () => Deno.env.get("APP_URL") ?? "https://acordelive.com";
@@ -47,7 +47,7 @@ serve(async (req) => {
     }
 
     // Identidad del maestro: su nombre visible, respuestas a su correo.
-    const identity = studioIdentity(account);
+    const identity = await resolveStudioIdentity(db, accountId, account);
     const replyTo = identity.replyTo;
     const from = identity.from;
     const footer = identity.footerNote;

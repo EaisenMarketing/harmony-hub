@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Link2, Users, Megaphone, Mail } from 'lucide-react';
+import { Copy, Link2, Users, Megaphone } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { INSTRUMENT_PLANS } from '@/lib/instrument-access';
 import { TEACHER_PLANS, TEACHER_PLAN_MAP, studioJoinUrl, studioLeadsUrl } from '@/lib/teacher-plans';
@@ -18,6 +18,7 @@ import {
 import { TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
 import { Badge } from '@/components/ui/badge';
 import { StudioPayments } from '@/components/studio/StudioPayments';
+import { StudioEmailSettings } from '@/components/studio/StudioEmailSettings';
 
 export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
   const update = useUpdateTeacherAccount();
@@ -137,33 +138,10 @@ export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
         </Button>
       </Card>
 
-      <Card className="p-4 bg-card/70 border-white/10 space-y-3">
-        <div className="flex items-center gap-2">
-          <Mail className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground text-sm">Tus correos a alumnos y prospectos</h3>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Tus invitaciones, correos del CRM y campañas salen con <span className="text-foreground">tu nombre</span>, no
-          con el de la escuela. Tus alumnos verán:
-        </p>
-        <div className="p-3 rounded-xl border border-white/10 bg-background/50 text-xs space-y-1">
-          <p>
-            <span className="text-muted-foreground">De:</span>{' '}
-            <span className="text-foreground font-medium">{form.studio_name || 'Tu estudio'} vía Acorde Live</span>
-          </p>
-          <p>
-            <span className="text-muted-foreground">Responder a:</span>{' '}
-            <span className="text-foreground font-medium">{form.contact_email || 'tu correo de contacto'}</span>
-          </p>
-        </div>
-        <p className="text-[11px] text-muted-foreground">
-          No necesitas configurar ni verificar nada: usamos la infraestructura de envío de Acorde Live, pero la
-          conversación es tuya y las respuestas llegan directo a tu correo. Los correos de la escuela Acorde Live
-          (registros, suscripciones, avisos generales) son un canal aparte y nunca se mezclan con los tuyos.
-        </p>
-      </Card>
+      <StudioEmailSettings account={account} />
 
       <StudioPayments account={account} />
+
 
       <Card className="p-4 bg-card/70 border-white/10 space-y-4">
         <div className="flex items-center gap-2">

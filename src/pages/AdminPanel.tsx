@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
 import logo from '@/assets/logo.webp';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin, useAdminStats } from '@/hooks/useAdminData';
@@ -20,9 +20,12 @@ import { TeacherAccountsManagement } from '@/components/admin/TeacherAccountsMan
 import { TeacherUsageDashboard } from '@/components/admin/TeacherUsageDashboard';
 import { SubscriptionsDashboard } from '@/components/admin/SubscriptionsDashboard';
 import { NotificationBroadcast } from '@/components/admin/NotificationBroadcast';
+import { AdminSettings } from '@/components/admin/AdminSettings';
 
-import { LogOut, Shield } from 'lucide-react';
+import { LogOut, Shield, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -89,11 +92,21 @@ const AdminPanel = () => {
       return <TeacherUsageDashboard />;
     }
 
+    // Alias histórico: el menú usa /admin/estudiantes.
+    if (currentPath === '/admin/alumnos') {
+      return <Navigate to="/admin/estudiantes" replace />;
+    }
     if (currentPath === '/admin/materiales') {
       return <FreeMaterialsManagement />;
     }
     if (currentPath === '/admin/notificaciones') {
       return <NotificationBroadcast />;
+    }
+    if (currentPath === '/admin/suscripciones') {
+      return <SubscriptionsDashboard />;
+    }
+    if (currentPath === '/admin/configuracion') {
+      return <AdminSettings />;
     }
     if (currentPath === '/admin/estadisticas') {
       return (
@@ -109,17 +122,35 @@ const AdminPanel = () => {
       );
     }
 
-    // Dashboard home - Show instructor activity dashboard
-    return (
-      <div className="space-y-8">
-        <AdminDashboardCharts />
-        <div className="grid lg:grid-cols-2 gap-6">
-          <CoursesTable />
-          <LiveClassesTable />
+    // Dashboard de inicio (solo en /admin).
+    if (currentPath === '/admin' || currentPath === '/admin/') {
+      return (
+        <div className="space-y-8">
+          <AdminDashboardCharts />
+          <div className="grid lg:grid-cols-2 gap-6">
+            <CoursesTable />
+            <LiveClassesTable />
+          </div>
         </div>
-      </div>
+      );
+    }
+
+    // Cualquier otra ruta de /admin: aviso explícito, nunca un fallback silencioso.
+    return (
+      <Card className="p-6 bg-card/70 border-white/10 text-center space-y-3">
+        <Compass className="w-8 h-8 text-primary mx-auto" />
+        <h2 className="text-lg font-bold text-foreground">Sección no disponible</h2>
+        <p className="text-sm text-muted-foreground">
+          La ruta <span className="text-foreground font-mono">{currentPath}</span> no existe en el panel de
+          administración. Usa el menú para ir a una sección válida.
+        </p>
+        <Button asChild>
+          <Link to="/admin">Ir al panel</Link>
+        </Button>
+      </Card>
     );
   };
+
 
   const getPageInfo = () => {
     switch (currentPath) {

@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,6 +37,23 @@ export const TeacherAccountsManagement = () => {
   const update = useUpdateTeacherAccount();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  /**
+   * Solo "conectado sí/no". El admin nunca ve ni gestiona la cuenta de Stripe
+   * del maestro: sus llaves, su identificador y sus cobros son suyos.
+   */
+  const { data: payments = [] } = useQuery({
+    queryKey: ['admin-studio-payments'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('admin_studio_payment_status');
+      if (error) throw error;
+      return (data ?? []) as Array<{ account_id: string; connected: boolean; charges_enabled: boolean }>;
+    },
+  });
+  const paymentMap = useMemo(
+    () => new Map(payments.map((p) => [p.account_id, p])),
+    [payments],
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -156,9 +175,18 @@ export const TeacherAccountsManagement = () => {
                       {a.contact_email ?? 'Sin email'} · {a.primary_instrument ?? 'sin instrumento'}
                     </p>
                   </div>
-                  <Badge variant="outline" className={statusVariant(a.status)}>
-                    {TEACHER_STATUS_LABEL[a.status] ?? a.status}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <Badge variant="outline" className={statusVariant(a.status)}>
+                      {TEACHER_STATUS_LABEL[a.status] ?? a.status}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px]">
+                      {paymentMap.get(a.id)?.charges_enabled
+                        ? 'Stripe conectado'
+                        : paymentMap.get(a.id)?.connected
+                          ? 'Stripe pendiente'
+                          : 'Stripe sin conectar'}
+                    </Badge>
+                  </div>
                 </div>
 
                 <div>

@@ -2622,6 +2622,47 @@ export type Database = {
           },
         ]
       }
+      teacher_email_settings: {
+        Row: {
+          account_id: string
+          brand_color: string | null
+          created_at: string
+          from_name: string | null
+          id: string
+          logo_url: string | null
+          reply_to_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          brand_color?: string | null
+          created_at?: string
+          from_name?: string | null
+          id?: string
+          logo_url?: string | null
+          reply_to_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          brand_color?: string | null
+          created_at?: string
+          from_name?: string | null
+          id?: string
+          logo_url?: string | null
+          reply_to_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_email_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_lead_activities: {
         Row: {
           created_at: string
@@ -2960,43 +3001,52 @@ export type Database = {
         }
         Relationships: []
       }
-      teacher_stripe_settings: {
+      teacher_stripe_accounts: {
         Row: {
           account_id: string
-          connected_at: string | null
+          application_fee_bps: number
+          charges_enabled: boolean
           created_at: string
-          currency: string
+          default_currency: string
+          details_submitted: boolean
+          id: string
           monthly_price: number | null
-          payment_link_url: string | null
-          publishable_key: string | null
-          secret_key: string | null
+          payouts_enabled: boolean
+          status: string
+          stripe_account_id: string | null
           updated_at: string
         }
         Insert: {
           account_id: string
-          connected_at?: string | null
+          application_fee_bps?: number
+          charges_enabled?: boolean
           created_at?: string
-          currency?: string
+          default_currency?: string
+          details_submitted?: boolean
+          id?: string
           monthly_price?: number | null
-          payment_link_url?: string | null
-          publishable_key?: string | null
-          secret_key?: string | null
+          payouts_enabled?: boolean
+          status?: string
+          stripe_account_id?: string | null
           updated_at?: string
         }
         Update: {
           account_id?: string
-          connected_at?: string | null
+          application_fee_bps?: number
+          charges_enabled?: boolean
           created_at?: string
-          currency?: string
+          default_currency?: string
+          details_submitted?: boolean
+          id?: string
           monthly_price?: number | null
-          payment_link_url?: string | null
-          publishable_key?: string | null
-          secret_key?: string | null
+          payouts_enabled?: boolean
+          status?: string
+          stripe_account_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "teacher_stripe_settings_account_id_fkey"
+            foreignKeyName: "teacher_stripe_accounts_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: true
             referencedRelation: "teacher_accounts"
@@ -3348,6 +3398,14 @@ export type Database = {
     }
     Functions: {
       active_instrument: { Args: { _user_id: string }; Returns: string }
+      admin_studio_payment_status: {
+        Args: never
+        Returns: {
+          account_id: string
+          charges_enabled: boolean
+          connected: boolean
+        }[]
+      }
       broadcast_notification: {
         Args: {
           _body?: string
@@ -3404,10 +3462,6 @@ export type Database = {
           trial_ends_at: string
         }[]
       }
-      disconnect_teacher_stripe: {
-        Args: { _account_id: string }
-        Returns: boolean
-      }
       get_user_instrument: { Args: { _user_id: string }; Returns: string }
       get_user_plan: {
         Args: { _user_id: string }
@@ -3460,17 +3514,22 @@ export type Database = {
       }
       reserved_studio_slug: { Args: { _slug: string }; Returns: boolean }
       run_email_automations: { Args: never; Returns: undefined }
-      save_teacher_stripe_settings: {
+      save_studio_email_settings: {
         Args: {
           _account_id: string
-          _currency: string
-          _monthly_price: number
-          _payment_link_url: string
-          _publishable_key: string
-          _secret_key: string
+          _brand_color?: string
+          _from_name: string
+          _logo_url?: string
+          _reply_to_email: string
         }
         Returns: {
-          connected: boolean
+          message: string
+          ok: boolean
+        }[]
+      }
+      save_studio_pricing: {
+        Args: { _account_id: string; _currency: string; _monthly_price: number }
+        Returns: {
           message: string
           ok: boolean
         }[]
@@ -3497,6 +3556,28 @@ export type Database = {
           message: string
           ok: boolean
           trial_ends_at: string
+        }[]
+      }
+      studio_email_identity: {
+        Args: { _account_id: string }
+        Returns: {
+          brand_color: string
+          from_name: string
+          logo_url: string
+          reply_to_email: string
+          studio_name: string
+        }[]
+      }
+      studio_payment_status: {
+        Args: { _account_id: string }
+        Returns: {
+          charges_enabled: boolean
+          default_currency: string
+          details_submitted: boolean
+          monthly_price: number
+          payouts_enabled: boolean
+          status: string
+          stripe_account_id: string
         }[]
       }
       studio_public_profile: {
@@ -3538,17 +3619,6 @@ export type Database = {
         }[]
       }
       teacher_seats_used: { Args: { _account_id: string }; Returns: number }
-      teacher_stripe_status: {
-        Args: { _account_id: string }
-        Returns: {
-          connected: boolean
-          connected_at: string
-          currency: string
-          monthly_price: number
-          payment_link_url: string
-          publishable_key: string
-        }[]
-      }
       unsubscribe_email: { Args: { _email: string }; Returns: boolean }
       verify_certificate: {
         Args: { _code: string }
