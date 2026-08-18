@@ -935,3 +935,63 @@ export const studioErrorMessage = (e: unknown) => {
     return 'Ese alumno ya está en tu estudio.';
   return msg || 'Intenta de nuevo.';
 };
+
+/* ------------------------------------------------------------------ */
+/* Enlace personalizado + invitaciones por correo                      */
+/* ------------------------------------------------------------------ */
+
+export const useSetStudioSlug = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (slug: string) => {
+      const { data, error } = await supabase.rpc('set_studio_slug', { _slug: slug });
+      if (error) throw error;
+      const row = (Array.isArray(data) ? data[0] : data) as { ok: boolean; message: string; slug: string | null };
+      if (!row?.ok) throw new Error(row?.message ?? 'invalid_slug');
+      return row;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['teacher-account'] }),
+  });
+};
+
+export const SLUG_ERRORS: Record<string, string> = {
+  invalid_slug: 'Usa entre 3 y 40 letras o números (sin espacios ni acentos).',
+  reserved_slug: 'Ese enlace está reservado por la plataforma. Prueba otro.',
+  slug_taken: 'Ese enlace ya lo está usando otro maestro. Prueba otro.',
+  no_studio: 'Primero crea tu estudio.',
+  not_authenticated: 'Inicia sesión de nuevo.',
+};
+
+export interface StudioPublicProfile {
+  studio_name: string;
+  bio: string | null;
+  primary_instrument: string | null;
+  avatar_url: string | null;
+  invite_code: string;
+  public_slug: string | null;
+  is_active: boolean;
+}
+
+export const useStudioPublicProfile = (slug?: string) =>
+  useQuery({
+    queryKey: ['studio-public-profile', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('studio_public_profile', { _slug: slug! });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row ?? null) as StudioPublicProfile | null;
+    },
+    enabled: !!slug,
+  });
+
+export const useSendStudioInvite = () =>
+  useMutation({
+    mutationFn: async (studentId: string) => {
+      const { data, error } = await supabase.functions.invoke('send-studio-invite', {
+        body: { studentId },
+      });
+      if (error) throw error;
+      if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
+      return data as { ok: boolean; joinUrl: string };
+    },
+  });
