@@ -3429,6 +3429,7 @@ export type Database = {
         }[]
       }
       teacher_seats_used: { Args: { _account_id: string }; Returns: number }
+      unsubscribe_email: { Args: { _email: string }; Returns: boolean }
       verify_certificate: {
         Args: { _code: string }
         Returns: {
