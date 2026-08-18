@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { adminClient, corsHeaders, json, sendEmail, studioIdentity, userClient } from "../_shared/resend.ts";
 import { emailLayout } from "../_shared/email-layout.ts";
 
-const appUrl = () => Deno.env.get("APP_URL") ?? "https://chord-crafters-academy.lovable.app";
+const appUrl = () => Deno.env.get("APP_URL") ?? "https://acordelive.com";
 
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString("es-MX", {

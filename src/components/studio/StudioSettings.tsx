@@ -17,6 +17,7 @@ import {
 } from '@/hooks/useTeacherStudio';
 import { TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
 import { Badge } from '@/components/ui/badge';
+import { StudioPayments } from '@/components/studio/StudioPayments';
 
 export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
   const update = useUpdateTeacherAccount();
@@ -161,6 +162,8 @@ export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
           (registros, suscripciones, avisos generales) son un canal aparte y nunca se mezclan con los tuyos.
         </p>
       </Card>
+
+      <StudioPayments account={account} />
 
       <Card className="p-4 bg-card/70 border-white/10 space-y-4">
         <div className="flex items-center gap-2">
