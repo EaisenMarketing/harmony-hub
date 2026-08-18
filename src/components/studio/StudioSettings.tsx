@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Copy, Link2, Users, Megaphone, Mail } from 'lucide-react';
+import { Copy, Link2, Users, Megaphone } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { INSTRUMENT_PLANS } from '@/lib/instrument-access';
 import { TEACHER_PLANS, TEACHER_PLAN_MAP, studioJoinUrl, studioLeadsUrl } from '@/lib/teacher-plans';
