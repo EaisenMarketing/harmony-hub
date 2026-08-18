@@ -24,12 +24,16 @@ import { useGenerateScore, useSaveScore } from '@/hooks/useScores';
 import { exportMidi, exportMusicXml, exportPdf, exportPng } from '@/lib/score/export';
 import { playScore, previewNote, type PlayHandle } from '@/lib/score/playback';
 import {
-  DURATION_LABEL, KEY_SIGNATURES, SCORE_INSTRUMENTS, TIME_SIGNATURES, autoTab, autoTabChord,
-  beatsPerMeasure, emptyMeasure, keyToMidi, measureBeats, newScore,
-  type DrumPiece, type NoteDuration, type ScoreDoc, type ScoreInstrument, type ScoreNote,
+  ARTICULATION_LABEL, DURATION_GLYPH, DURATION_LABEL, DYNAMICS, KEY_SIGNATURES, SCORE_INSTRUMENTS,
+  TIME_SIGNATURES, autoTab, autoTabChord, beatsPerMeasure, emptyMeasure, fillMeasureWithRests,
+  keyToMidi, measureBeats, newScore, noteBeats, transposeNote,
+  type Articulation, type DrumPiece, type Dynamic, type NoteDuration, type ScoreDoc,
+  type ScoreInstrument, type ScoreMeasure, type ScoreNote,
 } from '@/lib/score/model';
 
-const DURATIONS: NoteDuration[] = ['w', 'h', 'q', '8', '16'];
+const DURATIONS: NoteDuration[] = ['w', 'h', 'q', '8', '16', '32'];
+const ARTICULATIONS: Articulation[] = ['staccato', 'accent', 'tenuto', 'marcato', 'fermata'];
+
 
 interface Props {
   initialDoc?: ScoreDoc;
