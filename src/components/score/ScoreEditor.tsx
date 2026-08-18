@@ -302,17 +302,57 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
     setPlayingRef(null);
   }, []);
 
-  const play = () => {
+  const play = useCallback((fromMeasure = 0) => {
     stop();
     playRef.current = playScore(doc, {
       metronome,
-      fromMeasure: 0,
+      fromMeasure,
       onEvent: (e) => setPlayingRef(e ? { measure: e.measure, index: e.index } : null),
       onEnd: () => { playRef.current = null; setPlayingRef(null); },
     });
-  };
+  }, [doc, metronome, stop]);
 
   useEffect(() => () => { playRef.current?.stop(); }, []);
+
+  // ------------------------------------------------ atajos de teclado (MuseScore)
+  useEffect(() => {
+    if (!shortcutsOn) return;
+    const LETTER_KEYS = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
+    const DUR_KEYS: Record<string, NoteDuration> = {
+      '2': 'w', '3': 'h', '4': 'q', '5': '8', '6': '16', '7': '32',
+    };
+    const handler = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+      const k = e.key.toLowerCase();
+
+      if ((e.metaKey || e.ctrlKey) && k === 'z') { e.preventDefault(); undoRef.current(); return; }
+      if ((e.metaKey || e.ctrlKey) && k === 'c') { e.preventDefault(); copyRef.current(); return; }
+      if ((e.metaKey || e.ctrlKey) && k === 'v') { e.preventDefault(); pasteRef.current(); return; }
+      if (e.metaKey || e.ctrlKey) return;
+
+      if (DUR_KEYS[k]) { e.preventDefault(); setSelectedDuration(DUR_KEYS[k]); return; }
+      if (k === '.') { e.preventDefault(); toggleDot(); return; }
+      if (k === 'r') { e.preventDefault(); addRestRef.current(); return; }
+      if (k === 't') { e.preventDefault(); toggleTie(); return; }
+      if (k === ' ') { e.preventDefault(); playRef.current ? stop() : play(activeMeasure); return; }
+      if (k === 'backspace' || k === 'delete') { e.preventDefault(); deleteSelected(); return; }
+      if (k === 'arrowright') { e.preventDefault(); moveCursor(1); return; }
+      if (k === 'arrowleft') { e.preventDefault(); moveCursor(-1); return; }
+      if (k === 'arrowup') { e.preventDefault(); transposeBy(e.shiftKey ? 12 : 1); return; }
+      if (k === 'arrowdown') { e.preventDefault(); transposeBy(e.shiftKey ? -12 : -1); return; }
+
+      if (!cfg.isDrums && LETTER_KEYS.includes(k)) {
+        e.preventDefault();
+        const octave = cfg.clef === 'bass' ? 3 : 4;
+        const acc = accidental;
+        insertRef.current({ keys: [`${k}${acc}/${octave}`] });
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [accidental, activeMeasure, cfg, deleteSelected, moveCursor, play, setSelectedDuration, shortcutsOn, stop, toggleDot, toggleTie, transposeBy]);
+
 
   // --------------------------------------------------------------- acciones
   const handleSave = async () => {
