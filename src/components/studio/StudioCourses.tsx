@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Plus, Pencil, Trash2, Video, ChevronRight, ArrowLeft, BookOpen } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { INSTRUMENT_PLANS } from '@/lib/instrument-access';
+import { VideoUploader } from '@/components/admin/VideoUploader';
 import {
   useStudioCourses,
   useSaveStudioCourse,
@@ -101,7 +102,9 @@ const LessonsView = ({ account, course, onBack }: { account: TeacherAccount; cou
       ) : lessons.length === 0 ? (
         <Card className="p-6 text-center bg-card/70 border-white/10">
           <Video className="w-6 h-6 text-primary mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Agrega tu primera lección con el enlace de tu video.</p>
+          <p className="text-sm text-muted-foreground">
+            Agrega tu primera lección: sube el video desde tu computadora o pega un enlace de YouTube/Vimeo.
+          </p>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -148,9 +151,21 @@ const LessonsView = ({ account, course, onBack }: { account: TeacherAccount; cou
               <Label>Descripción</Label>
               <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Enlace del video (YouTube, Vimeo, Drive…)</Label>
-              <Input value={form.video_url} onChange={(e) => setForm({ ...form, video_url: e.target.value })} />
+            <div className="space-y-2">
+              <Label>Video de la lección</Label>
+              <VideoUploader
+                value={form.video_url}
+                onChange={(url) => setForm({ ...form, video_url: url })}
+                folder={`estudios/${account.id}`}
+              />
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">…o pega un enlace (YouTube, Vimeo, Drive)</Label>
+                <Input
+                  placeholder="https://…"
+                  value={form.video_url}
+                  onChange={(e) => setForm({ ...form, video_url: e.target.value })}
+                />
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label>Material adjunto (PDF/enlace)</Label>
