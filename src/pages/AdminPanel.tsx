@@ -20,9 +20,12 @@ import { TeacherAccountsManagement } from '@/components/admin/TeacherAccountsMan
 import { TeacherUsageDashboard } from '@/components/admin/TeacherUsageDashboard';
 import { SubscriptionsDashboard } from '@/components/admin/SubscriptionsDashboard';
 import { NotificationBroadcast } from '@/components/admin/NotificationBroadcast';
+import { AdminSettings } from '@/components/admin/AdminSettings';
 
-import { LogOut, Shield } from 'lucide-react';
+import { LogOut, Shield, Compass } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+
 
 const AdminPanel = () => {
   const { user, loading: authLoading, signOut } = useAuth();
