@@ -17,6 +17,7 @@ import {
 } from '@/hooks/useTeacherStudio';
 import { TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
 import { Badge } from '@/components/ui/badge';
+import { StudioPayments } from '@/components/studio/StudioPayments';
 
 export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
   const update = useUpdateTeacherAccount();
