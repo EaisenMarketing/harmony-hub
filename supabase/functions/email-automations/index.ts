@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { adminClient, corsHeaders, json, sendEmail, userClient } from "../_shared/resend.ts";
+import { adminClient, corsHeaders, json, sendEmail, studioIdentity, userClient } from "../_shared/resend.ts";
 import { emailLayout } from "../_shared/email-layout.ts";
 
 const appUrl = () => Deno.env.get("APP_URL") ?? "https://chord-crafters-academy.lovable.app";
@@ -140,6 +140,11 @@ serve(async (req) => {
         .eq("status", "active")
         .not("email", "is", null);
 
+      const identity = studioIdentity({
+        studio_name: account?.studio_name ?? "Estudio de música",
+        contact_email: account?.contact_email ?? null,
+      });
+
       for (const s of students ?? []) {
         if (!s.email) continue;
         const r = await sendEmail(db, {
@@ -147,16 +152,17 @@ serve(async (req) => {
           subject: `Recordatorio de clase: ${c.title}`,
           template: "studio_class_reminder",
           teacherAccountId: c.teacher_account_id,
-          replyTo: account?.contact_email ?? undefined,
+          from: identity.from,
+          replyTo: identity.replyTo,
           idempotencyKey: `studio-class-reminder-${c.id}-${s.id}`,
           html: emailLayout({
-            brand: account?.studio_name ?? "Acorde Live",
+            brand: identity.brand,
             heading: "Tu clase es muy pronto",
             intro: s.full_name ? `Hola ${s.full_name},` : undefined,
             paragraphs: [`${c.title} — ${fmt(c.scheduled_at)}.`],
             ctaLabel: c.join_url ? "Entrar a la clase" : "Ver mi estudio",
             ctaUrl: c.join_url ?? `${appUrl()}/mi-estudio`,
-            footerNote: `${account?.studio_name ?? "Acorde Live"} · Enviado con Acorde Live`,
+            footerNote: identity.footerNote,
           }),
         });
         if (r.ok) summary.studio_class_reminders++;
@@ -200,12 +206,12 @@ serve(async (req) => {
       const r = await sendEmail(db, {
         to,
         subject: `Tienes ${leads.length} prospecto(s) sin seguimiento`,
-        template: "lead_followup_digest",
+        template: "platform_lead_digest",
         teacherAccountId: accountId,
         idempotencyKey: `lead-digest-${accountId}-${dayKey}`,
         html: emailLayout({
-          brand: account?.studio_name ?? "Acorde Live",
-          heading: "Prospectos esperando respuesta",
+          brand: "Acorde Live",
+          heading: `Prospectos esperando respuesta · ${account?.studio_name ?? "tu estudio"}`,
           paragraphs: ["Estos prospectos llevan más de 3 días sin contacto. Un mensaje rápido suele convertirlos en alumnos."],
           bodyHtml: `<table style="width:100%;border-collapse:collapse">${rows}</table>`,
           ctaLabel: "Abrir mi CRM",
