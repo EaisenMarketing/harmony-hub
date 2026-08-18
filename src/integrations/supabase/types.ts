@@ -141,6 +141,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          created_at: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
@@ -3386,6 +3404,7 @@ export type Database = {
         }
         Returns: string
       }
+      run_email_automations: { Args: never; Returns: undefined }
       set_active_instrument: {
         Args: { _instrument: string; _level?: string }
         Returns: {
