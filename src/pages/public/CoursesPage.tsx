@@ -43,7 +43,7 @@ export default function CoursesPage() {
     itemListElement: filtered.slice(0, 20).map((c, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      url: `https://chord-crafters-academy.lovable.app/cursos/${c.slug ?? c.id}`,
+      url: `https://acordelive.com/cursos/${c.slug ?? c.id}`,
       name: c.title,
     })),
   };

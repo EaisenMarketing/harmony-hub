@@ -6,4 +6,4 @@ Disallow: /instructor
 Disallow: /adflow
 Disallow: /checkout
 
-Sitemap: https://chord-crafters-academy.lovable.app/sitemap.xml
+Sitemap: https://acordelive.com/sitemap.xml

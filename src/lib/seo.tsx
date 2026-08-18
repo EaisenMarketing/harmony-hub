@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://chord-crafters-academy.lovable.app";
+const SITE_URL = "https://acordelive.com";
 const SITE_NAME = "Acorde Live";
 
 interface SeoProps {
