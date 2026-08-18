@@ -53,6 +53,10 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
   const [chordMode, setChordMode] = useState(false);
   const [metronome, setMetronome] = useState(true);
   const [playingRef, setPlayingRef] = useState<NoteRef | null>(null);
+  const [clipboard, setClipboard] = useState<ScoreMeasure | null>(null);
+  const [measuresPerRow, setMeasuresPerRow] = useState(2);
+  const [shortcutsOn, setShortcutsOn] = useState(true);
+
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiYoutube, setAiYoutube] = useState('');
