@@ -3054,47 +3054,6 @@ export type Database = {
           },
         ]
       }
-      teacher_stripe_settings: {
-        Row: {
-          account_id: string
-          connected_at: string | null
-          created_at: string
-          currency: string
-          monthly_price: number | null
-          payment_link_url: string | null
-          publishable_key: string | null
-          updated_at: string
-        }
-        Insert: {
-          account_id: string
-          connected_at?: string | null
-          created_at?: string
-          currency?: string
-          monthly_price?: number | null
-          payment_link_url?: string | null
-          publishable_key?: string | null
-          updated_at?: string
-        }
-        Update: {
-          account_id?: string
-          connected_at?: string | null
-          created_at?: string
-          currency?: string
-          monthly_price?: number | null
-          payment_link_url?: string | null
-          publishable_key?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "teacher_stripe_settings_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: true
-            referencedRelation: "teacher_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       teacher_students: {
         Row: {
           created_at: string
@@ -3503,10 +3462,6 @@ export type Database = {
           trial_ends_at: string
         }[]
       }
-      disconnect_teacher_stripe: {
-        Args: { _account_id: string }
-        Returns: boolean
-      }
       get_user_instrument: { Args: { _user_id: string }; Returns: string }
       get_user_plan: {
         Args: { _user_id: string }
@@ -3559,17 +3514,22 @@ export type Database = {
       }
       reserved_studio_slug: { Args: { _slug: string }; Returns: boolean }
       run_email_automations: { Args: never; Returns: undefined }
-      save_teacher_stripe_settings: {
+      save_studio_email_settings: {
         Args: {
           _account_id: string
-          _currency: string
-          _monthly_price: number
-          _payment_link_url: string
-          _publishable_key: string
-          _secret_key: string
+          _brand_color?: string
+          _from_name: string
+          _logo_url?: string
+          _reply_to_email: string
         }
         Returns: {
-          connected: boolean
+          message: string
+          ok: boolean
+        }[]
+      }
+      save_studio_pricing: {
+        Args: { _account_id: string; _currency: string; _monthly_price: number }
+        Returns: {
           message: string
           ok: boolean
         }[]
@@ -3659,17 +3619,6 @@ export type Database = {
         }[]
       }
       teacher_seats_used: { Args: { _account_id: string }; Returns: number }
-      teacher_stripe_status: {
-        Args: { _account_id: string }
-        Returns: {
-          connected: boolean
-          connected_at: string
-          currency: string
-          monthly_price: number
-          payment_link_url: string
-          publishable_key: string
-        }[]
-      }
       unsubscribe_email: { Args: { _email: string }; Returns: boolean }
       verify_certificate: {
         Args: { _code: string }
