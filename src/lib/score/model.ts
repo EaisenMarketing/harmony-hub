@@ -2,7 +2,10 @@
 
 export type ScoreInstrument = 'guitar' | 'electric_guitar' | 'bass' | 'piano' | 'trumpet' | 'drums';
 
-export type NoteDuration = 'w' | 'h' | 'q' | '8' | '16';
+export type NoteDuration = 'w' | 'h' | 'q' | '8' | '16' | '32';
+
+export type Articulation = 'staccato' | 'accent' | 'tenuto' | 'marcato' | 'fermata';
+export type Dynamic = 'pp' | 'p' | 'mp' | 'mf' | 'f' | 'ff';
 
 export interface ScoreNote {
   /** Claves VexFlow: ["c/4", "e/4"]. Para batería son posiciones de la clave percusiva. */
@@ -16,6 +19,14 @@ export interface ScoreNote {
   drums?: DrumPiece[];
   /** Acorde escrito arriba del compás. */
   chord?: string;
+  /** Ligadura de prolongación hacia la nota siguiente. */
+  tie?: boolean;
+  /** Articulación (staccato, acento...). */
+  articulation?: Articulation;
+  /** Matiz dinámico escrito debajo del pentagrama. */
+  dynamic?: Dynamic;
+  /** Sílaba de letra cantada. */
+  lyric?: string;
 }
 
 export interface ScoreMeasure {
@@ -25,6 +36,7 @@ export interface ScoreMeasure {
 export interface ScoreContent {
   measures: ScoreMeasure[];
 }
+
 
 export interface ScoreDoc {
   id?: string;
