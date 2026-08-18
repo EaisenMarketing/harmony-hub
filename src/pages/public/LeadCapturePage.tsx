@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Music, CheckCircle2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { SEO } from '@/lib/seo';
+import { Seo } from '@/lib/seo';
 
 const LeadCapturePage = () => {
   const { code } = useParams<{ code: string }>();
@@ -59,7 +59,7 @@ const LeadCapturePage = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <SEO
+      <Seo
         title={`Clases de música con ${studio ?? 'tu maestro'} | Acorde Live`}
         description="Déjanos tus datos y tu maestro te contactará para agendar tu clase de prueba."
       />
