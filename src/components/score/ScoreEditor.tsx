@@ -474,9 +474,15 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
               <Pause className="w-4 h-4" /> Detener
             </Button>
           ) : (
-            <Button size="sm" onClick={play} className="gap-2">
-              <Play className="w-4 h-4" /> Reproducir
-            </Button>
+            <>
+              <Button size="sm" onClick={() => play(0)} className="gap-2">
+                <Play className="w-4 h-4" /> Reproducir
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => play(activeMeasure)} className="gap-2">
+                <Play className="w-3.5 h-3.5" /> Desde compás {activeMeasure + 1}
+              </Button>
+            </>
+
           )}
           <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/40">
             <Switch id="metro" checked={metronome} onCheckedChange={setMetronome} />
