@@ -140,7 +140,7 @@ serve(async (req) => {
         .eq("status", "active")
         .not("email", "is", null);
 
-      const identity = await resolveStudioIdentity(db, accountId, {
+      const identity = await resolveStudioIdentity(db, c.teacher_account_id, {
         studio_name: account?.studio_name ?? "Estudio de música",
         contact_email: account?.contact_email ?? null,
       });
