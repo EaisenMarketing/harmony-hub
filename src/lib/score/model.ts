@@ -53,12 +53,17 @@ export interface ScoreDoc {
 }
 
 export const DURATION_BEATS: Record<NoteDuration, number> = {
-  w: 4, h: 2, q: 1, '8': 0.5, '16': 0.25,
+  w: 4, h: 2, q: 1, '8': 0.5, '16': 0.25, '32': 0.125,
 };
 
 export const DURATION_LABEL: Record<NoteDuration, string> = {
-  w: 'Redonda', h: 'Blanca', q: 'Negra', '8': 'Corchea', '16': 'Semicorchea',
+  w: 'Redonda', h: 'Blanca', q: 'Negra', '8': 'Corchea', '16': 'Semicorchea', '32': 'Fusa',
 };
+
+export const DURATION_GLYPH: Record<NoteDuration, string> = {
+  w: '𝅝', h: '𝅗𝅥', q: '♩', '8': '♪', '16': '𝅘𝅥𝅯', '32': '𝅘𝅥𝅰',
+};
+
 
 export function noteBeats(n: ScoreNote): number {
   const base = DURATION_BEATS[n.duration];
