@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { adminClient, corsHeaders, json, sendEmail, studioIdentity, userClient } from "../_shared/resend.ts";
+import { adminClient, corsHeaders, json, sendEmail, resolveStudioIdentity, userClient } from "../_shared/resend.ts";
 import { emailLayout } from "../_shared/email-layout.ts";
 
 const appUrl = () => Deno.env.get("APP_URL") ?? "https://acordelive.com";
@@ -140,7 +140,7 @@ serve(async (req) => {
         .eq("status", "active")
         .not("email", "is", null);
 
-      const identity = studioIdentity({
+      const identity = await resolveStudioIdentity(db, accountId, {
         studio_name: account?.studio_name ?? "Estudio de música",
         contact_email: account?.contact_email ?? null,
       });
