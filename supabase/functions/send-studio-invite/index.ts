@@ -1,7 +1,7 @@
 import { corsHeaders, json, adminClient, userClient, sendEmail, studioIdentity } from "../_shared/resend.ts";
 import { emailLayout } from "../_shared/email-layout.ts";
 
-const appUrl = () => (Deno.env.get("APP_URL") ?? "https://chord-crafters-academy.lovable.app").replace(/\/+$/, "");
+const appUrl = () => (Deno.env.get("APP_URL") ?? "https://acordelive.com").replace(/\/+$/, "");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
