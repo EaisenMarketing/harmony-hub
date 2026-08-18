@@ -294,6 +294,15 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
     });
   };
 
+  // referencias vivas para los atajos de teclado
+  const undoRef = useRef(undo); undoRef.current = undo;
+  const copyRef = useRef(copyMeasure); copyRef.current = copyMeasure;
+  const pasteRef = useRef(pasteMeasure); pasteRef.current = pasteMeasure;
+  const addRestRef = useRef(addRest); addRestRef.current = addRest;
+  const insertRef = useRef(insertNote); insertRef.current = insertNote;
+
+
+
 
   // ------------------------------------------------------------- transporte
   const stop = useCallback(() => {
