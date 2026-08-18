@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Download, Eraser, FileMusic, Loader2, Mic, MicOff, Music2, Pause, Play, Plus,
-  Save, Sparkles, Trash2, Undo2, Keyboard as KeyboardIcon,
+  ArrowDown, ArrowUp, ClipboardPaste, Copy, Download, Eraser, FileMusic, Loader2, Mic, MicOff,
+  Music2, Pause, Play, Plus, Save, Sparkles, Trash2, Undo2, Keyboard as KeyboardIcon,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
