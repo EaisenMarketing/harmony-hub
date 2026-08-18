@@ -2278,6 +2278,7 @@ export type Database = {
       }
       teacher_accounts: {
         Row: {
+          avatar_url: string | null
           bio: string | null
           contact_email: string | null
           created_at: string
@@ -2290,6 +2291,7 @@ export type Database = {
           phone: string | null
           plan: Database["public"]["Enums"]["teacher_plan"]
           primary_instrument: string | null
+          public_slug: string | null
           seat_limit: number
           status: Database["public"]["Enums"]["teacher_account_status"]
           studio_name: string
@@ -2300,6 +2302,7 @@ export type Database = {
           zoom_room_url: string | null
         }
         Insert: {
+          avatar_url?: string | null
           bio?: string | null
           contact_email?: string | null
           created_at?: string
@@ -2312,6 +2315,7 @@ export type Database = {
           phone?: string | null
           plan?: Database["public"]["Enums"]["teacher_plan"]
           primary_instrument?: string | null
+          public_slug?: string | null
           seat_limit?: number
           status?: Database["public"]["Enums"]["teacher_account_status"]
           studio_name: string
@@ -2322,6 +2326,7 @@ export type Database = {
           zoom_room_url?: string | null
         }
         Update: {
+          avatar_url?: string | null
           bio?: string | null
           contact_email?: string | null
           created_at?: string
@@ -2334,6 +2339,7 @@ export type Database = {
           phone?: string | null
           plan?: Database["public"]["Enums"]["teacher_plan"]
           primary_instrument?: string | null
+          public_slug?: string | null
           seat_limit?: number
           status?: Database["public"]["Enums"]["teacher_account_status"]
           studio_name?: string
@@ -3404,12 +3410,21 @@ export type Database = {
         }
         Returns: string
       }
+      reserved_studio_slug: { Args: { _slug: string }; Returns: boolean }
       run_email_automations: { Args: never; Returns: undefined }
       set_active_instrument: {
         Args: { _instrument: string; _level?: string }
         Returns: {
           message: string
           ok: boolean
+        }[]
+      }
+      set_studio_slug: {
+        Args: { _slug: string }
+        Returns: {
+          message: string
+          ok: boolean
+          slug: string
         }[]
       }
       slugify: { Args: { input: string }; Returns: string }
@@ -3419,6 +3434,18 @@ export type Database = {
           message: string
           ok: boolean
           trial_ends_at: string
+        }[]
+      }
+      studio_public_profile: {
+        Args: { _slug: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          invite_code: string
+          is_active: boolean
+          primary_instrument: string
+          public_slug: string
+          studio_name: string
         }[]
       }
       studio_status: {
