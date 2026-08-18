@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { adminClient, corsHeaders, json, sendEmail, userClient } from "../_shared/resend.ts";
+import { adminClient, corsHeaders, json, sendEmail, studioIdentity, userClient } from "../_shared/resend.ts";
 import { emailLayout, textToHtml } from "../_shared/email-layout.ts";
 
 const appUrl = () => Deno.env.get("APP_URL") ?? "https://chord-crafters-academy.lovable.app";
@@ -46,8 +46,11 @@ serve(async (req) => {
       return json({ error: "Tu plan de maestro no está activo." }, 402);
     }
 
-    const replyTo = account.contact_email ?? undefined;
-    const footer = `${account.studio_name} · Enviado con Acorde Live`;
+    // Identidad del maestro: su nombre visible, respuestas a su correo.
+    const identity = studioIdentity(account);
+    const replyTo = identity.replyTo;
+    const from = identity.from;
+    const footer = identity.footerNote;
 
     /* --------------------------- Email individual --------------------------- */
     if (mode === "single") {
@@ -67,7 +70,7 @@ serve(async (req) => {
       if (!lead?.email) return json({ error: "El lead no tiene email" }, 400);
 
       const html = emailLayout({
-        brand: account.studio_name,
+        brand: identity.brand,
         heading: subject,
         intro: lead.full_name ? `Hola ${lead.full_name},` : undefined,
         bodyHtml: textToHtml(message),
@@ -80,8 +83,9 @@ serve(async (req) => {
         to: lead.email,
         subject,
         html,
+        from,
         replyTo,
-        template: "crm-lead-email",
+        template: "studio_crm_lead",
         teacherAccountId: accountId,
         leadId: lead.id,
       });
@@ -151,7 +155,7 @@ serve(async (req) => {
 
     for (const r of list) {
       const html = emailLayout({
-        brand: account.studio_name,
+        brand: identity.brand,
         heading: campaign.subject,
         intro: r.name ? `Hola ${r.name},` : undefined,
         bodyHtml: textToHtml(campaign.body),
@@ -165,8 +169,9 @@ serve(async (req) => {
         to: r.email,
         subject: campaign.subject,
         html,
+        from,
         replyTo,
-        template: "crm-campaign",
+        template: "studio_crm_campaign",
         marketing: true,
         teacherAccountId: accountId,
         campaignId: campaign.id,
