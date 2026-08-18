@@ -18,6 +18,7 @@ import {
 import { TEACHER_STATUS_LABEL } from '@/lib/teacher-plans';
 import { Badge } from '@/components/ui/badge';
 import { StudioPayments } from '@/components/studio/StudioPayments';
+import { StudioEmailSettings } from '@/components/studio/StudioEmailSettings';
 
 export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
   const update = useUpdateTeacherAccount();
