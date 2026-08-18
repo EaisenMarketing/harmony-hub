@@ -192,7 +192,17 @@ export const useSaveCampaign = () => {
         if (error) throw error;
         return data;
       }
-      const { data, error } = await supabase.from('teacher_campaigns').insert(c).select().single();
+      const row = {
+        teacher_account_id: c.teacher_account_id,
+        name: c.name ?? '',
+        subject: c.subject ?? '',
+        body: c.body ?? '',
+        cta_label: c.cta_label ?? null,
+        cta_url: c.cta_url ?? null,
+        audience: c.audience ?? 'leads',
+        stage_filter: c.stage_filter ?? null,
+      };
+      const { data, error } = await supabase.from('teacher_campaigns').insert(row).select().single();
       if (error) throw error;
       return data;
     },
