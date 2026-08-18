@@ -31,6 +31,7 @@ const ContactPage = lazy(() => import("./pages/public/ContactPage"));
 const SupportPage = lazy(() => import("./pages/public/SupportPage"));
 const FreeMaterialPage = lazy(() => import("./pages/public/FreeMaterialPage"));
 const LeadCapturePage = lazy(() => import("./pages/public/LeadCapturePage"));
+const StudioLandingPage = lazy(() => import("./pages/public/StudioLandingPage"));
 const UnsubscribePage = lazy(() => import("./pages/public/UnsubscribePage"));
 // (StaticPages se carga vía helper S abajo)
 
