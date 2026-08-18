@@ -100,7 +100,7 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
       await sendInvite.mutateAsync(student.id);
       toast({
         title: 'Invitación enviada',
-        description: `Le enviamos el correo a ${student.email} desde Acorde Live (hola@acordelive.com).`,
+        description: `Le enviamos el correo a ${student.email} como "${account.studio_name} vía Acorde Live", con respuestas a tu correo.`,
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : '';
@@ -258,8 +258,9 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
                   <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-              La invitación se envía automáticamente por correo desde <span className="text-foreground">Acorde Live
-              (hola@acordelive.com)</span>, con respuestas a tu email de contacto.
+              La invitación se envía automáticamente por correo con tu nombre:{' '}
+              <span className="text-foreground">{account.studio_name} vía Acorde Live</span>. Cuando el alumno responda,
+              el mensaje llega a tu correo de contacto.
             </p>
             <Button className="w-full" onClick={submit} disabled={save.isPending}>
                   {editing ? 'Guardar cambios' : 'Invitar'}
