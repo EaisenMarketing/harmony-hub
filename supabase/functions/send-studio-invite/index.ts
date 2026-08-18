@@ -1,4 +1,4 @@
-import { corsHeaders, json, adminClient, userClient, sendEmail } from "../_shared/resend.ts";
+import { corsHeaders, json, adminClient, userClient, sendEmail, studioIdentity } from "../_shared/resend.ts";
 import { emailLayout } from "../_shared/email-layout.ts";
 
 const appUrl = () => (Deno.env.get("APP_URL") ?? "https://chord-crafters-academy.lovable.app").replace(/\/+$/, "");
@@ -49,7 +49,10 @@ Deno.serve(async (req) => {
 
     const firstName = (student.full_name ?? "").trim().split(/\s+/)[0] || "Hola";
 
+    const identity = studioIdentity(account);
+
     const html = emailLayout({
+      brand: identity.brand,
       heading: `${account.studio_name} te invitó a sus clases`,
       intro: `${firstName}, tu maestro te dio acceso a su estudio en Acorde Live.`,
       paragraphs: [
@@ -59,16 +62,17 @@ Deno.serve(async (req) => {
       ],
       ctaLabel: "Activar mi acceso",
       ctaUrl: joinUrl,
-      footerNote: `Invitación enviada por ${account.studio_name} a través de Acorde Live.`,
+      footerNote: `Invitación enviada por ${identity.brand}. Responde a este correo para hablar con tu maestro.`,
     });
 
     const result = await sendEmail(db, {
       to: student.email,
-      subject: `${account.studio_name} te invitó a sus clases en Acorde Live`,
+      subject: `${identity.brand} te invitó a sus clases`,
       html,
       template: "studio_invite",
       teacherAccountId: account.id,
-      replyTo: account.contact_email ?? undefined,
+      from: identity.from,
+      replyTo: identity.replyTo,
     });
 
     if (!result.ok) return json({ error: result.error ?? "send_failed", status: result.status }, 502);
