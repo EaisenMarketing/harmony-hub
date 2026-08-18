@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Music, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useStudioByInviteCode, useClaimStudioInvite } from '@/hooks/useTeacherStudio';
+import { useStudioPublicProfile, useClaimStudioInvite } from '@/hooks/useTeacherStudio';
 import { toast } from '@/hooks/use-toast';
 
 const MESSAGES: Record<string, string> = {
@@ -15,9 +15,10 @@ const MESSAGES: Record<string, string> = {
 };
 
 const StudioInvitePage = () => {
-  const { code } = useParams<{ code: string }>();
+  const params = useParams<{ code?: string; slug?: string }>();
+  const code = params.code ?? params.slug;
   const { user, loading } = useAuth();
-  const { data: studio, isLoading } = useStudioByInviteCode(code);
+  const { data: studio, isLoading } = useStudioPublicProfile(code);
   const claim = useClaimStudioInvite();
   const navigate = useNavigate();
   const [done, setDone] = useState(false);
@@ -77,7 +78,7 @@ const StudioInvitePage = () => {
 
             {!user ? (
               <Button asChild className="w-full">
-                <Link to={`/auth?next=${encodeURIComponent(`/invitacion/${code}`)}`}>
+                <Link to={`/auth?next=${encodeURIComponent(window.location.pathname)}`}>
                   Crear cuenta o iniciar sesión
                 </Link>
               </Button>

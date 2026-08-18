@@ -75,3 +75,19 @@ export const TEACHER_STUDENT_STATUS_LABEL: Record<string, string> = {
 
 export const studioInviteUrl = (code: string) =>
   `${window.location.origin}/invitacion/${code}`;
+
+/** URL pública del estudio (landing de captación): acordelive.com/mi-academia */
+export const studioPublicUrl = (slugOrCode: string) =>
+  `${window.location.origin}/${slugOrCode}`;
+
+/** URL para que un alumno se una directo al estudio. */
+export const studioJoinUrl = (account: { public_slug?: string | null; invite_code: string }) =>
+  account.public_slug
+    ? `${window.location.origin}/${account.public_slug}/unirme`
+    : `${window.location.origin}/invitacion/${account.invite_code}`;
+
+/** URL de captación de prospectos (redes sociales). */
+export const studioLeadsUrl = (account: { public_slug?: string | null; invite_code: string }) =>
+  account.public_slug
+    ? `${window.location.origin}/${account.public_slug}`
+    : `${window.location.origin}/clases/${account.invite_code}`;

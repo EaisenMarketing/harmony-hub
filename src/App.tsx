@@ -31,6 +31,7 @@ const ContactPage = lazy(() => import("./pages/public/ContactPage"));
 const SupportPage = lazy(() => import("./pages/public/SupportPage"));
 const FreeMaterialPage = lazy(() => import("./pages/public/FreeMaterialPage"));
 const LeadCapturePage = lazy(() => import("./pages/public/LeadCapturePage"));
+const StudioLandingPage = lazy(() => import("./pages/public/StudioLandingPage"));
 const UnsubscribePage = lazy(() => import("./pages/public/UnsubscribePage"));
 // (StaticPages se carga vía helper S abajo)
 
@@ -121,6 +122,10 @@ const App = () => (
         <Route path="/invitacion/:code" element={<WithAuth><StudioInvitePage /></WithAuth>} />
         <Route path="/adflow" element={<WithAuth><AdFlowDashboard /></WithAuth>} />
         <Route path="/aplicar-maestro" element={<WithData><TeacherApplicationPage /></WithData>} />
+
+        {/* Enlace personalizado del maestro: /mi-academia y /mi-academia/unirme */}
+        <Route path="/:slug/unirme" element={<WithAuth><StudioInvitePage /></WithAuth>} />
+        <Route path="/:slug" element={<WithData><StudioLandingPage /></WithData>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
