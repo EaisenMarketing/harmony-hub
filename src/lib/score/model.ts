@@ -2,7 +2,10 @@
 
 export type ScoreInstrument = 'guitar' | 'electric_guitar' | 'bass' | 'piano' | 'trumpet' | 'drums';
 
-export type NoteDuration = 'w' | 'h' | 'q' | '8' | '16';
+export type NoteDuration = 'w' | 'h' | 'q' | '8' | '16' | '32';
+
+export type Articulation = 'staccato' | 'accent' | 'tenuto' | 'marcato' | 'fermata';
+export type Dynamic = 'pp' | 'p' | 'mp' | 'mf' | 'f' | 'ff';
 
 export interface ScoreNote {
   /** Claves VexFlow: ["c/4", "e/4"]. Para batería son posiciones de la clave percusiva. */
@@ -16,6 +19,14 @@ export interface ScoreNote {
   drums?: DrumPiece[];
   /** Acorde escrito arriba del compás. */
   chord?: string;
+  /** Ligadura de prolongación hacia la nota siguiente. */
+  tie?: boolean;
+  /** Articulación (staccato, acento...). */
+  articulation?: Articulation;
+  /** Matiz dinámico escrito debajo del pentagrama. */
+  dynamic?: Dynamic;
+  /** Sílaba de letra cantada. */
+  lyric?: string;
 }
 
 export interface ScoreMeasure {
@@ -25,6 +36,7 @@ export interface ScoreMeasure {
 export interface ScoreContent {
   measures: ScoreMeasure[];
 }
+
 
 export interface ScoreDoc {
   id?: string;
@@ -41,12 +53,17 @@ export interface ScoreDoc {
 }
 
 export const DURATION_BEATS: Record<NoteDuration, number> = {
-  w: 4, h: 2, q: 1, '8': 0.5, '16': 0.25,
+  w: 4, h: 2, q: 1, '8': 0.5, '16': 0.25, '32': 0.125,
 };
 
 export const DURATION_LABEL: Record<NoteDuration, string> = {
-  w: 'Redonda', h: 'Blanca', q: 'Negra', '8': 'Corchea', '16': 'Semicorchea',
+  w: 'Redonda', h: 'Blanca', q: 'Negra', '8': 'Corchea', '16': 'Semicorchea', '32': 'Fusa',
 };
+
+export const DURATION_GLYPH: Record<NoteDuration, string> = {
+  w: '𝅝', h: '𝅗𝅥', q: '♩', '8': '♪', '16': '𝅘𝅥𝅯', '32': '𝅘𝅥𝅰',
+};
+
 
 export function noteBeats(n: ScoreNote): number {
   const base = DURATION_BEATS[n.duration];
@@ -221,3 +238,79 @@ export function newScore(instrument: ScoreInstrument): ScoreDoc {
 
 export const KEY_SIGNATURES = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Am', 'Em', 'Bm', 'Dm', 'Gm', 'Cm'];
 export const TIME_SIGNATURES = ['4/4', '3/4', '2/4', '6/8', '12/8', '5/4'];
+
+// ------------------------------------------------------------- edición avanzada
+
+/** Transpone una clave VexFlow por semitonos, respetando la ortografía por sostenidos. */
+export function transposeKey(key: string, semitones: number): string {
+  return midiToKey(keyToMidi(key) + semitones);
+}
+
+export function transposeNote(n: ScoreNote, semitones: number, tuning?: number[]): ScoreNote {
+  if (n.rest || !n.keys.length) return n;
+  const keys = n.keys.map((k) => transposeKey(k, semitones));
+  const out: ScoreNote = { ...n, keys };
+  if (tuning) {
+    const midis = keys.map(keyToMidi);
+    out.tab = midis.length > 1
+      ? autoTabChord(midis, tuning)
+      : [autoTab(midis[0], tuning) ?? { str: 1, fret: 0 }];
+  }
+  return out;
+}
+
+const REST_STEPS: { d: NoteDuration; beats: number; dotted?: boolean }[] = [
+  { d: 'w', beats: 4 },
+  { d: 'h', beats: 3, dotted: true },
+  { d: 'h', beats: 2 },
+  { d: 'q', beats: 1.5, dotted: true },
+  { d: 'q', beats: 1 },
+  { d: '8', beats: 0.75, dotted: true },
+  { d: '8', beats: 0.5 },
+  { d: '16', beats: 0.25 },
+  { d: '32', beats: 0.125 },
+];
+
+/** Descompone un número de tiempos en silencios estándar. */
+export function restsForBeats(beats: number): ScoreNote[] {
+  const out: ScoreNote[] = [];
+  let left = Math.round(beats * 32) / 32;
+  let guard = 0;
+  while (left > 0.001 && guard++ < 64) {
+    const step = REST_STEPS.find((s) => s.beats <= left + 0.001);
+    if (!step) break;
+    out.push({ keys: [], duration: step.d, dotted: step.dotted, rest: true });
+    left = Math.round((left - step.beats) * 32) / 32;
+  }
+  return out;
+}
+
+/** Completa el compás con silencios hasta cuadrar el compás. */
+export function fillMeasureWithRests(m: ScoreMeasure, timeSignature: string): ScoreMeasure {
+  const missing = beatsPerMeasure(timeSignature) - measureBeats(m);
+  if (missing <= 0.001) return m;
+  return { notes: [...m.notes, ...restsForBeats(missing)] };
+}
+
+export const ARTICULATION_LABEL: Record<Articulation, string> = {
+  staccato: 'Staccato',
+  accent: 'Acento',
+  tenuto: 'Tenuto',
+  marcato: 'Marcato',
+  fermata: 'Fermata',
+};
+
+/** Códigos de articulación de VexFlow. */
+export const ARTICULATION_CODE: Record<Articulation, string> = {
+  staccato: 'a.',
+  accent: 'a>',
+  tenuto: 'a-',
+  marcato: 'a^',
+  fermata: 'a@a',
+};
+
+export const DYNAMICS: Dynamic[] = ['pp', 'p', 'mp', 'mf', 'f', 'ff'];
+
+export const DYNAMIC_GAIN: Record<Dynamic, number> = {
+  pp: 0.35, p: 0.5, mp: 0.7, mf: 0.85, f: 1, ff: 1.15,
+};

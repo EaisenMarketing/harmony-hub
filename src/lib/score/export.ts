@@ -46,11 +46,12 @@ export function exportMidi(doc: ScoreDoc) {
 // --------------------------------------------------------------- MusicXML
 
 const XML_DUR: Record<string, { type: string; divisions: number }> = {
-  w: { type: 'whole', divisions: 16 },
-  h: { type: 'half', divisions: 8 },
-  q: { type: 'quarter', divisions: 4 },
-  '8': { type: 'eighth', divisions: 2 },
-  '16': { type: '16th', divisions: 1 },
+  w: { type: "whole", divisions: 32 },
+  h: { type: "half", divisions: 16 },
+  q: { type: "quarter", divisions: 8 },
+  "8": { type: "eighth", divisions: 4 },
+  '16': { type: '16th', divisions: 2 },
+  '32': { type: '32nd', divisions: 1 },
 };
 
 export function exportMusicXml(doc: ScoreDoc) {
@@ -68,16 +69,25 @@ export function exportMusicXml(doc: ScoreDoc) {
       const keys = cfg.isDrums
         ? (n.drums ?? []).map((p) => DRUM_MAP[p].key)
         : n.keys;
+      const artMap: Record<string, string> = {
+        staccato: '<staccato/>', accent: '<accent/>', tenuto: '<tenuto/>', marcato: '<strong-accent/>',
+      };
+      const artXml = n.articulation && artMap[n.articulation]
+        ? `<notations><articulations>${artMap[n.articulation]}</articulations></notations>`
+        : n.articulation === 'fermata' ? '<notations><fermata/></notations>' : '';
+      const tieXml = n.tie ? '<tie type="start"/>' : '';
+      const lyricXml = n.lyric ? `<lyric><syllabic>single</syllabic><text>${n.lyric}</text></lyric>` : '';
       return keys.map((k, ki) => {
         const [rawStep, oct] = k.split('/');
         const step = rawStep[0].toUpperCase();
         const alter = rawStep.includes('#') ? '<alter>1</alter>' : rawStep.includes('b') && rawStep.length > 1 ? '<alter>-1</alter>' : '';
-        return `      <note>${ki > 0 ? '<chord/>' : ''}<pitch><step>${step}</step>${alter}<octave>${oct}</octave></pitch><duration>${dur}</duration><type>${d.type}</type>${dot}</note>`;
+        return `      <note>${ki > 0 ? '<chord/>' : ''}<pitch><step>${step}</step>${alter}<octave>${oct}</octave></pitch><duration>${dur}</duration>${tieXml}<type>${d.type}</type>${dot}${ki === 0 ? artXml : ''}${ki === 0 ? lyricXml : ''}</note>`;
       }).join('\n');
+
     }).join('\n');
 
     const attrs = i === 0
-      ? `      <attributes><divisions>4</divisions><key><fifths>0</fifths></key><time><beats>${beats}</beats><beat-type>${beatType}</beat-type></time><clef><sign>${sign}</sign><line>${line}</line></clef></attributes>\n`
+      ? `      <attributes><divisions>8</divisions><key><fifths>0</fifths></key><time><beats>${beats}</beats><beat-type>${beatType}</beat-type></time><clef><sign>${sign}</sign><line>${line}</line></clef></attributes>\n`
       : '';
     return `    <measure number="${i + 1}">\n${attrs}${notes}\n    </measure>`;
   }).join('\n');

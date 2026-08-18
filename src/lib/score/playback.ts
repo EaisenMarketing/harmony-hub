@@ -1,5 +1,5 @@
 import {
-  DRUM_MAP, SCORE_INSTRUMENTS, keyToMidi, midiToFreq, noteBeats,
+  DRUM_MAP, DYNAMIC_GAIN, SCORE_INSTRUMENTS, keyToMidi, midiToFreq, noteBeats,
   type ScoreDoc, type ScoreNote,
 } from './model';
 
@@ -11,15 +11,26 @@ export interface FlatEvent {
   midis: number[];
   drums: number[];
   rest: boolean;
+  /** Duración sonora real (staccato acorta, ligadura alarga). */
+  sustain: number;
+  gain: number;
 }
 
 export function flattenScore(doc: ScoreDoc, fromMeasure = 0): FlatEvent[] {
   const spb = 60 / Math.max(20, doc.tempo);
   const out: FlatEvent[] = [];
   let t = 0;
+  let carriedGain = 0.85;
   doc.content.measures.forEach((m, mi) => {
     m.notes.forEach((n, ni) => {
       const dur = noteBeats(n) * spb;
+      if (n.dynamic) carriedGain = DYNAMIC_GAIN[n.dynamic];
+      const next = m.notes[ni + 1];
+      let sustain = dur * 0.95;
+      if (n.articulation === 'staccato') sustain = dur * 0.45;
+      else if (n.articulation === 'tenuto') sustain = dur;
+      if (n.tie && next && !next.rest) sustain = dur + noteBeats(next) * spb * 0.95;
+      if (n.articulation === 'fermata') sustain = dur * 1.6;
       if (mi >= fromMeasure) {
         out.push({
           measure: mi,
@@ -29,6 +40,8 @@ export function flattenScore(doc: ScoreDoc, fromMeasure = 0): FlatEvent[] {
           midis: n.rest ? [] : n.keys.map(keyToMidi),
           drums: n.rest ? [] : (n.drums ?? []).map((d) => DRUM_MAP[d].midi),
           rest: !!n.rest,
+          sustain,
+          gain: carriedGain * (n.articulation === 'accent' || n.articulation === 'marcato' ? 1.25 : 1),
         });
       }
       if (mi >= fromMeasure) t += dur;
@@ -39,7 +52,7 @@ export function flattenScore(doc: ScoreDoc, fromMeasure = 0): FlatEvent[] {
 
 type Timbre = 'pluck' | 'piano' | 'brass' | 'drums';
 
-function playTone(ctx: AudioContext, out: GainNode, freq: number, at: number, dur: number, timbre: Timbre) {
+function playTone(ctx: AudioContext, out: GainNode, freq: number, at: number, dur: number, timbre: Timbre, level = 1) {
   const g = ctx.createGain();
   g.connect(out);
   const osc = ctx.createOscillator();
@@ -64,7 +77,7 @@ function playTone(ctx: AudioContext, out: GainNode, freq: number, at: number, du
   filter.type = 'lowpass';
   filter.frequency.value = timbre === 'brass' ? 3200 : 4800;
 
-  const peak = 0.22;
+  const peak = 0.22 * Math.min(1.4, Math.max(0.2, level));
   const attack = timbre === 'brass' ? 0.06 : 0.005;
   const release = timbre === 'pluck' ? Math.min(dur, 0.9) : 0.18;
   g.gain.setValueAtTime(0.0001, at);
@@ -149,7 +162,7 @@ export function playScore(
     const at = start + e.time;
     if (!e.rest) {
       if (timbre === 'drums') e.drums.forEach((m) => playDrum(ctx, master, m, at));
-      else e.midis.forEach((m) => playTone(ctx, master, midiToFreq(m), at, e.duration * 0.95, timbre));
+      else e.midis.forEach((m) => playTone(ctx, master, midiToFreq(m), at, e.sustain, timbre, e.gain));
     }
     if (opts.onEvent) {
       timers.push(window.setTimeout(() => { if (!stopped) opts.onEvent?.(e); }, (at - ctx.currentTime) * 1000));

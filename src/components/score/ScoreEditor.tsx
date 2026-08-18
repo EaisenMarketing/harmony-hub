@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Download, Eraser, FileMusic, Loader2, Mic, MicOff, Music2, Pause, Play, Plus,
-  Save, Sparkles, Trash2, Undo2, Keyboard as KeyboardIcon,
+  ArrowDown, ArrowUp, ClipboardPaste, Copy, Download, Eraser, FileMusic, Loader2, Mic, MicOff,
+  Music2, Pause, Play, Plus, Save, Sparkles, Trash2, Undo2, Keyboard as KeyboardIcon,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,12 +25,16 @@ import { useGenerateScore, useSaveScore } from '@/hooks/useScores';
 import { exportMidi, exportMusicXml, exportPdf, exportPng } from '@/lib/score/export';
 import { playScore, previewNote, type PlayHandle } from '@/lib/score/playback';
 import {
-  DURATION_LABEL, KEY_SIGNATURES, SCORE_INSTRUMENTS, TIME_SIGNATURES, autoTab, autoTabChord,
-  beatsPerMeasure, emptyMeasure, keyToMidi, measureBeats, newScore,
-  type DrumPiece, type NoteDuration, type ScoreDoc, type ScoreInstrument, type ScoreNote,
+  ARTICULATION_LABEL, DURATION_GLYPH, DURATION_LABEL, DYNAMICS, KEY_SIGNATURES, SCORE_INSTRUMENTS,
+  TIME_SIGNATURES, autoTab, autoTabChord, beatsPerMeasure, emptyMeasure, fillMeasureWithRests,
+  keyToMidi, measureBeats, newScore, noteBeats, transposeNote,
+  type Articulation, type DrumPiece, type Dynamic, type NoteDuration, type ScoreDoc,
+  type ScoreInstrument, type ScoreMeasure, type ScoreNote,
 } from '@/lib/score/model';
 
-const DURATIONS: NoteDuration[] = ['w', 'h', 'q', '8', '16'];
+const DURATIONS: NoteDuration[] = ['w', 'h', 'q', '8', '16', '32'];
+const ARTICULATIONS: Articulation[] = ['staccato', 'accent', 'tenuto', 'marcato', 'fermata'];
+
 
 interface Props {
   initialDoc?: ScoreDoc;
@@ -49,6 +54,10 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
   const [chordMode, setChordMode] = useState(false);
   const [metronome, setMetronome] = useState(true);
   const [playingRef, setPlayingRef] = useState<NoteRef | null>(null);
+  const [clipboard, setClipboard] = useState<ScoreMeasure | null>(null);
+  const [measuresPerRow, setMeasuresPerRow] = useState(2);
+  const [shortcutsOn, setShortcutsOn] = useState(true);
+
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiYoutube, setAiYoutube] = useState('');
@@ -81,8 +90,9 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
 
   // ------------------------------------------------------------- inserción
   const targetMeasure = selected?.measure ?? activeMeasure;
+  const chordTimer = useRef<{ t: number; ref: NoteRef | null }>({ t: 0, ref: null });
 
-  const insertNote = useCallback((partial: Partial<ScoreNote> & { keys: string[] }) => {
+  const insertNote = useCallback((partial: Partial<ScoreNote> & { keys: string[] }, opts?: { mergeChord?: boolean }) => {
     const note: ScoreNote = {
       keys: partial.keys,
       duration: partial.duration ?? duration,
@@ -91,6 +101,8 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
       tab: partial.tab,
       drums: partial.drums,
       chord: partial.chord,
+      articulation: partial.articulation,
+      dynamic: partial.dynamic,
     };
     if (cfg.tuning && !note.rest && !note.tab) {
       const midis = note.keys.map(keyToMidi);
@@ -100,52 +112,76 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
     }
     previewNote(doc, note);
 
+    const mergeChord = (opts?.mergeChord ?? chordMode) && !note.rest;
+    let nextSel: NoteRef | null = null;
+    let nextMeasure = targetMeasure;
+
     update((d) => {
       while (d.content.measures.length <= targetMeasure) d.content.measures.push(emptyMeasure());
       const m = d.content.measures[targetMeasure];
-      // modo acorde: agrega la nota a la última figura del compás
-      if (chordMode && m.notes.length && !note.rest) {
-        const last = m.notes[m.notes.length - 1];
-        if (!last.rest) {
-          last.keys = Array.from(new Set([...last.keys, ...note.keys]));
-          if (cfg.tuning) last.tab = autoTabChord(last.keys.map(keyToMidi), cfg.tuning);
-          if (cfg.isDrums) last.drums = Array.from(new Set([...(last.drums ?? []), ...(note.drums ?? [])])) as DrumPiece[];
+      const cursor = selected && selected.measure === targetMeasure ? selected.index : m.notes.length - 1;
+
+      // modo acorde: apila la nota sobre la figura del cursor
+      if (mergeChord && m.notes.length) {
+        const host = m.notes[Math.max(0, Math.min(cursor, m.notes.length - 1))];
+        if (host && !host.rest) {
+          host.keys = Array.from(new Set([...host.keys, ...note.keys]));
+          if (cfg.tuning) host.tab = autoTabChord(host.keys.map(keyToMidi), cfg.tuning);
+          if (cfg.isDrums) host.drums = Array.from(new Set([...(host.drums ?? []), ...(note.drums ?? [])])) as DrumPiece[];
+          nextSel = { measure: targetMeasure, index: m.notes.indexOf(host) };
           return d;
         }
       }
+
+      const insertAt = selected && selected.measure === targetMeasure ? selected.index + 1 : m.notes.length;
       const bar = beatsPerMeasure(d.time_signature);
-      if (measureBeats(m) >= bar) {
-        // compás lleno → siguiente compás
+      const atEnd = insertAt >= m.notes.length;
+
+      if (atEnd && measureBeats(m) + noteBeats(note) > bar + 0.001) {
+        // compás lleno → escribir en el siguiente compás
         const nextIndex = targetMeasure + 1;
         while (d.content.measures.length <= nextIndex) d.content.measures.push(emptyMeasure());
         d.content.measures[nextIndex].notes.push(note);
-        setActiveMeasure(nextIndex);
-        setSelected(null);
+        nextMeasure = nextIndex;
+        nextSel = { measure: nextIndex, index: d.content.measures[nextIndex].notes.length - 1 };
       } else {
-        m.notes.push(note);
+        m.notes.splice(insertAt, 0, note);
+        nextSel = { measure: targetMeasure, index: insertAt };
       }
       return d;
     });
-  }, [cfg, chordMode, doc, dotted, duration, targetMeasure, update]);
+
+    setActiveMeasure(nextMeasure);
+    setSelected(nextSel);
+    return nextSel;
+  }, [cfg, chordMode, doc, dotted, duration, selected, targetMeasure, update]);
 
   const onPickKey = (key: string) => insertNote({ keys: [key] });
   const onPickFret = ({ key, tab }: { key: string; tab: { str: number; fret: number } }) =>
     insertNote({ keys: [key], tab: [tab] });
   const onToggleDrum = (p: DrumPiece) => insertNote({ keys: [], drums: [p] });
 
-  const midi = useMidiInput((key) => onPickKey(key));
+  /** Entrada MIDI en tiempo real: notas tocadas juntas (<120 ms) forman un acorde. */
+  const onMidiNote = useCallback((key: string) => {
+    const now = performance.now();
+    const grouped = now - chordTimer.current.t < 120 && !!chordTimer.current.ref;
+    const ref = insertNote({ keys: [key] }, { mergeChord: grouped || chordMode });
+    chordTimer.current = { t: now, ref: ref ?? null };
+  }, [chordMode, insertNote]);
+
+  const midi = useMidiInput(onMidiNote);
   const pitch = usePitchInput((key) => onPickKey(key));
 
-  const addRest = () => insertNote({ keys: [], rest: true });
+  const addRest = () => insertNote({ keys: [], rest: true }, { mergeChord: false });
 
-  const deleteSelected = () => {
+  const deleteSelected = useCallback(() => {
     if (!selected) return;
     update((d) => {
       d.content.measures[selected.measure]?.notes.splice(selected.index, 1);
       return d;
     });
-    setSelected(null);
-  };
+    setSelected((s) => (s && s.index > 0 ? { measure: s.measure, index: s.index - 1 } : null));
+  }, [selected, update]);
 
   const clearMeasure = () => {
     update((d) => { if (d.content.measures[targetMeasure]) d.content.measures[targetMeasure].notes = []; return d; });
@@ -167,6 +203,108 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
     });
   };
 
+  // ------------------------------------------------- edición estilo MuseScore
+  const patchSelected = useCallback((fn: (n: ScoreNote) => void) => {
+    if (!selected) return;
+    update((d) => {
+      const n = d.content.measures[selected.measure]?.notes[selected.index];
+      if (n) fn(n);
+      return d;
+    });
+  }, [selected, update]);
+
+  const setSelectedDuration = useCallback((d: NoteDuration) => {
+    setDuration(d);
+    patchSelected((n) => { n.duration = d; });
+  }, [patchSelected]);
+
+  const toggleDot = useCallback(() => {
+    setDotted((v) => !v);
+    patchSelected((n) => { n.dotted = !n.dotted; });
+  }, [patchSelected]);
+
+  const toggleArticulation = (a: Articulation) =>
+    patchSelected((n) => { n.articulation = n.articulation === a ? undefined : a; });
+
+  const setDynamic = (d: Dynamic | '') =>
+    patchSelected((n) => { n.dynamic = d || undefined; });
+
+  const toggleTie = useCallback(() => patchSelected((n) => { n.tie = !n.tie; }), [patchSelected]);
+
+  const setLyric = (value: string) => patchSelected((n) => { n.lyric = value || undefined; });
+
+  /** Transpone la nota seleccionada, o todo el compás si no hay selección. */
+  const transposeBy = useCallback((semis: number) => {
+    update((d) => {
+      const apply = (n: ScoreNote) => Object.assign(n, transposeNote(n, semis, cfg.tuning));
+      if (selected) {
+        const n = d.content.measures[selected.measure]?.notes[selected.index];
+        if (n) apply(n);
+      } else {
+        d.content.measures[targetMeasure]?.notes.forEach(apply);
+      }
+      return d;
+    });
+  }, [cfg.tuning, selected, targetMeasure, update]);
+
+  const moveCursor = useCallback((delta: number) => {
+    setSelected((s) => {
+      const measures = doc.content.measures;
+      if (!s) {
+        const m = measures[activeMeasure];
+        if (!m?.notes.length) return s;
+        return { measure: activeMeasure, index: delta > 0 ? 0 : m.notes.length - 1 };
+      }
+      let { measure, index } = s;
+      index += delta;
+      while (index < 0) {
+        measure -= 1;
+        if (measure < 0) return { measure: 0, index: 0 };
+        index += measures[measure]?.notes.length ?? 0;
+      }
+      while (index >= (measures[measure]?.notes.length ?? 0)) {
+        index -= measures[measure]?.notes.length ?? 0;
+        measure += 1;
+        if (measure >= measures.length) return { measure: measures.length - 1, index: Math.max(0, (measures[measures.length - 1]?.notes.length ?? 1) - 1) };
+      }
+      setActiveMeasure(measure);
+      return { measure, index };
+    });
+  }, [activeMeasure, doc]);
+
+  const copyMeasure = () => {
+    setClipboard(JSON.parse(JSON.stringify(doc.content.measures[targetMeasure] ?? emptyMeasure())));
+    toast({ title: `Compás ${targetMeasure + 1} copiado` });
+  };
+
+  const pasteMeasure = () => {
+    if (!clipboard) return;
+    update((d) => {
+      while (d.content.measures.length <= targetMeasure) d.content.measures.push(emptyMeasure());
+      d.content.measures[targetMeasure] = JSON.parse(JSON.stringify(clipboard));
+      return d;
+    });
+    setSelected(null);
+  };
+
+  const fillRests = () => {
+    update((d) => {
+      d.content.measures = d.content.measures.map((m) =>
+        (m.notes.length ? fillMeasureWithRests(m, d.time_signature) : m));
+      return d;
+    });
+  };
+
+  // referencias vivas para los atajos de teclado
+  const undoRef = useRef(undo); undoRef.current = undo;
+  const copyRef = useRef(copyMeasure); copyRef.current = copyMeasure;
+  const pasteRef = useRef(pasteMeasure); pasteRef.current = pasteMeasure;
+  const addRestRef = useRef(addRest); addRestRef.current = addRest;
+  const insertRef = useRef(insertNote); insertRef.current = insertNote;
+
+
+
+
   // ------------------------------------------------------------- transporte
   const stop = useCallback(() => {
     playRef.current?.stop();
@@ -174,17 +312,57 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
     setPlayingRef(null);
   }, []);
 
-  const play = () => {
+  const play = useCallback((fromMeasure = 0) => {
     stop();
     playRef.current = playScore(doc, {
       metronome,
-      fromMeasure: 0,
+      fromMeasure,
       onEvent: (e) => setPlayingRef(e ? { measure: e.measure, index: e.index } : null),
       onEnd: () => { playRef.current = null; setPlayingRef(null); },
     });
-  };
+  }, [doc, metronome, stop]);
 
   useEffect(() => () => { playRef.current?.stop(); }, []);
+
+  // ------------------------------------------------ atajos de teclado (MuseScore)
+  useEffect(() => {
+    if (!shortcutsOn) return;
+    const LETTER_KEYS = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
+    const DUR_KEYS: Record<string, NoteDuration> = {
+      '2': 'w', '3': 'h', '4': 'q', '5': '8', '6': '16', '7': '32',
+    };
+    const handler = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return;
+      const k = e.key.toLowerCase();
+
+      if ((e.metaKey || e.ctrlKey) && k === 'z') { e.preventDefault(); undoRef.current(); return; }
+      if ((e.metaKey || e.ctrlKey) && k === 'c') { e.preventDefault(); copyRef.current(); return; }
+      if ((e.metaKey || e.ctrlKey) && k === 'v') { e.preventDefault(); pasteRef.current(); return; }
+      if (e.metaKey || e.ctrlKey) return;
+
+      if (DUR_KEYS[k]) { e.preventDefault(); setSelectedDuration(DUR_KEYS[k]); return; }
+      if (k === '.') { e.preventDefault(); toggleDot(); return; }
+      if (k === 'r') { e.preventDefault(); addRestRef.current(); return; }
+      if (k === 't') { e.preventDefault(); toggleTie(); return; }
+      if (k === ' ') { e.preventDefault(); playRef.current ? stop() : play(activeMeasure); return; }
+      if (k === 'backspace' || k === 'delete') { e.preventDefault(); deleteSelected(); return; }
+      if (k === 'arrowright') { e.preventDefault(); moveCursor(1); return; }
+      if (k === 'arrowleft') { e.preventDefault(); moveCursor(-1); return; }
+      if (k === 'arrowup') { e.preventDefault(); transposeBy(e.shiftKey ? 12 : 1); return; }
+      if (k === 'arrowdown') { e.preventDefault(); transposeBy(e.shiftKey ? -12 : -1); return; }
+
+      if (!cfg.isDrums && LETTER_KEYS.includes(k)) {
+        e.preventDefault();
+        const octave = cfg.clef === 'bass' ? 3 : 4;
+        const acc = accidental;
+        insertRef.current({ keys: [`${k}${acc}/${octave}`] });
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [accidental, activeMeasure, cfg, deleteSelected, moveCursor, play, setSelectedDuration, shortcutsOn, stop, toggleDot, toggleTie, transposeBy]);
+
 
   // --------------------------------------------------------------- acciones
   const handleSave = async () => {
@@ -297,9 +475,15 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
               <Pause className="w-4 h-4" /> Detener
             </Button>
           ) : (
-            <Button size="sm" onClick={play} className="gap-2">
-              <Play className="w-4 h-4" /> Reproducir
-            </Button>
+            <>
+              <Button size="sm" onClick={() => play(0)} className="gap-2">
+                <Play className="w-4 h-4" /> Reproducir
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => play(activeMeasure)} className="gap-2">
+                <Play className="w-3.5 h-3.5" /> Desde compás {activeMeasure + 1}
+              </Button>
+            </>
+
           )}
           <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/40">
             <Switch id="metro" checked={metronome} onCheckedChange={setMetronome} />
@@ -392,6 +576,7 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
         doc={doc}
         selected={selected}
         playing={playingRef}
+        measuresPerRow={measuresPerRow}
         onSelectNote={(r) => { setSelected(r); setActiveMeasure(r.measure); }}
         onSelectMeasure={(m) => { setSelected(null); setActiveMeasure(m); }}
         svgRef={(svg) => { svgRef.current = svg; }}
@@ -405,13 +590,15 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
             <Button
               key={d}
               size="sm"
+              title={`${DURATION_LABEL[d]} (${{ w: '2', h: '3', q: '4', '8': '5', '16': '6', '32': '7' }[d]})`}
               variant={duration === d ? 'default' : 'outline'}
-              onClick={() => setDuration(d)}
+              onClick={() => setSelectedDuration(d)}
             >
-              {DURATION_LABEL[d]}
+              <span className="text-base leading-none mr-1">{DURATION_GLYPH[d]}</span>
+              <span className="hidden sm:inline">{DURATION_LABEL[d]}</span>
             </Button>
           ))}
-          <Button size="sm" variant={dotted ? 'default' : 'outline'} onClick={() => setDotted(!dotted)}>
+          <Button size="sm" variant={dotted ? 'default' : 'outline'} onClick={toggleDot} title="Puntillo (.)">
             Puntillo
           </Button>
           {!cfg.isDrums && (
@@ -426,7 +613,10 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
           <Button size="sm" variant={chordMode ? 'default' : 'outline'} onClick={() => setChordMode(!chordMode)} className="gap-1.5">
             <Music2 className="w-3.5 h-3.5" /> Acorde
           </Button>
-          <Button size="sm" variant="outline" onClick={addRest}>Silencio</Button>
+          <Button size="sm" variant="outline" onClick={addRest} title="Silencio (R)">Silencio</Button>
+          <Button size="sm" variant={selectedNote?.tie ? 'default' : 'outline'} onClick={toggleTie} disabled={!selected} title="Ligadura (T)">
+            Ligadura
+          </Button>
           <Button size="sm" variant="outline" onClick={deleteSelected} disabled={!selected} className="gap-1.5">
             <Trash2 className="w-3.5 h-3.5" /> Borrar nota
           </Button>
@@ -435,18 +625,83 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
           </Button>
         </div>
 
+        {/* Articulaciones, dinámicas y transporte de altura */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">Articulación:</span>
+          {ARTICULATIONS.map((a) => (
+            <Button
+              key={a} size="sm" disabled={!selected}
+              variant={selectedNote?.articulation === a ? 'default' : 'outline'}
+              onClick={() => toggleArticulation(a)}
+            >
+              {ARTICULATION_LABEL[a]}
+            </Button>
+          ))}
+          <span className="text-xs text-muted-foreground ml-2">Dinámica:</span>
+          {DYNAMICS.map((d) => (
+            <Button
+              key={d} size="sm" disabled={!selected}
+              variant={selectedNote?.dynamic === d ? 'default' : 'outline'}
+              onClick={() => setDynamic(selectedNote?.dynamic === d ? '' : d)}
+              className="italic font-serif"
+            >
+              {d}
+            </Button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            {selected ? 'Transponer nota:' : 'Transponer compás:'}
+          </span>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(1)} className="gap-1"><ArrowUp className="w-3.5 h-3.5" />½</Button>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(-1)} className="gap-1"><ArrowDown className="w-3.5 h-3.5" />½</Button>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(12)}>+8va</Button>
+          <Button size="sm" variant="outline" onClick={() => transposeBy(-12)}>−8va</Button>
+          <Button size="sm" variant="outline" onClick={copyMeasure} className="gap-1.5">
+            <Copy className="w-3.5 h-3.5" /> Copiar compás
+          </Button>
+          <Button size="sm" variant="outline" onClick={pasteMeasure} disabled={!clipboard} className="gap-1.5">
+            <ClipboardPaste className="w-3.5 h-3.5" /> Pegar
+          </Button>
+          <Button size="sm" variant="outline" onClick={fillRests}>Completar con silencios</Button>
+          <div className="flex items-center gap-2 ml-auto">
+            <Label className="text-xs">Compases por línea</Label>
+            <Select value={String(measuresPerRow)} onValueChange={(v) => setMeasuresPerRow(Number(v))}>
+              <SelectTrigger className="w-16 h-8"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Badge variant="secondary">Compás activo: {targetMeasure + 1}</Badge>
+          {selected && <Badge variant="secondary">Nota {selected.index + 1}</Badge>}
           <Badge variant="outline">{doc.content.measures.length} compases</Badge>
           <Badge variant="outline">{totalBeats} tiempos escritos</Badge>
+          <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/40">
+            <Switch id="shortcuts" checked={shortcutsOn} onCheckedChange={setShortcutsOn} />
+            <Label htmlFor="shortcuts" className="text-xs cursor-pointer">Atajos de teclado</Label>
+          </div>
           <Button size="sm" variant="outline" onClick={addMeasure} className="gap-1.5 ml-auto">
             <Plus className="w-3.5 h-3.5" /> Compás
           </Button>
           <Button size="sm" variant="outline" onClick={removeMeasure}>Quitar último</Button>
         </div>
 
+        {shortcutsOn && (
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            <strong>Atajos:</strong> A–G escriben notas · 2–7 eligen la figura · <kbd>.</kbd> puntillo ·
+            <kbd> R</kbd> silencio · <kbd>T</kbd> ligadura · ←/→ mueven el cursor · ↑/↓ transponen
+            (con Shift, una octava) · <kbd>Espacio</kbd> reproduce · <kbd>⌘/Ctrl+Z</kbd> deshacer ·
+            <kbd> ⌘/Ctrl+C/V</kbd> copiar/pegar compás.
+          </p>
+        )}
+
         {selectedNote && !cfg.isDrums && (
-          <div className="flex items-end gap-2">
+          <div className="flex flex-wrap items-end gap-2">
             <div className="w-40">
               <Label className="text-xs">Acorde sobre la nota</Label>
               <Input
@@ -455,8 +710,17 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
                 onChange={(e) => setChordLabel(e.target.value)}
               />
             </div>
+            <div className="w-40">
+              <Label className="text-xs">Letra (sílaba)</Label>
+              <Input
+                value={selectedNote.lyric ?? ''}
+                placeholder="ven-"
+                onChange={(e) => setLyric(e.target.value)}
+              />
+            </div>
           </div>
         )}
+
       </Card>
 
       {/* Entrada de notas */}

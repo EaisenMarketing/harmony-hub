@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import {
-  Accidental, Beam, Dot, Formatter, Renderer, Stave, StaveNote, TabNote, TabStave, Voice,
+  Accidental, Annotation, Articulation, Beam, Dot, Formatter, Renderer, Stave, StaveNote, StaveTie,
+  TabNote, TabStave, Voice,
 } from 'vexflow';
 import {
-  DRUM_MAP, SCORE_INSTRUMENTS, beatsPerMeasure, keyToMidi, measureBeats,
+  ARTICULATION_CODE, DRUM_MAP, SCORE_INSTRUMENTS, beatsPerMeasure, keyToMidi, measureBeats,
   type ScoreDoc, type ScoreMeasure, type ScoreNote,
 } from '@/lib/score/model';
+
 
 export interface NoteRef { measure: number; index: number }
 
@@ -146,7 +148,25 @@ export const ScoreCanvas = ({
         });
         if (n.dotted) Dot.buildAndAttach([sn], { all: true });
         if (!trebleIsRest && !cfg.isDrums) addAccidentals(sn, rightKeys);
+        if (n.articulation) {
+          try {
+            sn.addModifier(new Articulation(ARTICULATION_CODE[n.articulation]).setPosition(3), 0);
+          } catch { /* articulación no soportada */ }
+        }
+        if (n.dynamic) {
+          const dyn = new Annotation(n.dynamic)
+            .setFont('serif', 11, 'bold italic')
+            .setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
+          sn.addModifier(dyn, 0);
+        }
+        if (n.lyric) {
+          const ly = new Annotation(n.lyric)
+            .setFont('sans-serif', 10, 'normal')
+            .setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
+          sn.addModifier(ly, 0);
+        }
         staveNotes.push(sn);
+
 
         if (bassStave) {
           const leftIsRest = n.rest || leftKeys.length === 0;
@@ -227,6 +247,18 @@ export const ScoreCanvas = ({
         bassVoice.draw(ctx, bassStave);
         bassBeams.forEach((b) => b.setContext(ctx).draw());
       }
+
+      // ligaduras de prolongación dentro del compás
+      source.notes.forEach((n, ni) => {
+        if (!n.tie) return;
+        const first = staveNotes[ni];
+        const next = staveNotes[ni + 1];
+        if (!first || !next || first.isRest() || next.isRest()) return;
+        try {
+          new StaveTie({ firstNote: first, lastNote: next }).setContext(ctx).draw();
+        } catch { /* ligadura no dibujable */ }
+      });
+
 
       // número de compás
       ctx.save();
