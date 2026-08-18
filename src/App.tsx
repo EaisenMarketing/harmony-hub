@@ -61,7 +61,7 @@ const App = () => (
     <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/__score-lab" element={<DevScoreLab />} />
+        <Route path="/__score-lab" element={<WithAuth><DevScoreLab /></WithAuth>} />
 
         {/* Rutas públicas nuevas */}
         <Route path="/cursos" element={<CoursesPage />} />
