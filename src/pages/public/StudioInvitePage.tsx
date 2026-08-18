@@ -78,7 +78,7 @@ const StudioInvitePage = () => {
 
             {!user ? (
               <Button asChild className="w-full">
-                <Link to={`/auth?next=${encodeURIComponent(`/invitacion/${code}`)}`}>
+                <Link to={`/auth?next=${encodeURIComponent(window.location.pathname)}`}>
                   Crear cuenta o iniciar sesión
                 </Link>
               </Button>

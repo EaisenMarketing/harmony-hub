@@ -122,6 +122,10 @@ const App = () => (
         <Route path="/adflow" element={<WithAuth><AdFlowDashboard /></WithAuth>} />
         <Route path="/aplicar-maestro" element={<WithData><TeacherApplicationPage /></WithData>} />
 
+        {/* Enlace personalizado del maestro: /mi-academia y /mi-academia/unirme */}
+        <Route path="/:slug/unirme" element={<WithAuth><StudioInvitePage /></WithAuth>} />
+        <Route path="/:slug" element={<WithData><StudioLandingPage /></WithData>} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
