@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
 import logo from '@/assets/logo.webp';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsAdmin, useAdminStats } from '@/hooks/useAdminData';
@@ -92,6 +92,10 @@ const AdminPanel = () => {
       return <TeacherUsageDashboard />;
     }
 
+    // Alias histórico: el menú usa /admin/estudiantes.
+    if (currentPath === '/admin/alumnos') {
+      return <Navigate to="/admin/estudiantes" replace />;
+    }
     if (currentPath === '/admin/materiales') {
       return <FreeMaterialsManagement />;
     }
