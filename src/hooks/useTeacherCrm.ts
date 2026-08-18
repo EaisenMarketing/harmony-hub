@@ -85,11 +85,19 @@ export const useSaveTeacherLead = () => {
         if (error) throw error;
         return data;
       }
-      const { data, error } = await supabase
-        .from('teacher_leads')
-        .insert({ ...lead, source: lead.source ?? 'manual', stage: lead.stage ?? 'new' })
-        .select()
-        .single();
+      const row = {
+        teacher_account_id: lead.teacher_account_id,
+        full_name: lead.full_name ?? '',
+        email: lead.email ?? null,
+        phone: lead.phone ?? null,
+        instrument: lead.instrument ?? null,
+        notes: lead.notes ?? null,
+        message: lead.message ?? null,
+        marketing_opt_in: lead.marketing_opt_in ?? true,
+        source: lead.source ?? 'manual',
+        stage: lead.stage ?? 'new',
+      };
+      const { data, error } = await supabase.from('teacher_leads').insert(row).select().single();
       if (error) throw error;
       return data;
     },
