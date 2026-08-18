@@ -12,10 +12,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { UserPlus, Search, Trash2, Pencil, Copy, Mail, BarChart3, Download } from 'lucide-react';
+import { UserPlus, Search, Trash2, Pencil, Copy, Mail, BarChart3, Download, Send, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { INSTRUMENT_PLANS } from '@/lib/instrument-access';
-import { studioInviteUrl, TEACHER_STUDENT_STATUS_LABEL } from '@/lib/teacher-plans';
+import { studioJoinUrl, TEACHER_STUDENT_STATUS_LABEL } from '@/lib/teacher-plans';
 import { downloadCsv } from '@/lib/csv';
 import { StudioStudentDetail } from './StudioStudentDetail';
 import {
@@ -23,6 +23,7 @@ import {
   useSaveStudioStudent,
   useDeleteStudioStudent,
   useStudioStudentProgress,
+  useSendStudioInvite,
   type TeacherAccount,
   type StudioStudent,
   studioErrorMessage,
@@ -35,6 +36,8 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
   const { data: progress } = useStudioStudentProgress(account.id);
   const save = useSaveStudioStudent();
   const remove = useDeleteStudioStudent();
+  const sendInvite = useSendStudioInvite();
+  const [sendingId, setSendingId] = useState<string | null>(null);
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<StudioStudent | null>(null);
@@ -91,6 +94,26 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
   };
 
 
+  const inviteByEmail = async (student: StudioStudent, silent = false) => {
+    setSendingId(student.id);
+    try {
+      await sendInvite.mutateAsync(student.id);
+      toast({
+        title: 'Invitación enviada',
+        description: `Le enviamos el correo a ${student.email} desde Acorde Live (hola@acordelive.com).`,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      toast({
+        title: silent ? 'Alumno guardado, pero el correo no salió' : 'No se pudo enviar el correo',
+        description: msg || 'Intenta de nuevo o comparte tu enlace de invitación.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSendingId(null);
+    }
+  };
+
   const openNew = () => {
     setEditing(null);
     setForm({ ...emptyForm, instrument: account.primary_instrument ?? '' });
@@ -124,7 +147,7 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
       return;
     }
     try {
-      await save.mutateAsync({
+      const created = await save.mutateAsync({
         id: editing?.id,
         teacher_account_id: account.id,
         full_name: form.full_name.trim(),
@@ -135,10 +158,13 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
         notes: form.notes || null,
       });
       toast({
-        title: editing ? 'Alumno actualizado' : 'Alumno invitado',
-        description: editing ? undefined : 'Compártele tu enlace de invitación para que active su acceso.',
+        title: editing ? 'Alumno actualizado' : 'Alumno agregado',
+        description: editing ? undefined : 'Enviando su invitación por correo…',
       });
       setOpen(false);
+      if (!editing && created && typeof created === 'object' && 'id' in created) {
+        await inviteByEmail(created as StudioStudent, true);
+      }
     } catch (e) {
       toast({
         title: 'No se pudo guardar',
@@ -149,7 +175,7 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
   };
 
   const copyInvite = async () => {
-    const url = studioInviteUrl(account.invite_code);
+    const url = studioJoinUrl(account);
     try {
       await navigator.clipboard.writeText(url);
       toast({ title: 'Enlace copiado', description: url });
@@ -231,7 +257,11 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
                   <Label>Notas privadas</Label>
                   <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
-                <Button className="w-full" onClick={submit} disabled={save.isPending}>
+                <p className="text-[11px] text-muted-foreground">
+              La invitación se envía automáticamente por correo desde <span className="text-foreground">Acorde Live
+              (hola@acordelive.com)</span>, con respuestas a tu email de contacto.
+            </p>
+            <Button className="w-full" onClick={submit} disabled={save.isPending}>
                   {editing ? 'Guardar cambios' : 'Invitar'}
                 </Button>
               </div>
@@ -338,6 +368,19 @@ export const StudioStudents = ({ account }: { account: TeacherAccount }) => {
                   <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
                     <Pencil className="w-3.5 h-3.5 mr-1" />
                     Editar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={sendingId === s.id}
+                    onClick={() => inviteByEmail(s)}
+                  >
+                    {sendingId === s.id ? (
+                      <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5 mr-1" />
+                    )}
+                    {s.student_user_id ? 'Reenviar acceso' : 'Enviar invitación'}
                   </Button>
                   <Button
                     size="sm"
