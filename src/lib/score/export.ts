@@ -46,11 +46,12 @@ export function exportMidi(doc: ScoreDoc) {
 // --------------------------------------------------------------- MusicXML
 
 const XML_DUR: Record<string, { type: string; divisions: number }> = {
-  w: { type: 'whole', divisions: 16 },
-  h: { type: 'half', divisions: 8 },
-  q: { type: 'quarter', divisions: 4 },
-  '8': { type: 'eighth', divisions: 2 },
-  '16': { type: '16th', divisions: 1 },
+  w: { type: "whole", divisions: 32 },
+  h: { type: "half", divisions: 16 },
+  q: { type: "quarter", divisions: 8 },
+  "8": { type: "eighth", divisions: 4 },
+  '16': { type: '16th', divisions: 2 },
+  '32': { type: '32nd', divisions: 1 },
 };
 
 export function exportMusicXml(doc: ScoreDoc) {
@@ -77,7 +78,7 @@ export function exportMusicXml(doc: ScoreDoc) {
     }).join('\n');
 
     const attrs = i === 0
-      ? `      <attributes><divisions>4</divisions><key><fifths>0</fifths></key><time><beats>${beats}</beats><beat-type>${beatType}</beat-type></time><clef><sign>${sign}</sign><line>${line}</line></clef></attributes>\n`
+      ? `      <attributes><divisions>8</divisions><key><fifths>0</fifths></key><time><beats>${beats}</beats><beat-type>${beatType}</beat-type></time><clef><sign>${sign}</sign><line>${line}</line></clef></attributes>\n`
       : '';
     return `    <measure number="${i + 1}">\n${attrs}${notes}\n    </measure>`;
   }).join('\n');
