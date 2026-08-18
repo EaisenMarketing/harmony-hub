@@ -2622,6 +2622,47 @@ export type Database = {
           },
         ]
       }
+      teacher_email_settings: {
+        Row: {
+          account_id: string
+          brand_color: string | null
+          created_at: string
+          from_name: string | null
+          id: string
+          logo_url: string | null
+          reply_to_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          brand_color?: string | null
+          created_at?: string
+          from_name?: string | null
+          id?: string
+          logo_url?: string | null
+          reply_to_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          brand_color?: string | null
+          created_at?: string
+          from_name?: string | null
+          id?: string
+          logo_url?: string | null
+          reply_to_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_email_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_lead_activities: {
         Row: {
           created_at: string
@@ -2960,6 +3001,59 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_stripe_accounts: {
+        Row: {
+          account_id: string
+          application_fee_bps: number
+          charges_enabled: boolean
+          created_at: string
+          default_currency: string
+          details_submitted: boolean
+          id: string
+          monthly_price: number | null
+          payouts_enabled: boolean
+          status: string
+          stripe_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          application_fee_bps?: number
+          charges_enabled?: boolean
+          created_at?: string
+          default_currency?: string
+          details_submitted?: boolean
+          id?: string
+          monthly_price?: number | null
+          payouts_enabled?: boolean
+          status?: string
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          application_fee_bps?: number
+          charges_enabled?: boolean
+          created_at?: string
+          default_currency?: string
+          details_submitted?: boolean
+          id?: string
+          monthly_price?: number | null
+          payouts_enabled?: boolean
+          status?: string
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_stripe_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_stripe_settings: {
         Row: {
           account_id: string
@@ -2969,7 +3063,6 @@ export type Database = {
           monthly_price: number | null
           payment_link_url: string | null
           publishable_key: string | null
-          secret_key: string | null
           updated_at: string
         }
         Insert: {
@@ -2980,7 +3073,6 @@ export type Database = {
           monthly_price?: number | null
           payment_link_url?: string | null
           publishable_key?: string | null
-          secret_key?: string | null
           updated_at?: string
         }
         Update: {
@@ -2991,7 +3083,6 @@ export type Database = {
           monthly_price?: number | null
           payment_link_url?: string | null
           publishable_key?: string | null
-          secret_key?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3348,6 +3439,14 @@ export type Database = {
     }
     Functions: {
       active_instrument: { Args: { _user_id: string }; Returns: string }
+      admin_studio_payment_status: {
+        Args: never
+        Returns: {
+          account_id: string
+          charges_enabled: boolean
+          connected: boolean
+        }[]
+      }
       broadcast_notification: {
         Args: {
           _body?: string
@@ -3497,6 +3596,28 @@ export type Database = {
           message: string
           ok: boolean
           trial_ends_at: string
+        }[]
+      }
+      studio_email_identity: {
+        Args: { _account_id: string }
+        Returns: {
+          brand_color: string
+          from_name: string
+          logo_url: string
+          reply_to_email: string
+          studio_name: string
+        }[]
+      }
+      studio_payment_status: {
+        Args: { _account_id: string }
+        Returns: {
+          charges_enabled: boolean
+          default_currency: string
+          details_submitted: boolean
+          monthly_price: number
+          payouts_enabled: boolean
+          status: string
+          stripe_account_id: string
         }[]
       }
       studio_public_profile: {
