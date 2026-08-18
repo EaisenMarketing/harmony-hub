@@ -81,8 +81,9 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
 
   // ------------------------------------------------------------- inserción
   const targetMeasure = selected?.measure ?? activeMeasure;
+  const chordTimer = useRef<{ t: number; ref: NoteRef | null }>({ t: 0, ref: null });
 
-  const insertNote = useCallback((partial: Partial<ScoreNote> & { keys: string[] }) => {
+  const insertNote = useCallback((partial: Partial<ScoreNote> & { keys: string[] }, opts?: { mergeChord?: boolean }) => {
     const note: ScoreNote = {
       keys: partial.keys,
       duration: partial.duration ?? duration,
@@ -91,6 +92,8 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
       tab: partial.tab,
       drums: partial.drums,
       chord: partial.chord,
+      articulation: partial.articulation,
+      dynamic: partial.dynamic,
     };
     if (cfg.tuning && !note.rest && !note.tab) {
       const midis = note.keys.map(keyToMidi);
@@ -100,52 +103,76 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
     }
     previewNote(doc, note);
 
+    const mergeChord = (opts?.mergeChord ?? chordMode) && !note.rest;
+    let nextSel: NoteRef | null = null;
+    let nextMeasure = targetMeasure;
+
     update((d) => {
       while (d.content.measures.length <= targetMeasure) d.content.measures.push(emptyMeasure());
       const m = d.content.measures[targetMeasure];
-      // modo acorde: agrega la nota a la última figura del compás
-      if (chordMode && m.notes.length && !note.rest) {
-        const last = m.notes[m.notes.length - 1];
-        if (!last.rest) {
-          last.keys = Array.from(new Set([...last.keys, ...note.keys]));
-          if (cfg.tuning) last.tab = autoTabChord(last.keys.map(keyToMidi), cfg.tuning);
-          if (cfg.isDrums) last.drums = Array.from(new Set([...(last.drums ?? []), ...(note.drums ?? [])])) as DrumPiece[];
+      const cursor = selected && selected.measure === targetMeasure ? selected.index : m.notes.length - 1;
+
+      // modo acorde: apila la nota sobre la figura del cursor
+      if (mergeChord && m.notes.length) {
+        const host = m.notes[Math.max(0, Math.min(cursor, m.notes.length - 1))];
+        if (host && !host.rest) {
+          host.keys = Array.from(new Set([...host.keys, ...note.keys]));
+          if (cfg.tuning) host.tab = autoTabChord(host.keys.map(keyToMidi), cfg.tuning);
+          if (cfg.isDrums) host.drums = Array.from(new Set([...(host.drums ?? []), ...(note.drums ?? [])])) as DrumPiece[];
+          nextSel = { measure: targetMeasure, index: m.notes.indexOf(host) };
           return d;
         }
       }
+
+      const insertAt = selected && selected.measure === targetMeasure ? selected.index + 1 : m.notes.length;
       const bar = beatsPerMeasure(d.time_signature);
-      if (measureBeats(m) >= bar) {
-        // compás lleno → siguiente compás
+      const atEnd = insertAt >= m.notes.length;
+
+      if (atEnd && measureBeats(m) + noteBeats(note) > bar + 0.001) {
+        // compás lleno → escribir en el siguiente compás
         const nextIndex = targetMeasure + 1;
         while (d.content.measures.length <= nextIndex) d.content.measures.push(emptyMeasure());
         d.content.measures[nextIndex].notes.push(note);
-        setActiveMeasure(nextIndex);
-        setSelected(null);
+        nextMeasure = nextIndex;
+        nextSel = { measure: nextIndex, index: d.content.measures[nextIndex].notes.length - 1 };
       } else {
-        m.notes.push(note);
+        m.notes.splice(insertAt, 0, note);
+        nextSel = { measure: targetMeasure, index: insertAt };
       }
       return d;
     });
-  }, [cfg, chordMode, doc, dotted, duration, targetMeasure, update]);
+
+    setActiveMeasure(nextMeasure);
+    setSelected(nextSel);
+    return nextSel;
+  }, [cfg, chordMode, doc, dotted, duration, selected, targetMeasure, update]);
 
   const onPickKey = (key: string) => insertNote({ keys: [key] });
   const onPickFret = ({ key, tab }: { key: string; tab: { str: number; fret: number } }) =>
     insertNote({ keys: [key], tab: [tab] });
   const onToggleDrum = (p: DrumPiece) => insertNote({ keys: [], drums: [p] });
 
-  const midi = useMidiInput((key) => onPickKey(key));
+  /** Entrada MIDI en tiempo real: notas tocadas juntas (<120 ms) forman un acorde. */
+  const onMidiNote = useCallback((key: string) => {
+    const now = performance.now();
+    const grouped = now - chordTimer.current.t < 120 && !!chordTimer.current.ref;
+    const ref = insertNote({ keys: [key] }, { mergeChord: grouped || chordMode });
+    chordTimer.current = { t: now, ref: ref ?? null };
+  }, [chordMode, insertNote]);
+
+  const midi = useMidiInput(onMidiNote);
   const pitch = usePitchInput((key) => onPickKey(key));
 
-  const addRest = () => insertNote({ keys: [], rest: true });
+  const addRest = () => insertNote({ keys: [], rest: true }, { mergeChord: false });
 
-  const deleteSelected = () => {
+  const deleteSelected = useCallback(() => {
     if (!selected) return;
     update((d) => {
       d.content.measures[selected.measure]?.notes.splice(selected.index, 1);
       return d;
     });
-    setSelected(null);
-  };
+    setSelected((s) => (s && s.index > 0 ? { measure: s.measure, index: s.index - 1 } : null));
+  }, [selected, update]);
 
   const clearMeasure = () => {
     update((d) => { if (d.content.measures[targetMeasure]) d.content.measures[targetMeasure].notes = []; return d; });
@@ -166,6 +193,99 @@ export const ScoreEditor = ({ initialDoc, defaultInstrument = 'guitar', onSaved 
       return d;
     });
   };
+
+  // ------------------------------------------------- edición estilo MuseScore
+  const patchSelected = useCallback((fn: (n: ScoreNote) => void) => {
+    if (!selected) return;
+    update((d) => {
+      const n = d.content.measures[selected.measure]?.notes[selected.index];
+      if (n) fn(n);
+      return d;
+    });
+  }, [selected, update]);
+
+  const setSelectedDuration = useCallback((d: NoteDuration) => {
+    setDuration(d);
+    patchSelected((n) => { n.duration = d; });
+  }, [patchSelected]);
+
+  const toggleDot = useCallback(() => {
+    setDotted((v) => !v);
+    patchSelected((n) => { n.dotted = !n.dotted; });
+  }, [patchSelected]);
+
+  const toggleArticulation = (a: Articulation) =>
+    patchSelected((n) => { n.articulation = n.articulation === a ? undefined : a; });
+
+  const setDynamic = (d: Dynamic | '') =>
+    patchSelected((n) => { n.dynamic = d || undefined; });
+
+  const toggleTie = useCallback(() => patchSelected((n) => { n.tie = !n.tie; }), [patchSelected]);
+
+  const setLyric = (value: string) => patchSelected((n) => { n.lyric = value || undefined; });
+
+  /** Transpone la nota seleccionada, o todo el compás si no hay selección. */
+  const transposeBy = useCallback((semis: number) => {
+    update((d) => {
+      const apply = (n: ScoreNote) => Object.assign(n, transposeNote(n, semis, cfg.tuning));
+      if (selected) {
+        const n = d.content.measures[selected.measure]?.notes[selected.index];
+        if (n) apply(n);
+      } else {
+        d.content.measures[targetMeasure]?.notes.forEach(apply);
+      }
+      return d;
+    });
+  }, [cfg.tuning, selected, targetMeasure, update]);
+
+  const moveCursor = useCallback((delta: number) => {
+    setSelected((s) => {
+      const measures = doc.content.measures;
+      if (!s) {
+        const m = measures[activeMeasure];
+        if (!m?.notes.length) return s;
+        return { measure: activeMeasure, index: delta > 0 ? 0 : m.notes.length - 1 };
+      }
+      let { measure, index } = s;
+      index += delta;
+      while (index < 0) {
+        measure -= 1;
+        if (measure < 0) return { measure: 0, index: 0 };
+        index += measures[measure]?.notes.length ?? 0;
+      }
+      while (index >= (measures[measure]?.notes.length ?? 0)) {
+        index -= measures[measure]?.notes.length ?? 0;
+        measure += 1;
+        if (measure >= measures.length) return { measure: measures.length - 1, index: Math.max(0, (measures[measures.length - 1]?.notes.length ?? 1) - 1) };
+      }
+      setActiveMeasure(measure);
+      return { measure, index };
+    });
+  }, [activeMeasure, doc]);
+
+  const copyMeasure = () => {
+    setClipboard(JSON.parse(JSON.stringify(doc.content.measures[targetMeasure] ?? emptyMeasure())));
+    toast({ title: `Compás ${targetMeasure + 1} copiado` });
+  };
+
+  const pasteMeasure = () => {
+    if (!clipboard) return;
+    update((d) => {
+      while (d.content.measures.length <= targetMeasure) d.content.measures.push(emptyMeasure());
+      d.content.measures[targetMeasure] = JSON.parse(JSON.stringify(clipboard));
+      return d;
+    });
+    setSelected(null);
+  };
+
+  const fillRests = () => {
+    update((d) => {
+      d.content.measures = d.content.measures.map((m) =>
+        (m.notes.length ? fillMeasureWithRests(m, d.time_signature) : m));
+      return d;
+    });
+  };
+
 
   // ------------------------------------------------------------- transporte
   const stop = useCallback(() => {
