@@ -29,7 +29,10 @@ export const userClient = (authHeader: string): SupabaseClient =>
 
 /** Remitente por defecto (dominio verificado en Resend). */
 export const defaultFrom = () =>
-  Deno.env.get("ACORDE_FROM_EMAIL") ?? "Acorde Live <onboarding@resend.dev>";
+  Deno.env.get("ACORDE_FROM_EMAIL") ?? "Acorde Live <hola@acordelive.com>";
+
+/** Dirección de respuesta por defecto. */
+export const defaultReplyTo = () => Deno.env.get("ACORDE_REPLY_TO") ?? undefined;
 
 export interface SendEmailInput {
   to: string;
