@@ -116,7 +116,9 @@ export async function sendEmail(
       to: [recipient],
       subject: input.subject,
       html: input.html,
-      ...(input.replyTo ? { reply_to: input.replyTo } : {}),
+      ...(input.replyTo ?? defaultReplyTo()
+        ? { reply_to: input.replyTo ?? defaultReplyTo() }
+        : {}),
     }),
   });
 
