@@ -774,6 +774,105 @@ export type Database = {
         }
         Relationships: []
       }
+      email_log: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          idempotency_key: string | null
+          lead_id: string | null
+          provider_id: string | null
+          recipient_email: string
+          status: string
+          subject: string | null
+          teacher_account_id: string | null
+          template: string
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          lead_id?: string | null
+          provider_id?: string | null
+          recipient_email: string
+          status?: string
+          subject?: string | null
+          teacher_account_id?: string | null
+          template: string
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          idempotency_key?: string | null
+          lead_id?: string | null
+          provider_id?: string | null
+          recipient_email?: string
+          status?: string
+          subject?: string | null
+          teacher_account_id?: string | null
+          template?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_log_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_log_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_log_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_unsubscribes: {
+        Row: {
+          created_at: string
+          email: string
+          reason: string | null
+          teacher_account_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          reason?: string | null
+          teacher_account_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          reason?: string | null
+          teacher_account_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_unsubscribes_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enrollments: {
         Row: {
           course_id: string
@@ -2342,6 +2441,71 @@ export type Database = {
           },
         ]
       }
+      teacher_campaigns: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          cta_label: string | null
+          cta_url: string | null
+          failed_count: number
+          id: string
+          name: string
+          recipients_count: number
+          sent_at: string | null
+          sent_count: number
+          stage_filter: string | null
+          status: string
+          subject: string
+          teacher_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          failed_count?: number
+          id?: string
+          name: string
+          recipients_count?: number
+          sent_at?: string | null
+          sent_count?: number
+          stage_filter?: string | null
+          status?: string
+          subject: string
+          teacher_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
+          failed_count?: number
+          id?: string
+          name?: string
+          recipients_count?: number
+          sent_at?: string | null
+          sent_count?: number
+          stage_filter?: string | null
+          status?: string
+          subject?: string
+          teacher_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_campaigns_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teacher_class_registrations: {
         Row: {
           attended: boolean
@@ -2427,6 +2591,120 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "teacher_courses_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_lead_activities: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          lead_id: string
+          note: string | null
+          teacher_account_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_id: string
+          note?: string | null
+          teacher_account_id: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lead_id?: string
+          note?: string | null
+          teacher_account_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_lead_activities_teacher_account_id_fkey"
+            columns: ["teacher_account_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_leads: {
+        Row: {
+          converted_student_id: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          instrument: string | null
+          last_contacted_at: string | null
+          marketing_opt_in: boolean
+          message: string | null
+          notes: string | null
+          phone: string | null
+          source: string
+          stage: string
+          teacher_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          converted_student_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          instrument?: string | null
+          last_contacted_at?: string | null
+          marketing_opt_in?: boolean
+          message?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string
+          stage?: string
+          teacher_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          converted_student_id?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          instrument?: string | null
+          last_contacted_at?: string | null
+          marketing_opt_in?: boolean
+          message?: string | null
+          notes?: string | null
+          phone?: string | null
+          source?: string
+          stage?: string
+          teacher_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_leads_converted_student_id_fkey"
+            columns: ["converted_student_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_leads_teacher_account_id_fkey"
             columns: ["teacher_account_id"]
             isOneToOne: false
             referencedRelation: "teacher_accounts"
@@ -3029,6 +3307,18 @@ export type Database = {
           studio_name: string
         }[]
       }
+      crm_stats: {
+        Args: { _account_id: string }
+        Returns: {
+          contacted: number
+          emails_30d: number
+          enrolled: number
+          lost: number
+          new_leads: number
+          total: number
+          trials: number
+        }[]
+      }
       current_entitlement: {
         Args: { _user_id: string }
         Returns: {
@@ -3121,6 +3411,21 @@ export type Database = {
           seat_limit: number
           seats_used: number
           status: string
+        }[]
+      }
+      submit_teacher_lead: {
+        Args: {
+          _email: string
+          _full_name: string
+          _instrument?: string
+          _invite_code: string
+          _message?: string
+          _phone?: string
+        }
+        Returns: {
+          message: string
+          ok: boolean
+          studio_name: string
         }[]
       }
       teacher_seats_used: { Args: { _account_id: string }; Returns: number }
