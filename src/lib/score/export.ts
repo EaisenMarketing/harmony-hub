@@ -69,12 +69,21 @@ export function exportMusicXml(doc: ScoreDoc) {
       const keys = cfg.isDrums
         ? (n.drums ?? []).map((p) => DRUM_MAP[p].key)
         : n.keys;
+      const artMap: Record<string, string> = {
+        staccato: '<staccato/>', accent: '<accent/>', tenuto: '<tenuto/>', marcato: '<strong-accent/>',
+      };
+      const artXml = n.articulation && artMap[n.articulation]
+        ? `<notations><articulations>${artMap[n.articulation]}</articulations></notations>`
+        : n.articulation === 'fermata' ? '<notations><fermata/></notations>' : '';
+      const tieXml = n.tie ? '<tie type="start"/>' : '';
+      const lyricXml = n.lyric ? `<lyric><syllabic>single</syllabic><text>${n.lyric}</text></lyric>` : '';
       return keys.map((k, ki) => {
         const [rawStep, oct] = k.split('/');
         const step = rawStep[0].toUpperCase();
         const alter = rawStep.includes('#') ? '<alter>1</alter>' : rawStep.includes('b') && rawStep.length > 1 ? '<alter>-1</alter>' : '';
-        return `      <note>${ki > 0 ? '<chord/>' : ''}<pitch><step>${step}</step>${alter}<octave>${oct}</octave></pitch><duration>${dur}</duration><type>${d.type}</type>${dot}</note>`;
+        return `      <note>${ki > 0 ? '<chord/>' : ''}<pitch><step>${step}</step>${alter}<octave>${oct}</octave></pitch><duration>${dur}</duration>${tieXml}<type>${d.type}</type>${dot}${ki === 0 ? artXml : ''}${ki === 0 ? lyricXml : ''}</note>`;
       }).join('\n');
+
     }).join('\n');
 
     const attrs = i === 0
