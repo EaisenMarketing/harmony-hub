@@ -1,6 +1,5 @@
 import React, { Suspense, lazy, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import DevScoreLab from "./pages/DevScoreLab";
 import Index from "./pages/Index";
 
 const Auth = lazy(() => import("./pages/Auth"));
@@ -61,7 +60,6 @@ const App = () => (
     <Suspense fallback={<PageFallback />}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/__score-lab" element={<WithAuth><DevScoreLab /></WithAuth>} />
 
         {/* Rutas públicas nuevas */}
         <Route path="/cursos" element={<CoursesPage />} />
