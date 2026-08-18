@@ -148,7 +148,25 @@ export const ScoreCanvas = ({
         });
         if (n.dotted) Dot.buildAndAttach([sn], { all: true });
         if (!trebleIsRest && !cfg.isDrums) addAccidentals(sn, rightKeys);
+        if (n.articulation) {
+          try {
+            sn.addModifier(new Articulation(ARTICULATION_CODE[n.articulation]).setPosition(3), 0);
+          } catch { /* articulación no soportada */ }
+        }
+        if (n.dynamic) {
+          const dyn = new Annotation(n.dynamic)
+            .setFont('serif', 11, 'bold italic')
+            .setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
+          sn.addModifier(dyn, 0);
+        }
+        if (n.lyric) {
+          const ly = new Annotation(n.lyric)
+            .setFont('sans-serif', 10, 'normal')
+            .setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
+          sn.addModifier(ly, 0);
+        }
         staveNotes.push(sn);
+
 
         if (bassStave) {
           const leftIsRest = n.rest || leftKeys.length === 0;
