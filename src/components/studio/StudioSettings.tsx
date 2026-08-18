@@ -162,6 +162,8 @@ export const StudioSettings = ({ account }: { account: TeacherAccount }) => {
         </p>
       </Card>
 
+      <StudioPayments account={account} />
+
       <Card className="p-4 bg-card/70 border-white/10 space-y-4">
         <div className="flex items-center gap-2">
           <Link2 className="w-4 h-4 text-primary" />
