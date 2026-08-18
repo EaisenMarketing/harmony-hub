@@ -20,10 +20,19 @@ serve(async (req) => {
   try {
     const db = adminClient();
 
-    // Autorización: header con CRON_SECRET (para el programador) o un admin autenticado.
-    const cronSecret = Deno.env.get("CRON_SECRET");
+    // Autorización: header con el token del programador (env o tabla interna) o un admin autenticado.
     const providedSecret = req.headers.get("x-cron-secret");
-    let authorized = !!cronSecret && providedSecret === cronSecret;
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    let authorized = !!cronSecret && !!providedSecret && providedSecret === cronSecret;
+
+    if (!authorized && providedSecret) {
+      const { data: stored } = await db
+        .from("app_settings")
+        .select("value")
+        .eq("key", "cron_secret")
+        .maybeSingle();
+      authorized = !!stored?.value && stored.value === providedSecret;
+    }
 
     if (!authorized) {
       const authHeader = req.headers.get("Authorization");
