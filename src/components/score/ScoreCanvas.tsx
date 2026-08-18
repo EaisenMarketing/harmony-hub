@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import {
-  Accidental, Beam, Dot, Formatter, Renderer, Stave, StaveNote, TabNote, TabStave, Voice,
+  Accidental, Annotation, Articulation, Beam, Dot, Formatter, Renderer, Stave, StaveNote, StaveTie,
+  TabNote, TabStave, Voice,
 } from 'vexflow';
 import {
-  DRUM_MAP, SCORE_INSTRUMENTS, beatsPerMeasure, keyToMidi, measureBeats,
+  ARTICULATION_CODE, DRUM_MAP, SCORE_INSTRUMENTS, beatsPerMeasure, keyToMidi, measureBeats,
   type ScoreDoc, type ScoreMeasure, type ScoreNote,
 } from '@/lib/score/model';
+
 
 export interface NoteRef { measure: number; index: number }
 
