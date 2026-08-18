@@ -11,6 +11,8 @@ import { StudioCourses } from '@/components/studio/StudioCourses';
 import { StudioAssignments } from '@/components/studio/StudioAssignments';
 import { StudioLiveClasses } from '@/components/studio/StudioLiveClasses';
 import { StudioAnnouncements } from '@/components/studio/StudioAnnouncements';
+import { StudioCrm } from '@/components/studio/StudioCrm';
+import { StudioCampaigns } from '@/components/studio/StudioCampaigns';
 import { StudioTools } from '@/components/studio/StudioTools';
 import { StudioSettings } from '@/components/studio/StudioSettings';
 import { StudioBillingBanner } from '@/components/studio/StudioBillingBanner';
@@ -71,6 +73,8 @@ const StudioPanel = () => {
     if (pathname.startsWith('/estudio/cursos')) return <StudioCourses account={account} />;
     if (pathname.startsWith('/estudio/clases')) return <StudioLiveClasses account={account} />;
     if (pathname.startsWith('/estudio/avisos')) return <StudioAnnouncements account={account} />;
+    if (pathname.startsWith('/estudio/crm')) return <StudioCrm account={account} />;
+    if (pathname.startsWith('/estudio/campanas')) return <StudioCampaigns account={account} />;
     if (pathname.startsWith('/estudio/tareas')) return <StudioAssignments account={account} />;
     if (pathname.startsWith('/estudio/herramientas')) return <StudioTools account={account} />;
     if (pathname.startsWith('/estudio/configuracion')) return <StudioSettings account={account} />;
