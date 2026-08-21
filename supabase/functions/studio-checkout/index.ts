@@ -18,7 +18,7 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const appUrl = () => (Deno.env.get("APP_URL") ?? "https://acordelive.com").replace(/\/+$/, "");
+const appUrl = () => (Deno.env.get("APP_URL") ?? "https://chord-crafters-academy.lovable.app").replace(/\/+$/, "");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
