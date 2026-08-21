@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, type ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import AuthLinkRedirect from "@/components/auth/AuthLinkRedirect";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -60,8 +61,9 @@ const S = (name: 'AboutPage'|'FaqPage'|'TermsPage'|'PrivacyPage'|'CancelPolicyPa
 
 const App = () => (
   <BrowserRouter>
-    <Suspense fallback={<PageFallback />}>
-      <Routes>
+    <AuthLinkRedirect>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
         <Route path="/" element={<Index />} />
 
         {/* Rutas públicas nuevas */}
@@ -128,8 +130,9 @@ const App = () => (
         <Route path="/:slug" element={<WithData><StudioLandingPage /></WithData>} />
 
         <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </AuthLinkRedirect>
   </BrowserRouter>
 );
 
