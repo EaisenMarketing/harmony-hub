@@ -158,6 +158,9 @@ const Auth = () => {
     const { error } = await supabase.auth.resend({
       email: loginEmail,
       type: 'signup',
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     setIsLoading(false);
     if (error) {
